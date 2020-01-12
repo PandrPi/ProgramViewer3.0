@@ -1,0 +1,160 @@
+﻿<Window x:Class="Program_Viewer_3.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Program_Viewer_3"
+        Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000">
+    
+    
+    <Border x:Name="WindowBorder" HorizontalAlignment="Right" Width="600" BorderThickness="2" CornerRadius="2" BorderBrush="White">
+        <Grid x:Name="MyGrid" HorizontalAlignment="Right" Width="598" Margin="0" AllowDrop="True" Drop="MyGrid_Drop">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF5D747E" Offset="0"/>
+                    <GradientStop Color="#FF12131A" Offset="1"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Rectangle HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="0" Margin="0,2,1,1">
+                <Rectangle.Fill>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FF688293" Offset="0"/>
+                        <GradientStop Color="#FF2C363C" Offset="1"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+            <!--<controls:PiButton HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click"/>-->
+
+
+            <Button Content="" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click">
+                <Button.Effect>
+                    <DropShadowEffect ShadowDepth="3"/>
+                </Button.Effect>
+            </Button>
+            <!--Desktop ListView-->
+            <ListView x:Name="DesktopLV" VerticalAlignment="Top" Margin="0,0,115,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="453" Background="{x:Null}" BorderThickness="0">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="10,10,10,0" VerticalAlignment="Top" Cursor="Hand">
+                            <Image Source="{Binding ImageData}" Width="75" Height="75" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                                <Image.Effect>
+                                    <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
+                                </Image.Effect>
+                            </Image>
+                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Test"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+            </ListView>
+            <!--Hot ListView-->
+            <ListView x:Name="HotLV" VerticalAlignment="Top" Margin="0,1,1,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="1" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="5,10,5,0" VerticalAlignment="Top" Cursor="Hand">
+                            <Image Source="{Binding ImageData}" Width="75" Height="75" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                                <Image.Effect>
+                                    <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
+                                </Image.Effect>
+                            </Image>
+                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="30" Background="#FF171717" Margin="0,0,0,1">
+                <Grid.Effect>
+                    <DropShadowEffect/>
+                </Grid.Effect>
+                <!--SettingsButton-->
+                <controls:PiButton x:Name="SettingsButton" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="24" RenderTransformOrigin="0,-0.25"
+                       Margin="4,5,0,0" Cursor="Hand" Source="Pictures/icons8-menu-48.png">
+                </controls:PiButton>
+            </Grid>
+            <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Margin="0,1,1,1" Width="96"/>
+        </Grid>
+    </Border>
+
+    <!--Window Resources-->
+    <Window.Resources>
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--<Color x:Key="Item.MouseOver.Background">#3F1B1B1B</Color>
+        <Color x:Key="Item.MouseOver.Border">#3F1B1B1B</Color>-->
+        <SolidColorBrush x:Key="Item.MouseOver.Background" Color="#3F1B1B1B"/>
+        <SolidColorBrush x:Key="Item.MouseOver.Border" Color="#3F1B1B1B"/>
+        <SolidColorBrush x:Key="Item.SelectedInactive.Background" Color="#3DDADADA"/>
+        <SolidColorBrush x:Key="Item.SelectedInactive.Border" Color="#3DDADADA"/>
+        <SolidColorBrush x:Key="Item.SelectedActive.Background" Color="#3DDADADA"/>
+        <SolidColorBrush x:Key="Item.SelectedActive.Border" Color="#3DDADADA"/>
+        <Style TargetType="{x:Type ListViewItem}">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Padding" Value="4,1"/>
+            <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                        <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.MouseOver.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.MouseOver.Border}"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.SelectedInactive.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.SelectedInactive.Border}"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="Selector.IsSelectionActive" Value="True"/>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.SelectedActive.Background}"/>
+                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.SelectedActive.Border}"/>
+                            </MultiTrigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+</Window>
