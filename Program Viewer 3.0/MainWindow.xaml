@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:Program_Viewer_3"
         Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000">
-    
-    
+
+
     <Border x:Name="WindowBorder" HorizontalAlignment="Right" Width="600" BorderThickness="2" CornerRadius="2" BorderBrush="White">
         <Grid x:Name="MyGrid" HorizontalAlignment="Right" Width="598" Margin="0" AllowDrop="True" Drop="MyGrid_Drop">
             <Grid.Background>
@@ -24,14 +24,17 @@
                     </LinearGradientBrush>
                 </Rectangle.Fill>
             </Rectangle>
-            <!--<controls:PiButton HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click"/>-->
 
-
-            <Button Content="" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click">
-                <Button.Effect>
+            <controls:PiButton HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
+                <controls:PiButton.Effect>
                     <DropShadowEffect ShadowDepth="3"/>
-                </Button.Effect>
-            </Button>
+                </controls:PiButton.Effect>
+            </controls:PiButton>
+            <controls:PiButton Text="Test text" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Margin="137,255,224,0" HoverColor="#FFFB0000" Foreground="White" Background="#FF171717" Height="49" VerticalAlignment="Top" />
+
+            <controls:PiContexMenu x:Name="TestListBox" Margin="152,327,314,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Width="132" HorizontalAlignment="Center" Background="#FF171717"/>
+
+
             <!--Desktop ListView-->
             <ListView x:Name="DesktopLV" VerticalAlignment="Top" Margin="0,0,115,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="453" Background="{x:Null}" BorderThickness="0">
                 <ListView.ItemsPanel>

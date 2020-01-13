@@ -24,10 +24,38 @@
         </EventTrigger>
     </UserControl.Triggers>
 
-    <Grid>
-        <Image x:Name="ButtonImage" Source="{Binding RelativeSource={RelativeSource FindAncestor,
-            AncestorType=local:PiButton}, Path=Source}">
+    <Grid MouseDown="Grid_MouseDown">
+        <Image x:Name="ButtonImage" Source="{Binding Path=Source}">
+            
         </Image>
-        <TextBlock x:Name="ButtonText"/>
+        <TextBlock x:Name="ButtonText" Text="{Binding Path=Text}" Foreground="{Binding Path=Foreground}"
+                   HorizontalAlignment="{Binding Path=TextHorizontalAlignment}" VerticalAlignment="{Binding Path=TextVerticalAlignment}"/>
+        <!--Style-->
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <SolidColorBrush Color="Transparent"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Style>
+        <Grid.Triggers>
+            <EventTrigger RoutedEvent="MouseEnter">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="{Binding RelativeSource={RelativeSource FindAncestor,
+            AncestorType=local:PiButton}, Path=HoverColor}" Duration="0:0:0.1" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MouseLeave">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="Transparent" Duration="0:0:0.1" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Grid.Triggers>
     </Grid>
 </UserControl>

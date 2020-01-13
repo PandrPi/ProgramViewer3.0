@@ -47,6 +47,13 @@ namespace Program_Viewer_3
             hotItems.Add(new ItemData { Title = "Movie 2", ImageData = image1 });
             HotLV.ItemsSource = hotItems;
 
+            //TestListBox.ContextListBox.ItemsSource = new ItemData[]{
+            //    new ItemData{Title = "Header 1"},
+            //    new ItemData{Title = "Header 2"},
+            //    new ItemData{Title = "Header 3"},
+            //    new ItemData{Title = "Header 4"},
+            //};
+
             animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
 
             double screenWidth = SystemParameters.VirtualScreenWidth;
