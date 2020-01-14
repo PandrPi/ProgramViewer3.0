@@ -13,7 +13,7 @@ namespace Program_Viewer_3
     public static class IconExtractor
     {
         private static FileToIconConverter fic = new FileToIconConverter();
-        private static readonly int DefaultIconSize = 256;
+        private static readonly int DefaultIconSize = 192;
 
         public static ImageSource GetIcon(string fileName)
         {

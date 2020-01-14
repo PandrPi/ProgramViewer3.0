@@ -35,6 +35,8 @@ namespace Program_Viewer_3
         {
             itemManager = new ItemManager();
             animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
+            animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
+            animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
 
             DesktopLV.ItemsSource = itemManager.desktopItems;
             HotLV.ItemsSource = itemManager.hotItems;
@@ -44,6 +46,7 @@ namespace Program_Viewer_3
             Left = screenWidth - Width - 10;
             Top = 10;
             //ToggleDesktop();
+            AddItemGrid.Visibility = Visibility.Hidden;
         }
 
         private void ToggleDesktop()
@@ -70,12 +73,42 @@ namespace Program_Viewer_3
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string title = System.IO.Path.GetFileNameWithoutExtension(files[0]);
 
-                foreach (var f in files)
-                {
-                    //desktopItems.Add(new ItemData { Title = "test", ImageData = IconExtractor.GetIcon(f) as BitmapImage });
-                }
+                AddWindowFilePath.Text = files[0];
+                AddWindowFileTitle.Text = title;
+                AddWindowFileWindow.SelectedIndex = 0;
+
+                AddItemGridVisibility(Visibility.Visible);
             }
+        }
+
+        private void AddFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            string title = AddWindowFileTitle.Text;
+            string path = AddWindowFilePath.Text;
+            string selectedWindow = (AddWindowFileWindow.Items[AddWindowFileWindow.SelectedIndex] as ComboBoxItem).Content.ToString();
+            ItemType itemType = selectedWindow == "Hot Window" ? ItemType.Hot : ItemType.Desktop;
+            itemManager.AddItem(title, path, itemType);
+            AddItemGridVisibility(Visibility.Hidden);
+        }
+
+        private void AddItemGridVisibility(Visibility visibility)
+        {
+
+            if (visibility == Visibility.Visible)
+            {
+                AddItemGrid.Visibility = visibility;
+                animationManager.AddItemWindowShow();
+            }
+            else
+                animationManager.AddItemWindowHide();
+        }
+
+        private void AddWindowCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddItemGridVisibility(Visibility.Hidden);
+            (sender as PiButton).Opacity = 1;
         }
     }
 }
