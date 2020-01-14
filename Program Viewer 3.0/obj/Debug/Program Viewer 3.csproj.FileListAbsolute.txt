@@ -18,3 +18,9 @@ D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Progr
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\PiButton.baml
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\PiContexMenu.g.cs
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\PiContexMenu.baml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Newtonsoft.Json.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Newtonsoft.Json.xml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.CopyComplete
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\IconLib.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Interop.Shell32.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.ResolveComReference.cache

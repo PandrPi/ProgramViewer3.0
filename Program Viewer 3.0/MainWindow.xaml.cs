@@ -26,46 +26,24 @@ namespace Program_Viewer_3
         }
 
         private AnimationManager animationManager;
+        private ItemManager itemManager;
         private bool isWindowExpanded = true;
 
-        private ObservableCollection<ItemData> desktopItems = new ObservableCollection<ItemData>();
-        private ObservableCollection<ItemData> hotItems = new ObservableCollection<ItemData>();
+        
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            BitmapImage image1 = LoadImage("image.jpg");
-
-            desktopItems.Add(new ItemData { Title = "Movie 1", ImageData = image1 });
-            desktopItems.Add(new ItemData { Title = "Movie 2", ImageData = image1 });
-            desktopItems.Add(new ItemData { Title = "Movie 3", ImageData = image1 });
-            desktopItems.Add(new ItemData { Title = "Movie 4", ImageData = image1 });
-            desktopItems.Add(new ItemData { Title = "Movie 5", ImageData = image1 });
-            desktopItems.Add(new ItemData { Title = "Movie 6", ImageData = image1 });
-            DesktopLV.ItemsSource = desktopItems;
-
-            hotItems.Add(new ItemData { Title = "Movie 1", ImageData = image1 });
-            hotItems.Add(new ItemData { Title = "Movie 2", ImageData = image1 });
-            HotLV.ItemsSource = hotItems;
-
-            //TestListBox.ContextListBox.ItemsSource = new ItemData[]{
-            //    new ItemData{Title = "Header 1"},
-            //    new ItemData{Title = "Header 2"},
-            //    new ItemData{Title = "Header 3"},
-            //    new ItemData{Title = "Header 4"},
-            //};
-
+            itemManager = new ItemManager();
             animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
+
+            DesktopLV.ItemsSource = itemManager.desktopItems;
+            HotLV.ItemsSource = itemManager.hotItems;
 
             double screenWidth = SystemParameters.VirtualScreenWidth;
             Height = SystemParameters.VirtualScreenHeight - 60;
             Left = screenWidth - Width - 10;
             Top = 10;
             //ToggleDesktop();
-        }
-
-        private BitmapImage LoadImage(string filename)
-        {
-            return new BitmapImage(new Uri(AppDomain.CurrentDomain.BaseDirectory + filename, UriKind.Absolute));
         }
 
         private void ToggleDesktop()
@@ -95,7 +73,7 @@ namespace Program_Viewer_3
 
                 foreach (var f in files)
                 {
-                    desktopItems.Add(new ItemData { Title = "test", ImageData = IconExtractor.GetIcon(f) as BitmapImage });
+                    //desktopItems.Add(new ItemData { Title = "test", ImageData = IconExtractor.GetIcon(f) as BitmapImage });
                 }
             }
         }

@@ -13,10 +13,10 @@
                     <local:PiButton Text="Hover 1" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" HoverColor="#99ACACAC" Foreground="White" VerticalAlignment="Top"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>-->
-            <local:PiButton Text="Hover 1" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99ACACAC" Foreground="White" VerticalAlignment="Top"/>
-            <local:PiButton Text="Hover 2" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99ACACAC" Foreground="White" VerticalAlignment="Top"/>
-            <local:PiButton Text="Hover 3" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99ACACAC" Foreground="White" VerticalAlignment="Top"/>
-            <local:PiButton Text="Hover 4" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99ACACAC" Foreground="White" VerticalAlignment="Top"/>
+            <local:PiButton Text="Hover 1" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"/>
+            <local:PiButton Text="Hover 2" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"/>
+            <local:PiButton Text="Hover 3" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"/>
+            <local:PiButton Text="Hover 4" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"/>
         </ListBox>
     </Grid>
     <!--Resources-->
