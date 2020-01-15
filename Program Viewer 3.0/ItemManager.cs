@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -28,14 +29,20 @@ namespace Program_Viewer_3
         public ObservableCollection<ItemData> desktopItems { get; private set; }
         public ObservableCollection<ItemData> hotItems { get; private set; }
 
-        private Dictionary<string, dynamic> hotItemsJsonData;
+        private Dispatcher mainDispatcher;
+        private Dictionary<string, dynamic> hotItemsJsonData;       // used to store loaded json data for hot items
+        private Dictionary<string, ItemData> desktopKeyValuePair = new Dictionary<string, ItemData>();   // used to store to get ItemData fast by file name
         private DirectoryInfo desktopDirectoryInfo;
+        private FileSystemWatcher desktopFileWatcher;
 
         private static readonly string HotItemsJSONFilename = "HotItems.json";
         private static readonly string DesktopFolderPath = "PV Desktop";
+        private static readonly string DesktopFolderFullPath =
+            System.AppDomain.CurrentDomain.BaseDirectory + DesktopFolderPath;
 
-        public ItemManager()
+        public ItemManager(Dispatcher dispatcher)
         {
+            this.mainDispatcher = dispatcher;
             desktopItems = new ObservableCollection<ItemData>();
             hotItems = new ObservableCollection<ItemData>();
 
@@ -67,8 +74,53 @@ namespace Program_Viewer_3
             for(int i = 0; i < fileInfos.Length; i++)
             {
                 FileInfo info = fileInfos[i];
-                desktopItems.Add(new ItemData(Path.GetFileNameWithoutExtension(info.Name), IconExtractor.GetIcon(info.FullName)));
+                ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name), IconExtractor.GetIcon(info.FullName));
+                desktopItems.Add(itemData);
+                desktopKeyValuePair.Add(info.Name, itemData);
             }
+
+            desktopFileWatcher = new FileSystemWatcher(DesktopFolderPath)
+            {
+                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName,
+            };
+            desktopFileWatcher.Created += DesktopFileWatcher_Created;
+            desktopFileWatcher.Deleted += DesktopFileWatcher_Deleted;
+            desktopFileWatcher.Renamed += DesktopFileWatcher_Renamed;
+
+            desktopFileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            ItemData oldItem = desktopKeyValuePair[e.OldName];
+            int index = desktopItems.IndexOf(oldItem);
+            string newTitle = Path.GetFileNameWithoutExtension(e.Name);
+            ItemData newItem = new ItemData(newTitle, oldItem.ImageData);
+            desktopKeyValuePair.Remove(e.OldName);
+
+            Action action = () => 
+            {
+                desktopItems[index] = newItem;
+                desktopKeyValuePair.Add(e.Name, newItem);
+            };
+            mainDispatcher.BeginInvoke(action);
+        }
+
+        private void DesktopFileWatcher_Deleted(object sender, FileSystemEventArgs e)
+        {
+            Action action = () =>
+            {
+                desktopItems.Remove(desktopKeyValuePair[e.Name]);
+                desktopKeyValuePair.Remove(e.Name);
+            };
+            mainDispatcher.BeginInvoke(action);
+        }
+
+        private void DesktopFileWatcher_Created(object sender, FileSystemEventArgs e)
+        {
+            string title = Path.GetFileNameWithoutExtension(e.Name);
+            Action action = () => AddItem(title, e.Name, ItemType.Desktop);
+            mainDispatcher.BeginInvoke(action);
         }
 
         public void AddItem(string title, string path, ItemType itemType)
@@ -84,7 +136,9 @@ namespace Program_Viewer_3
             }
             else if(itemType == ItemType.Desktop)
             {
-                desktopItems.Add(new ItemData(title, IconExtractor.GetIcon(path)));
+                ItemData itemData = new ItemData(title, IconExtractor.GetIcon(path));
+                desktopItems.Add(itemData);
+                desktopKeyValuePair.Add(path, itemData);
             }
         }
 
@@ -92,6 +146,11 @@ namespace Program_Viewer_3
         {
             var json = JsonConvert.SerializeObject(hotItemsJsonData, Formatting.Indented);
             File.WriteAllText(HotItemsJSONFilename, json);
+        }
+
+        public void Dispose()
+        {
+            desktopFileWatcher.Dispose();
         }
     }
 }

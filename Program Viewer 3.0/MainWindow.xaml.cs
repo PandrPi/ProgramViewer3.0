@@ -35,7 +35,7 @@ namespace Program_Viewer_3
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
-            itemManager = new ItemManager();
+            itemManager = new ItemManager(Dispatcher);
             animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
             animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
             animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
@@ -118,6 +118,11 @@ namespace Program_Viewer_3
         {
             AddItemGridVisibility(Visibility.Hidden);
             (sender as PiButton).Opacity = 1;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            itemManager.Dispose();
         }
     }
 }
