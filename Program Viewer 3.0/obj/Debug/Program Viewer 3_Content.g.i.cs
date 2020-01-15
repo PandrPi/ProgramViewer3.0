@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("pictures/icons8-close-window-96.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("pictures/closeicon.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("pictures/settingsicon.png")]
 
 

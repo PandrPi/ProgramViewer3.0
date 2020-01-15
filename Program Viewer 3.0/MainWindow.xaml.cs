@@ -29,10 +29,12 @@ namespace Program_Viewer_3
         private ItemManager itemManager;
         private bool isWindowExpanded = true;
 
-        
 
+
+        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
             itemManager = new ItemManager();
             animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
             animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
@@ -77,8 +79,15 @@ namespace Program_Viewer_3
 
                 AddWindowFilePath.Text = files[0];
                 AddWindowFileTitle.Text = title;
-                AddWindowFileWindow.SelectedIndex = 0;
+                if (e.GetPosition(MyGrid).X >= Width - (desktopShirkExpandButton.Margin.Right + desktopShirkExpandButton.Width))
+                    AddWindowFileWindow.SelectedIndex = 0;
+                else
+                    AddWindowFileWindow.SelectedIndex = 1;
 
+                if (!isWindowExpanded)
+                {
+                    ToggleDesktop();
+                }
                 AddItemGridVisibility(Visibility.Visible);
             }
         }

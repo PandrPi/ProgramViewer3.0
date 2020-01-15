@@ -25,28 +25,11 @@
                 </Rectangle.Fill>
             </Rectangle>
 
-            <controls:PiButton HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
+            <controls:PiButton x:Name="desktopShirkExpandButton" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFC830" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
                 <controls:PiButton.Effect>
                     <DropShadowEffect ShadowDepth="3"/>
                 </controls:PiButton.Effect>
             </controls:PiButton>
-
-            <controls:PiContexMenu x:Name="TestListBox" Margin="165,340,301,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Width="132" HorizontalAlignment="Center" Background="#FF171717"/>
-
-            <Grid x:Name="AddItemGrid" Margin="0" Background="#FF171717" HorizontalAlignment="Center" Width="375" VerticalAlignment="Center" Height="230">
-                <Label Content="File Path" HorizontalAlignment="Left" Height="28" Margin="18,47,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
-                <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038" IsReadOnly="True"/>
-                <Label Content="File Window" HorizontalAlignment="Left" Height="28" Margin="18,129,0,0" VerticalAlignment="Top" Width="75" Foreground="White"/>
-                <Rectangle Fill="#FF0F0F0F" Height="26" Stroke="Black" VerticalAlignment="Top" Width="375"/>
-                <controls:PiButton x:Name="AddWindowCloseButton" HorizontalAlignment="Left" Height="26" Margin="349,0,0,0" VerticalAlignment="Top" Width="26" Source="Pictures/icons8-close-window-96.png" Click="AddWindowCloseButton_Click"/>
-                <ComboBox x:Name="AddWindowFileWindow" HorizontalAlignment="Left" Margin="101,131,0,0" VerticalAlignment="Top" Width="249" SelectedIndex="0" Foreground="Black" Background="#FF293038" IsReadOnly="True">
-                    <ComboBoxItem Content="Hot Window"/>
-                    <ComboBoxItem Content="Desktop Window"/>
-                </ComboBox>
-                <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click"/>
-                <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,89,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
-                <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038"/>
-            </Grid>
 
             <!--Desktop ListView-->
             <ListView x:Name="DesktopLV" VerticalAlignment="Top" Margin="0,0,115,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="453" Background="{x:Null}" BorderThickness="0">
@@ -63,7 +46,7 @@
                                     <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
                                 </Image.Effect>
                             </Image>
-                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding Title}" MaxWidth="75" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -88,27 +71,44 @@
                                     <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
                                 </Image.Effect>
                             </Image>
-                            <TextBlock Text="{Binding Title}" TextWrapping="Wrap" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+                            <TextBlock Text="{Binding Title}" MaxWidth="75" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <!--SettingsGrid-->
             <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="30" Background="#FF171717" Margin="0,0,0,1">
                 <Grid.Effect>
                     <DropShadowEffect/>
                 </Grid.Effect>
                 <!--SettingsButton-->
                 <controls:PiButton x:Name="SettingsButton" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="24" RenderTransformOrigin="0,-0.25"
-                       Margin="4,5,0,0" Cursor="Hand" Source="Pictures/icons8-menu-48.png">
+                       Margin="4,5,0,0" Cursor="Hand" Source="Pictures/SettingsIcon.png">
                 </controls:PiButton>
             </Grid>
             <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Margin="0,1,1,1" Width="96"/>
             <Slider HorizontalAlignment="Left" Margin="667,335,-169,0" VerticalAlignment="Top" Width="100"/>
+            <controls:PiContexMenu x:Name="TestListBox" Margin="185,336,281,0" VerticalAlignment="Top" VerticalContentAlignment="Top" Width="132" HorizontalAlignment="Center" Background="#FF171717"/>
+            <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="#FF171717" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230">
+                <Label Content="File Path" HorizontalAlignment="Left" Height="28" Margin="18,47,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
+                <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038" IsReadOnly="True"/>
+                <Label Content="File Window" HorizontalAlignment="Left" Height="28" Margin="18,129,0,0" VerticalAlignment="Top" Width="75" Foreground="White"/>
+                <Rectangle Fill="#FF0F0F0F" Height="26" Stroke="Black" VerticalAlignment="Top" Width="375"/>
+                <controls:PiButton x:Name="AddWindowCloseButton" HorizontalAlignment="Left" Height="26" Margin="349,0,0,0" VerticalAlignment="Top" Width="26" Source="Pictures/CloseIcon.png" Click="AddWindowCloseButton_Click"/>
+                <ComboBox x:Name="AddWindowFileWindow" HorizontalAlignment="Left" Margin="101,131,0,0" VerticalAlignment="Top" Width="249" SelectedIndex="0" Foreground="Black" Background="#FF293038" IsReadOnly="True">
+                    <ComboBoxItem Content="Hot Window"/>
+                    <ComboBoxItem Content="Desktop Window"/>
+                </ComboBox>
+                <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click"/>
+                <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,89,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
+                <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038"/>
+            </Grid>
         </Grid>
     </Border>
 
     <!--Window Resources-->
     <Window.Resources>
+        <Image x:Key="BaseExeImage" HorizontalAlignment="Left" Height="100" Margin="30,0,0,0" VerticalAlignment="Top" Width="100" IsEnabled="False" Visibility="Hidden" Source="Pictures/BaseExeIcon.png"/>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
                 <Setter.Value>

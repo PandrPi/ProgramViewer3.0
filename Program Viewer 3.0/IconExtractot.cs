@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Shell32;
 using System.IO;
 using System.Drawing;
@@ -12,8 +13,13 @@ namespace Program_Viewer_3
 {
     public static class IconExtractor
     {
+        public static ImageSource BaseExeIcon;
+
         private static FileToIconConverter fic = new FileToIconConverter();
+        private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
         private static readonly int DefaultIconSize = 192;
+        private static readonly HashSet<string> imageExtensions = 
+            new HashSet<string>(new string[] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
         public static ImageSource GetIcon(string fileName)
         {
@@ -39,14 +45,24 @@ namespace Program_Viewer_3
                             new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
                     }
                     else
-                        return fic.GetImage(fileName, DefaultIconSize);
+                        return BaseExeIcon;
                 }
                 else
-                    return fic.GetImage(fileName, DefaultIconSize);
+                    return BaseExeIcon;
             }
             else
             {
-                return fic.GetImage(fileName, DefaultIconSize);
+                if (cachedImages.ContainsKey(extension))
+                {
+                    return cachedImages[extension];
+                }
+                else
+                {
+                    ImageSource image = fic.GetImage(fileName, DefaultIconSize);
+                    if (!imageExtensions.Contains(extension))
+                        cachedImages.Add(extension, image);
+                    return image;
+                }
             }
         }
 

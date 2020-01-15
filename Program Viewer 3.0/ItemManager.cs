@@ -29,33 +29,45 @@ namespace Program_Viewer_3
         public ObservableCollection<ItemData> hotItems { get; private set; }
 
         private Dictionary<string, dynamic> hotItemsJsonData;
+        private DirectoryInfo desktopDirectoryInfo;
 
         private static readonly string HotItemsJSONFilename = "HotItems.json";
+        private static readonly string DesktopFolderPath = "PV Desktop";
 
         public ItemManager()
         {
             desktopItems = new ObservableCollection<ItemData>();
             hotItems = new ObservableCollection<ItemData>();
 
-            ImageSource image1 = IconExtractor.GetIcon("temp1.lnk");
-            var temp = IconExtractor.GetIcon("image.jpg");
+            // if hotItems json file does not exist create it and write an empty json content
+            if (!File.Exists(HotItemsJSONFilename))
+            {
+                using (StreamWriter sw = File.CreateText(HotItemsJSONFilename))
+                {
+                    sw.WriteLine("{"); sw.WriteLine(""); sw.WriteLine("}");
+                }
+            }
 
-            desktopItems.Add(new ItemData { Title = "Movie 1", ImageData = IconExtractor.GetIcon("HotItems.json") });
-            desktopItems.Add(new ItemData { Title = "Movie 2", ImageData = IconExtractor.GetIcon("IconLib.dll") });
-            desktopItems.Add(new ItemData { Title = "Movie 3", ImageData = IconExtractor.GetIcon("temp.exe") });
-            desktopItems.Add(new ItemData { Title = "Movie 4", ImageData = IconExtractor.GetIcon("Program Viewer 3.pdb") });
-            desktopItems.Add(new ItemData { Title = "Movie 5", ImageData = IconExtractor.GetIcon("image.jpg") });
-            desktopItems.Add(new ItemData { Title = "Movie 6", ImageData = IconExtractor.GetIcon("Program Viewer 3") });
-
-            hotItems.Add(new ItemData { Title = "Movie 1", ImageData = image1 });
-            hotItems.Add(new ItemData { Title = "Movie 2", ImageData = image1 });
-
+            if (!Directory.Exists(DesktopFolderPath))
+            {
+                desktopDirectoryInfo = Directory.CreateDirectory(DesktopFolderPath);
+            }
+            else
+            {
+                desktopDirectoryInfo = new DirectoryInfo(DesktopFolderPath);
+            }
+                
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
-
             foreach(var item in hotItemsJsonData)
             {
-                dynamic value = item.Value;
-                //hotItems.Add(new ItemData { Title = value.Title, ImageData = IconExtractor.GetIcon(value.Path) });
+                hotItems.Add(new ItemData(item.Key, IconExtractor.GetIcon(item.Value)));
+            }
+
+            FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
+            for(int i = 0; i < fileInfos.Length; i++)
+            {
+                FileInfo info = fileInfos[i];
+                desktopItems.Add(new ItemData(Path.GetFileNameWithoutExtension(info.Name), IconExtractor.GetIcon(info.FullName)));
             }
         }
 
@@ -67,12 +79,19 @@ namespace Program_Viewer_3
                 {
                     hotItems.Add(new ItemData(title, IconExtractor.GetIcon(path)));
                     hotItemsJsonData.Add(title, path);
+                    HotItemsSave();
                 }
             }
             else if(itemType == ItemType.Desktop)
             {
                 desktopItems.Add(new ItemData(title, IconExtractor.GetIcon(path)));
             }
+        }
+
+        private void HotItemsSave()
+        {
+            var json = JsonConvert.SerializeObject(hotItemsJsonData, Formatting.Indented);
+            File.WriteAllText(HotItemsJSONFilename, json);
         }
     }
 }
