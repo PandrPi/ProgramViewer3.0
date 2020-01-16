@@ -89,17 +89,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PiContexMenu.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PiButton.xaml.cs">
       <DependentUpon>PiButton.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="PiContexMenu.xaml.cs">
-      <DependentUpon>PiContexMenu.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
