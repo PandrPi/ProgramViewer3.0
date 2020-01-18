@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.IO;
 using System.Windows;
@@ -18,11 +19,20 @@ namespace Program_Viewer_3
         public ImageSource ImageData { get; set; }
 
 
+
         public ItemData(string title, string path, ImageSource imageSource)
         {
             this.Title = title;
             this.Path = path;
             this.ImageData = imageSource;
+        }
+    }
+
+    public class ItemDataComparer : IComparer<ItemData>
+    {
+        public int Compare(ItemData x, ItemData y)
+        {
+            return x.Title.CompareTo(y.Title);
         }
     }
 
@@ -38,11 +48,10 @@ namespace Program_Viewer_3
         private Dictionary<string, ItemData> desktopKeyValuePair = new Dictionary<string, ItemData>();   // used to store to get ItemData fast by file name
         private DirectoryInfo desktopDirectoryInfo;
         private FileSystemWatcher desktopFileWatcher;
+        private ItemDataComparer itemDataComparer = new ItemDataComparer();
 
         private static readonly string HotItemsJSONFilename = "HotItems.json";
         private static readonly string DesktopFolderPath = "PV Desktop";
-        private static readonly string DesktopFolderFullPath =
-            System.AppDomain.CurrentDomain.BaseDirectory + DesktopFolderPath + "\\";
 
         public ItemManager(Dispatcher dispatcher)
         {
@@ -69,23 +78,40 @@ namespace Program_Viewer_3
             }
                 
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
-            foreach(var item in hotItemsJsonData)
+            List<string> hotItemsToRemove = new List<string>();
+            foreach (var item in hotItemsJsonData)
             {
-                hotItems.Add(new ItemData(item.Key, item.Value, IconExtractor.GetIcon(item.Value)));
+                if (Directory.Exists(item.Key) || File.Exists(item.Key))
+                    AddSorted(hotItems, new ItemData(item.Value, item.Key, IconExtractor.GetIcon(item.Key)), itemDataComparer);
+                else
+                    hotItemsToRemove.Add(item.Key);
             }
+            for(int i = 0; i < hotItemsToRemove.Count; i++)
+            {
+                hotItemsJsonData.Remove(hotItemsToRemove[i]);
+            }
+            HotItemsSave();
 
             FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
             for(int i = 0; i < fileInfos.Length; i++)
             {
                 FileInfo info = fileInfos[i];
                 ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name), info.FullName, IconExtractor.GetIcon(info.FullName));
-                desktopItems.Add(itemData);
-                desktopKeyValuePair.Add(info.Name, itemData);
+                AddSorted(desktopItems, itemData, itemDataComparer);
+                desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
+            }
+            DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
+            for (int i = 0; i < directoryInfos.Length; i++)
+            {
+                DirectoryInfo info = directoryInfos[i];
+                ItemData itemData = new ItemData(info.Name, info.FullName, IconExtractor.GetIcon(info.FullName));
+                AddSorted(desktopItems, itemData, itemDataComparer);
+                desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
             }
 
             desktopFileWatcher = new FileSystemWatcher(DesktopFolderPath)
             {
-                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName,
+                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.DirectoryName
             };
             desktopFileWatcher.Created += DesktopFileWatcher_Created;
             desktopFileWatcher.Deleted += DesktopFileWatcher_Deleted;
@@ -96,16 +122,16 @@ namespace Program_Viewer_3
 
         private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
         {
-            ItemData oldItem = desktopKeyValuePair[e.OldName];
+            ItemData oldItem = desktopKeyValuePair[e.OldFullPath];
             int index = desktopItems.IndexOf(oldItem);
             string newTitle = Path.GetFileNameWithoutExtension(e.Name);
             ItemData newItem = new ItemData(newTitle, e.FullPath, oldItem.ImageData);
-            desktopKeyValuePair.Remove(e.OldName);
+            desktopKeyValuePair.Remove(e.OldFullPath);
 
             Action action = () => 
             {
                 desktopItems[index] = newItem;
-                desktopKeyValuePair.Add(e.Name, newItem);
+                desktopKeyValuePair.Add(e.FullPath, newItem);
             };
             mainDispatcher.BeginInvoke(action);
         }
@@ -114,35 +140,73 @@ namespace Program_Viewer_3
         {
             Action action = () =>
             {
-                desktopItems.Remove(desktopKeyValuePair[e.Name]);
-                desktopKeyValuePair.Remove(e.Name);
+                desktopItems.Remove(desktopKeyValuePair[e.FullPath]);
+                desktopKeyValuePair.Remove(e.FullPath);
             };
             mainDispatcher.BeginInvoke(action);
         }
 
         private void DesktopFileWatcher_Created(object sender, FileSystemEventArgs e)
         {
-            string title = Path.GetFileNameWithoutExtension(e.Name);
-            Action action = () => AddItem(title, e.FullPath, ItemType.Desktop);
+            FileAttributes attributes = File.GetAttributes(e.FullPath);
+            string title;
+            if (attributes.HasFlag(FileAttributes.Directory))
+                title = e.Name;
+            else
+                title = Path.GetFileNameWithoutExtension(e.Name);
+            Action action = () =>
+            {
+                ItemData itemData = new ItemData(title, e.FullPath, IconExtractor.GetIcon(e.FullPath));
+                AddSorted(desktopItems, itemData, itemDataComparer);
+                desktopKeyValuePair.Add(e.FullPath, itemData);
+            };
             mainDispatcher.BeginInvoke(action);
+        }
+
+
+        private void AddSorted<T>(Collection<T> list, T item, IComparer<T> comparer)
+        {
+            if (comparer == null)
+                comparer = Comparer<T>.Default;
+
+            int i = 0;
+            while (i < list.Count && comparer.Compare(list[i], item) < 0)
+                i++;
+
+            list.Insert(i, item);
         }
 
         public void AddItem(string title, string path, ItemType itemType)
         {
-            if(itemType == ItemType.Hot)
+            if (itemType == ItemType.Hot)
             {
-                if (!hotItemsJsonData.ContainsKey(title))
+                if (!hotItemsJsonData.ContainsKey(path))
                 {
-                    hotItems.Add(new ItemData(title, path, IconExtractor.GetIcon(path)));
-                    hotItemsJsonData.Add(title, path);
+                    AddSorted(hotItems, new ItemData(title, path, IconExtractor.GetIcon(path)), itemDataComparer);
+                    hotItemsJsonData.Add(path, title);
                     HotItemsSave();
                 }
             }
-            else if(itemType == ItemType.Desktop)
+            else if (itemType == ItemType.Desktop)
             {
-                ItemData itemData = new ItemData(title, path, IconExtractor.GetIcon(path));
-                desktopItems.Add(itemData);
-                desktopKeyValuePair.Add(path, itemData);
+                try
+                {
+                    FileAttributes attributes = File.GetAttributes(path);
+                    if (attributes.HasFlag(FileAttributes.Directory))
+                    {
+                        FileManager.MoveFolder(path, DesktopFolderPath);
+                    }
+                    else
+                    {
+                        string filename = Path.GetFileName(path);
+                        string sourcePath = Path.GetDirectoryName(path);
+                        FileManager.MoveFile(filename, sourcePath, DesktopFolderPath);
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.StackTrace, e.Message);
+                }
             }
         }
 
@@ -152,9 +216,10 @@ namespace Program_Viewer_3
             File.WriteAllText(HotItemsJSONFilename, json);
         }
 
-        public void Dispose()
+        public void DisposeManager()
         {
             desktopFileWatcher.Dispose();
+            HotItemsSave();
         }
 
         private void StartProcess(string filename)
@@ -184,30 +249,50 @@ namespace Program_Viewer_3
 
         public void OpenItem(int index, ItemType itemType)
         {
-
-            if (itemType == ItemType.Hot)
+            Task.Run(() =>
             {
-                StartProcess(hotItems[index].Path);
-            }
-            else
-            {
-                StartProcess(desktopItems[index].Path);
-            }
+                if (itemType == ItemType.Hot)
+                {
+                    StartProcess(hotItems[index].Path);
+                }
+                else
+                {
+                    StartProcess(desktopItems[index].Path);
+                }
+            });
         }
 
         public void RemoveItem(int index, ItemType itemType)
         {
             if(itemType == ItemType.Hot)
             {
-                hotItemsJsonData.Remove(hotItems[index].Title);
+                hotItemsJsonData.Remove(hotItems[index].Path);
                 hotItems.RemoveAt(index);
                 HotItemsSave();
+            }
+            else
+            {
+                Task.Run(() =>
+                {
+                    string path = desktopItems[index].Path;
+                    FileManager.SendToRecycle(path);
+                });
             }
         }
 
         public void ShowItemInExplorer(int index, ItemType itemType)
         {
+            string argument = "/select, \"";
+            if(itemType == ItemType.Hot)
+                argument += hotItems[index].Path + "\"";
+            else
+                argument += desktopItems[index].Path + "\"";
 
+            try
+            {
+                Task.Run(() => Process.Start("explorer.exe", argument));
+            }
+            catch { }
         }
     }
 }

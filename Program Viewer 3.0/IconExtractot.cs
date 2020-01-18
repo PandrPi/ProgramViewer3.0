@@ -32,23 +32,30 @@ namespace Program_Viewer_3
 
             if (extension == ".exe")
             {
-                MultiIcon mIcon = new MultiIcon();
-                mIcon.Load(fileName);
-
-                if (mIcon.Count > 0)
+                try
                 {
-                    SingleIcon temp = mIcon[0];
-                    if (temp.Count > 0)
+                    MultiIcon mIcon = new MultiIcon();
+                    mIcon.Load(fileName);
+
+                    if (mIcon.Count > 0)
                     {
-                        Icon icon = temp[temp.Count - 1].Icon;
-                        return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
-                            new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
+                        SingleIcon temp = mIcon[0];
+                        if (temp.Count > 0)
+                        {
+                            Icon icon = temp[temp.Count - 1].Icon;
+                            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
+                                new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
+                        }
+                        else
+                            return BaseExeIcon;
                     }
                     else
                         return BaseExeIcon;
                 }
-                else
+                catch
+                {
                     return BaseExeIcon;
+                }
             }
             else
             {

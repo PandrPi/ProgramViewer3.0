@@ -40,8 +40,8 @@
                 </ListView.ItemsPanel>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="10,10,10,0" VerticalAlignment="Top" Cursor="Hand" MouseDown="Desktop_StackPanel_MouseDown" Background="#02000000">
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="75" Height="75" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                        <StackPanel Orientation="Vertical" Margin="10,10,10,0" VerticalAlignment="Top" Cursor="Hand" MouseDown="Desktop_StackPanel_MouseDown" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown" Background="#02000000">
+                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
                                 <Image.Effect>
                                     <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
                                 </Image.Effect>
@@ -52,7 +52,7 @@
                 </ListView.ItemTemplate>
             </ListView>
             <!--Hot ListView-->
-            <ListView x:Name="HotLV" VerticalAlignment="Top" Margin="0,1,1,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center">
+            <ListView x:Name="HotLV" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="1" HorizontalAlignment="Center"/>
@@ -60,8 +60,8 @@
                 </ListView.ItemsPanel>
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" Margin="5,10,5,0" VerticalAlignment="Top" Cursor="Hand" MouseDown="Hot_StackPanel_MouseDown" Background="#02000000">
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="75" Height="75" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
+                        <StackPanel Orientation="Vertical" Margin="5,10,5,0" VerticalAlignment="Top" Cursor="Hand" MouseDown="Hot_StackPanel_MouseDown" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown" Background="#02000000">
+                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
                                 <Image.Effect>
                                     <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
                                 </Image.Effect>
@@ -84,18 +84,17 @@
             <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Margin="0,1,1,1" Width="96"/>
             <Slider HorizontalAlignment="Left" Margin="667,335,-169,0" VerticalAlignment="Top" Width="100"/>
             <!--PiContextMenu-->
-            <Grid x:Name="PiContextMenu" Margin="456,69,0,0" VerticalAlignment="Top" Width="132" HorizontalAlignment="Left">
+            <Grid x:Name="PiContextMenu" Margin="449,10,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left">
                 <Rectangle Fill="#FF171717" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2"/>
                 <ListBox x:Name="ContextListBox" Margin="3" BorderBrush="{x:Null}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="#FF171717">
-                    <controls:PiButton x:Name="PiContextOpenFileButton" Text="   Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextOpenFileButton_Click"/>
-                    <controls:PiButton x:Name="PiContextRemoveButton" Text="   Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click"/>
-                    <controls:PiButton x:Name="PiContextShowInExlorerButton" Text="   Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click"/>
-                    <controls:PiButton x:Name="PiContextRefreshButton" Text="   Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRefreshButton_Click"/>
+                    <controls:PiButton x:Name="PiContextOpenFileButton"         Text="   Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"        Click="PiContextOpenFileButton_Click"/>
+                    <controls:PiButton x:Name="PiContextRemoveButton"           Text="   Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click"/>
+                    <controls:PiButton x:Name="PiContextShowInExlorerButton"    Text="   Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click"/>
+                    <controls:PiButton x:Name="PiContextRefreshButton"          Text="   Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"          Click="PiContextRefreshButton_Click"/>
                 </ListBox>
             </Grid>
             <!--AddItemGrid-->
             <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="#FF171717" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230">
-                <Label Content="File Path" HorizontalAlignment="Left" Height="28" Margin="18,47,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
                 <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038" IsReadOnly="True"/>
                 <Label Content="File Window" HorizontalAlignment="Left" Height="28" Margin="18,129,0,0" VerticalAlignment="Top" Width="75" Foreground="White"/>
                 <Rectangle Fill="#FF0F0F0F" Height="26" Stroke="Black" VerticalAlignment="Top" Width="375"/>
@@ -105,8 +104,10 @@
                     <ComboBoxItem Content="Desktop Window"/>
                 </ComboBox>
                 <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click"/>
-                <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,89,0,0" VerticalAlignment="Top" Width="59" Foreground="White"/>
                 <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038"/>
+                <Label x:Name="AddFileWindowFilesCount" Content="" HorizontalAlignment="Left" Height="28" VerticalAlignment="Top" Width="166" Foreground="White" FontWeight="Bold" Margin="10,0,0,0" FontSize="13"/>
+                <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,86,0,0" VerticalAlignment="Top" Width="60" Foreground="White"/>
+                <Label Content="File Path" HorizontalAlignment="Left" Height="28" Margin="18,44,0,0" VerticalAlignment="Top" Width="60" Foreground="White"/>
             </Grid>
         </Grid>
     </Border>

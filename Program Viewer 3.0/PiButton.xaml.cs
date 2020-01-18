@@ -42,6 +42,12 @@ namespace Program_Viewer_3
         public PiButton()
         {
             InitializeComponent();
+            LostMouseCapture += PiButton_LostMouseCapture;
+        }
+
+        private void PiButton_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            Opacity = 1;
         }
 
         public event RoutedEventHandler Click;

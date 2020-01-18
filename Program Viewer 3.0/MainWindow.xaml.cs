@@ -28,10 +28,13 @@ namespace Program_Viewer_3
         private AnimationManager animationManager;
         private ItemManager itemManager;
         private bool isWindowExpanded = true;
+        private bool shouldShirkWindowAfterContextMenuClosing = false;
         /// <summary>
         /// Used to store cursor position at the moment when PiContextMenu was shown
         /// </summary>
         private Point lastCursorPoint;
+        private Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
+        private int filesToAddCounter = 0;
 
         
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -51,9 +54,9 @@ namespace Program_Viewer_3
             HotLV.LostFocus     += (ev, ee) => HotLV.SelectedIndex = -1;
 
             double screenWidth = SystemParameters.VirtualScreenWidth;
-            Height = SystemParameters.VirtualScreenHeight - 60;
-            Left = screenWidth - Width - 10;
-            Top = 10;
+            Height = SystemParameters.VirtualScreenHeight - 46;
+            Left = screenWidth - Width - 2;
+            Top = 2;
             //ToggleDesktop();
             AddItemGrid.Visibility = Visibility.Hidden;
             PiContextMenu.Visibility = Visibility.Hidden;
@@ -82,20 +85,25 @@ namespace Program_Viewer_3
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                Focus();
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                string title = System.IO.Path.GetFileNameWithoutExtension(files[0]);
 
+                ItemType itemType = GetWindowTypeFromPoint(e.GetPosition(MyGrid));
+                for(int i = 1; i < files.Length; i++)
+                {
+                    filesToAdd.Enqueue(new Tuple<string, ItemType>(files[i], itemType));
+                }
+
+                string title = System.IO.Path.GetFileNameWithoutExtension(files[0]);
                 AddWindowFilePath.Text = files[0];
                 AddWindowFileTitle.Text = title;
-                if (GetWindowTypeFromPoint(e.GetPosition(MyGrid)) == ItemType.Hot)
-                    AddWindowFileWindow.SelectedIndex = 0;
-                else
-                    AddWindowFileWindow.SelectedIndex = 1;
+                AddWindowFileWindow.SelectedIndex = (itemType == ItemType.Hot) ? 0 : 1;
 
                 if (!isWindowExpanded)
-                {
                     ToggleDesktop();
-                }
+
+                filesToAddCounter = filesToAdd.Count + 1;
+                AddFileWindowFilesCount.Content = $"Files to proceed - {filesToAddCounter}";
                 SetAddItemGridVisibility(Visibility.Visible);
             }
         }
@@ -111,27 +119,34 @@ namespace Program_Viewer_3
             else
                 return ItemType.Desktop;
         }
-        /// <summary>
-        /// Determines over which window is point (Desktop or Hot)
-        /// </summary>
-        /// <param name="X">X position of cursor click point</param>
-        /// <returns></returns>
-        private ItemType GetWindowTypeFromPoint(double X)
-        {
-            if (X >= Width - (desktopShirkExpandButton.Margin.Right + desktopShirkExpandButton.Width))
-                return ItemType.Hot;
-            else
-                return ItemType.Desktop;
-        }
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
         {
             string title = AddWindowFileTitle.Text;
             string path = AddWindowFilePath.Text;
-            string selectedWindow = (AddWindowFileWindow.Items[AddWindowFileWindow.SelectedIndex] as ComboBoxItem).Content.ToString();
-            ItemType itemType = selectedWindow == "Hot Window" ? ItemType.Hot : ItemType.Desktop;
+            ItemType itemType = AddWindowFileWindow.SelectedIndex == 0 ? ItemType.Hot : ItemType.Desktop;
             itemManager.AddItem(title, path, itemType);
-            SetAddItemGridVisibility(Visibility.Hidden);
+
+            ProceedNextFile();
+        }
+
+        private void ProceedNextFile()
+        {
+            if (filesToAdd.Count > 0)
+            {
+                var item = filesToAdd.Dequeue();
+                AddWindowFilePath.Text = item.Item1;
+                AddWindowFileTitle.Text = System.IO.Path.GetFileNameWithoutExtension(item.Item1);
+                AddWindowFileWindow.SelectedIndex = (item.Item2 == ItemType.Hot) ? 0 : 1;
+            }
+
+            filesToAddCounter--;
+            AddFileWindowFilesCount.Content = $"Files to proceed - {filesToAddCounter}";
+
+            if (filesToAddCounter == 0)
+            {
+                SetAddItemGridVisibility(Visibility.Hidden);
+            }
         }
 
         /// <summary>
@@ -162,84 +177,75 @@ namespace Program_Viewer_3
                 animationManager.ContextMenuShow();
             }
             else
+            {
                 animationManager.ContextMenuHide();
+                if (shouldShirkWindowAfterContextMenuClosing)
+                {
+                    ToggleDesktop();
+                    shouldShirkWindowAfterContextMenuClosing = false;
+                }
+            }
         }
 
         private void AddWindowCloseButton_Click(object sender, RoutedEventArgs e)
         {
-            SetAddItemGridVisibility(Visibility.Hidden);
-            (sender as PiButton).Opacity = 1;
+            ProceedNextFile();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            itemManager.Dispose();
+            itemManager.DisposeManager();
+        }
+
+
+        private delegate void ExecuteContextCommand(int index, ItemType itemType);
+        private void ExexuteContextMenuCommand(ExecuteContextCommand command)
+        {
+            ItemType itemType = GetWindowTypeFromPoint(lastCursorPoint);
+            if (itemType == ItemType.Hot)
+            {
+                int selectedIndex = HotLV.SelectedIndex;
+                if (selectedIndex != -1)
+                {
+                    command(selectedIndex, itemType);
+                }
+            }
+            else
+            {
+                int selectedIndex = DesktopLV.SelectedIndex;
+                if (selectedIndex != -1)
+                {
+                    command(selectedIndex, itemType);
+                }
+            }
+            SetContextMenuVisibility(Visibility.Hidden);
+        }
+
+        private void StackPanel_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if(e.ClickCount == 2)
+            {
+                ExecuteContextCommand command = itemManager.OpenItem;
+                ExexuteContextMenuCommand(command);
+            }
         }
 
         private void PiContextOpenFileButton_Click(object sender, RoutedEventArgs e)
         {
-            ItemType itemType = GetWindowTypeFromPoint(lastCursorPoint);
-            if(itemType == ItemType.Hot)
-            {
-                int selectedIndex = HotLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.OpenItem(selectedIndex, itemType);
-                }
-            }
-            else
-            {
-                int selectedIndex = DesktopLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.OpenItem(selectedIndex, itemType);
-                }
-            }
-            SetContextMenuVisibility(Visibility.Hidden);
+            ExecuteContextCommand command = itemManager.OpenItem;
+            ExexuteContextMenuCommand(command);            
         }
 
         private void PiContextRemoveButton_Click(object sender, RoutedEventArgs e)
         {
-            ItemType itemType = GetWindowTypeFromPoint(lastCursorPoint);
-            if (itemType == ItemType.Hot)
-            {
-                int selectedIndex = HotLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.RemoveItem(selectedIndex, itemType);
-                }
-            }
-            else
-            {
-                int selectedIndex = DesktopLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.RemoveItem(selectedIndex, itemType);
-                }
-            }
-            SetContextMenuVisibility(Visibility.Hidden);
+            ExecuteContextCommand command = itemManager.RemoveItem;
+            ExexuteContextMenuCommand(command);  
         }
 
         private void PiContextShowInExlorerButton_Click(object sender, RoutedEventArgs e)
         {
-            ItemType itemType = GetWindowTypeFromPoint(lastCursorPoint);
-            if (itemType == ItemType.Hot)
-            {
-                int selectedIndex = HotLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.ShowItemInExplorer(selectedIndex, itemType);
-                }
-            }
-            else
-            {
-                int selectedIndex = DesktopLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.ShowItemInExplorer(selectedIndex, itemType);
-                }
-            }
-            SetContextMenuVisibility(Visibility.Hidden);
+            ExecuteContextCommand command = itemManager.ShowItemInExplorer;
+            ExexuteContextMenuCommand(command);
         }
 
         private void PiContextRefreshButton_Click(object sender, RoutedEventArgs e)
@@ -256,6 +262,12 @@ namespace Program_Viewer_3
                 lastCursorPoint = cursorPosition;
                 if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Hot)
                 {
+                    PiContextRemoveButton.Text = "   Remove From List";
+                    if (!isWindowExpanded)
+                    {
+                        ToggleDesktop();
+                        shouldShirkWindowAfterContextMenuClosing = true;
+                    }
                     SetContextMenuVisibility(Visibility.Visible);
                     PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Hot);
                 }
@@ -271,6 +283,7 @@ namespace Program_Viewer_3
                 lastCursorPoint = cursorPosition;
                 if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Desktop)
                 {
+                    PiContextRemoveButton.Text = "   Remove From Drive";
                     SetContextMenuVisibility(Visibility.Visible);
                     PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Desktop);
                 }
