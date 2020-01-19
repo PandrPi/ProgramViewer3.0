@@ -4,6 +4,7 @@ using Shell32;
 using System.IO;
 using System.Drawing;
 using System.Drawing.IconLib;
+using System.Drawing.IconLib.ColorProcessing;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -34,23 +35,12 @@ namespace Program_Viewer_3
             {
                 try
                 {
-                    MultiIcon mIcon = new MultiIcon();
-                    mIcon.Load(fileName);
-
-                    if (mIcon.Count > 0)
-                    {
-                        SingleIcon temp = mIcon[0];
-                        if (temp.Count > 0)
-                        {
-                            Icon icon = temp[temp.Count - 1].Icon;
-                            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
+                    var icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo);
+                    BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
                                 new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
-                        }
-                        else
-                            return BaseExeIcon;
-                    }
-                    else
-                        return BaseExeIcon;
+                    image.Freeze();
+                    icon.Dispose();
+                    return image;
                 }
                 catch
                 {
@@ -88,6 +78,19 @@ namespace Program_Viewer_3
             }
 
             return string.Empty;
+        }
+
+        private static void MultiIconDispose(MultiIcon multiIcon)
+        {
+            for(int i = 0; i < multiIcon.Count; i++)
+            {
+                SingleIcon icons = multiIcon[i];
+                for(int j = 0; j < icons.Count; j++)
+                {
+                    icons[j].Icon.Dispose();
+                }
+                multiIcon[i].Icon.Dispose();
+            }
         }
 
     }

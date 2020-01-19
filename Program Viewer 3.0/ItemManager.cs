@@ -76,7 +76,7 @@ namespace Program_Viewer_3
             {
                 desktopDirectoryInfo = new DirectoryInfo(DesktopFolderPath);
             }
-                
+
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
             List<string> hotItemsToRemove = new List<string>();
             foreach (var item in hotItemsJsonData)
@@ -86,14 +86,14 @@ namespace Program_Viewer_3
                 else
                     hotItemsToRemove.Add(item.Key);
             }
-            for(int i = 0; i < hotItemsToRemove.Count; i++)
+            for (int i = 0; i < hotItemsToRemove.Count; i++)
             {
                 hotItemsJsonData.Remove(hotItemsToRemove[i]);
             }
             HotItemsSave();
 
             FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
-            for(int i = 0; i < fileInfos.Length; i++)
+            for (int i = 0; i < fileInfos.Length; i++)
             {
                 FileInfo info = fileInfos[i];
                 ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name), info.FullName, IconExtractor.GetIcon(info.FullName));

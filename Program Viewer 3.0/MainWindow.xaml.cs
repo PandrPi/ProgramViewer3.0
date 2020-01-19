@@ -1,20 +1,11 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using Hardcodet.Wpf;
+
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace Program_Viewer_3
 {
@@ -36,7 +27,6 @@ namespace Program_Viewer_3
         private Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
         private int filesToAddCounter = 0;
 
-        
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
@@ -60,6 +50,13 @@ namespace Program_Viewer_3
             //ToggleDesktop();
             AddItemGrid.Visibility = Visibility.Hidden;
             PiContextMenu.Visibility = Visibility.Hidden;
+
+            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+            if (registryKey.GetValue(assemblyName) == null)
+            {
+                registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
+            }
         }
 
         private void ToggleDesktop()
@@ -194,6 +191,7 @@ namespace Program_Viewer_3
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            TaskbarIcon.Dispose();
             itemManager.DisposeManager();
         }
 
@@ -309,6 +307,11 @@ namespace Program_Viewer_3
             SetContextMenuVisibility(Visibility.Hidden);
             HotLV.SelectedIndex = -1;
             DesktopLV.SelectedIndex = -1;
+        }
+
+        private void ExitToolTipButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }

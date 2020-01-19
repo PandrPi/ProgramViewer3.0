@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Drawing;
 using System.Windows.Media;
@@ -11,9 +9,9 @@ using System.Windows.Interop;
 using System.Windows;
 using System.Runtime.InteropServices;
 using vbAccelerator.Components.ImageList;
-using System.Diagnostics;
 using System.Threading;
 using System.Windows.Threading;
+using System.Drawing.Imaging;
 
 namespace QuickZip.Tools
 {
@@ -54,7 +52,7 @@ namespace QuickZip.Tools
         internal struct SHFILEINFO
         {
             public IntPtr hIcon;
-            public IntPtr iIcon;
+            public int iIcon;
             public uint dwAttributes;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
             public string szDisplayName;
@@ -77,11 +75,154 @@ namespace QuickZip.Tools
         [DllImport("shell32.dll")]
         internal static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes,
                                                   ref SHFILEINFO psfi, uint cbSizeFileInfo, uint uFlags);
+        [DllImport("shell32.dll", EntryPoint = "#727")]
+        private extern static int SHGetImageList(int iImageList, ref Guid riid, out IImageList ppv);
+
+        [DllImport("user32")]
+        public static extern int DestroyIcon(IntPtr hIcon);
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct RECT
+        {
+            public int left, top, right, bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT
+        {
+            int x;
+            int y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct IMAGELISTDRAWPARAMS
+        {
+            public int cbSize;
+            public IntPtr himl;
+            public int i;
+            public IntPtr hdcDst;
+            public int x;
+            public int y;
+            public int cx;
+            public int cy;
+            public int xBitmap;    // x offest from the upperleft of bitmap
+            public int yBitmap;    // y offset from the upperleft of bitmap
+            public int rgbBk;
+            public int rgbFg;
+            public int fStyle;
+            public int dwRop;
+            public int fState;
+            public int Frame;
+            public int crEffect;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct IMAGEINFO
+        {
+            public IntPtr hbmImage;
+            public IntPtr hbmMask;
+            public int Unused1;
+            public int Unused2;
+            public RECT rcImage;
+        }
+        [ComImportAttribute()]
+        [GuidAttribute("46EB5926-582E-4017-9FDF-E8998DAA0950")]
+        [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
+        interface IImageList
+        {
+            [PreserveSig]
+            int Add(IntPtr hbmImage, IntPtr hbmMask, ref int pi);
+
+            [PreserveSig]
+            int ReplaceIcon(int i, IntPtr hicon, ref int pi);
+
+            [PreserveSig]
+            int SetOverlayImage(int iImage, int iOverlay);
+            [PreserveSig]
+            int Replace(int i, IntPtr hbmImage, IntPtr hbmMask);
+            [PreserveSig]
+            int AddMasked(IntPtr hbmImage, int crMask, ref int pi);
+
+            [PreserveSig]
+            int Draw(ref IMAGELISTDRAWPARAMS pimldp);
+
+            [PreserveSig]
+            int Remove(int i);
+
+            [PreserveSig]
+            int GetIcon(int i, int flags, ref IntPtr picon);
+
+            [PreserveSig]
+            int GetImageInfo(int i, ref IMAGEINFO pImageInfo);
+
+            [PreserveSig]
+            int Copy(int iDst, IImageList punkSrc, int iSrc, int uFlags);
+
+            [PreserveSig]
+            int Merge(int i1, IImageList punk2, int i2, int dx, int dy, ref Guid riid, ref IntPtr ppv);
+
+            [PreserveSig]
+            int Clone(ref Guid riid, ref IntPtr ppv);
+
+            [PreserveSig]
+            int GetImageRect(int i, ref RECT prc);
+
+            [PreserveSig]
+            int GetIconSize(ref int cx, ref int cy);
+
+            [PreserveSig]
+            int SetIconSize(int cx, int cy);
+
+            [PreserveSig]
+            int GetImageCount(ref int pi);
+
+            [PreserveSig]
+            int SetImageCount(int uNewCount);
+
+            [PreserveSig]
+            int SetBkColor(int clrBk, ref int pclr);
+
+            [PreserveSig]
+            int GetBkColor(ref int pclr);
+
+            [PreserveSig]
+            int BeginDrag(int iTrack, int dxHotspot, int dyHotspot);
+
+            [PreserveSig]
+            int EndDrag();
+
+            [PreserveSig]
+            int DragEnter(IntPtr hwndLock, int x, int y);
+
+            [PreserveSig]
+            int DragLeave(IntPtr hwndLock);
+
+            [PreserveSig]
+            int DragMove(int x, int y);
+
+            [PreserveSig]
+            int SetDragCursorImage(ref IImageList punk, int iDrag, int dxHotspot, int dyHotspot);
+
+            [PreserveSig]
+            int DragShowNolock(int fShow);
+
+            [PreserveSig]
+            int GetDragImage(ref POINT ppt, ref POINT pptHotspot, ref Guid riid, ref IntPtr ppv);
+
+            [PreserveSig]
+            int GetItemFlags(int i, ref int dwFlags);
+
+            [PreserveSig]
+            int GetOverlayImage(int iOverlay, ref int piIndex);
+        };
+
+        private const int SHIL_JUMBO = 0x4;
+        private const int SHIL_EXTRALARGE = 0x2;
 
         // <summary>
         /// Return large file icon of the specified file.
         /// </summary>
-        internal static Icon GetFileIcon(string fileName, IconSize size)
+        internal static unsafe Icon GetFileIcon(string fileName, IconSize size)
         {
             SHFILEINFO shinfo = new SHFILEINFO();
 
@@ -93,8 +234,63 @@ namespace QuickZip.Tools
             else flags = flags | SHGFI_ICON;
 
             SHGetFileInfo(fileName, 0, ref shinfo, (uint)Marshal.SizeOf(shinfo), flags);
-            return Icon.FromHandle(shinfo.hIcon);
+
+            var iconIndex = shinfo.iIcon;
+            IImageList iml;
+            Guid iidImageList = new Guid("46EB5926-582E-4017-9FDF-E8998DAA0950");
+
+            var hres = SHGetImageList(SHIL_JUMBO, ref iidImageList, out iml);
+            IntPtr hIcon = IntPtr.Zero;
+            int ILD_TRANSPARENT = 1;
+            hres = iml.GetIcon(iconIndex, ILD_TRANSPARENT, ref hIcon);
+            Icon icon = Icon.FromHandle(hIcon);
+            Bitmap bmp = icon.ToBitmap();
+            bool isEmpty = IsEmptyImage(ref bmp);
+
+            if(isEmpty) // if icon has few not zero(alpha chanel) pixels then load extralarge icon
+            {
+                icon.Dispose();
+                hres = SHGetImageList(SHIL_EXTRALARGE, ref iidImageList, out iml);
+                hIcon = IntPtr.Zero;
+                hres = iml.GetIcon(iconIndex, ILD_TRANSPARENT, ref hIcon);
+                icon = Icon.FromHandle(hIcon);
+            }
+
+            return icon;
         }
+
+        internal static unsafe bool IsEmptyImage(ref Bitmap bmp)
+        {
+            BitmapData bData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, bmp.PixelFormat);
+
+            byte bitsPerPixel = (byte)Image.GetPixelFormatSize(bmp.PixelFormat);
+
+            /*This time we convert the IntPtr to a ptr*/
+            byte* scan0 = (byte*)bData.Scan0.ToPointer();
+
+            int generalCounter = 0;
+            int notZeroCounter = 0;
+            for (int i = 0; i < bData.Height; i += 8)
+            {
+                for (int j = 0; j < bData.Width; j += 8)
+                {
+                    byte* data = scan0 + i * bData.Stride + j * bitsPerPixel / 8;
+
+                    generalCounter++;
+                    var temp = (data[0] == data[1] && data[1] == data[2]);
+                    if (data[3] != 0)
+                    {
+                        notZeroCounter++;
+                    }
+                }
+            }
+            Console.WriteLine($"{notZeroCounter} / {generalCounter}");
+            bmp.UnlockBits(bData);
+            bmp.Dispose();
+
+            return (notZeroCounter < 100);
+        }
+
         #endregion
 
         #region Static Tools
