@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Shell32;
 using System.IO;
 using System.Drawing;
-using System.Drawing.IconLib;
-using System.Drawing.IconLib.ColorProcessing;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -79,19 +77,5 @@ namespace Program_Viewer_3
 
             return string.Empty;
         }
-
-        private static void MultiIconDispose(MultiIcon multiIcon)
-        {
-            for(int i = 0; i < multiIcon.Count; i++)
-            {
-                SingleIcon icons = multiIcon[i];
-                for(int j = 0; j < icons.Count; j++)
-                {
-                    icons[j].Icon.Dispose();
-                }
-                multiIcon[i].Icon.Dispose();
-            }
-        }
-
     }
 }

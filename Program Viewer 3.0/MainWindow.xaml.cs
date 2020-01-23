@@ -29,33 +29,41 @@ namespace Program_Viewer_3
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
-            itemManager = new ItemManager(Dispatcher);
-            animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
-            animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
-            animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
-            animationManager.SetContextMenuShowCallback(() => PiContextMenu.Visibility = Visibility.Visible);
-            animationManager.SetContextMenuHideCallback(() => PiContextMenu.Visibility = Visibility.Hidden);
-
-            DesktopLV.ItemsSource = itemManager.desktopItems;
-            HotLV.ItemsSource = itemManager.hotItems;
-
-            DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
-            HotLV.LostFocus     += (ev, ee) => HotLV.SelectedIndex = -1;
-
-            double screenWidth = SystemParameters.VirtualScreenWidth;
-            Height = SystemParameters.VirtualScreenHeight - 46;
-            Left = screenWidth - Width - 2;
-            Top = 2;
-            //ToggleDesktop();
-            AddItemGrid.Visibility = Visibility.Hidden;
-            PiContextMenu.Visibility = Visibility.Hidden;
-
-            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-            string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
-            if (registryKey.GetValue(assemblyName) == null)
+            try
             {
-                registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
+                IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
+                itemManager = new ItemManager(Dispatcher);
+                animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
+                animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
+                animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
+                animationManager.SetContextMenuShowCallback(() => PiContextMenu.Visibility = Visibility.Visible);
+                animationManager.SetContextMenuHideCallback(() => PiContextMenu.Visibility = Visibility.Hidden);
+
+                DesktopLV.ItemsSource = itemManager.desktopItems;
+                HotLV.ItemsSource = itemManager.hotItems;
+
+                DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
+                HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
+
+                double screenWidth = SystemParameters.VirtualScreenWidth;
+                Height = SystemParameters.VirtualScreenHeight - 46;
+                Left = screenWidth - Width - 2;
+                Top = 2;
+                ToggleDesktop();
+                AddItemGrid.Visibility = Visibility.Hidden;
+                PiContextMenu.Visibility = Visibility.Hidden;
+
+                RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+                if (registryKey.GetValue(assemblyName) == null)
+                {
+                    registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
+                }
+                registryKey.Dispose();
+            }
+            catch(Exception exc)
+            {
+                MessageBox.Show(exc.StackTrace, exc.Message);
             }
         }
 
@@ -223,8 +231,23 @@ namespace Program_Viewer_3
         {
             if(e.ClickCount == 2)
             {
-                ExecuteContextCommand command = itemManager.OpenItem;
-                ExexuteContextMenuCommand(command);
+                ItemType itemType = GetWindowTypeFromPoint(Mouse.GetPosition(MyGrid));
+                if (itemType == ItemType.Hot)
+                {
+                    int selectedIndex = HotLV.SelectedIndex;
+                    if (selectedIndex != -1)
+                    {
+                        itemManager.OpenItem(selectedIndex, itemType);
+                    }
+                }
+                else
+                {
+                    int selectedIndex = DesktopLV.SelectedIndex;
+                    if (selectedIndex != -1)
+                    {
+                        itemManager.OpenItem(selectedIndex, itemType);
+                    }
+                }
             }
         }
 

@@ -50,8 +50,10 @@ namespace Program_Viewer_3
         private FileSystemWatcher desktopFileWatcher;
         private ItemDataComparer itemDataComparer = new ItemDataComparer();
 
-        private static readonly string HotItemsJSONFilename = "HotItems.json";
-        private static readonly string DesktopFolderPath = "PV Desktop";
+        private static readonly string ApplicationPath = Path.GetDirectoryName(
+            System.Reflection.Assembly.GetExecutingAssembly().Location);
+        private static readonly string HotItemsJSONFilename = Path.Combine(ApplicationPath, "HotItems.json");
+        private static readonly string DesktopFolderPath = Path.Combine(ApplicationPath, "PV Desktop");
 
         public ItemManager(Dispatcher dispatcher)
         {
