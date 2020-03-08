@@ -284,7 +284,6 @@ namespace QuickZip.Tools
                     }
                 }
             }
-            Console.WriteLine($"{notZeroCounter} / {generalCounter}");
             bmp.UnlockBits(bData);
             bmp.Dispose();
 

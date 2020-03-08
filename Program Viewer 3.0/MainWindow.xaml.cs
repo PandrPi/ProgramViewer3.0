@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Hardcodet.Wpf;
 
 using System.Windows.Input;
 using Microsoft.Win32;
@@ -32,21 +31,29 @@ namespace Program_Viewer_3
             try
             {
                 IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
-                itemManager = new ItemManager(Dispatcher);
-                animationManager = new AnimationManager(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
+                IconExtractor.Dispatcher = Dispatcher;
+
+                System.Threading.Tasks.Task.Run(() =>
+                {
+                    itemManager = new ItemManager(Dispatcher);
+                    Dispatcher.Invoke(() =>
+                    {
+                        DesktopLV.ItemsSource = itemManager.desktopItems;
+                        HotLV.ItemsSource = itemManager.hotItems;
+                        DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
+                        HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
+                    });
+                });
+
+                animationManager = new AnimationManager();
+                animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
                 animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
                 animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
                 animationManager.SetContextMenuShowCallback(() => PiContextMenu.Visibility = Visibility.Visible);
                 animationManager.SetContextMenuHideCallback(() => PiContextMenu.Visibility = Visibility.Hidden);
 
-                DesktopLV.ItemsSource = itemManager.desktopItems;
-                HotLV.ItemsSource = itemManager.hotItems;
-
-                DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
-                HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
-
-                double screenWidth = SystemParameters.VirtualScreenWidth;
-                Height = SystemParameters.VirtualScreenHeight - 46;
+                double screenWidth = SystemParameters.PrimaryScreenWidth;
+                Height = SystemParameters.PrimaryScreenHeight - 46;
                 Left = screenWidth - Width - 2;
                 Top = 2;
                 ToggleDesktop();
@@ -271,6 +278,10 @@ namespace Program_Viewer_3
 
         private void PiContextRefreshButton_Click(object sender, RoutedEventArgs e)
         {
+            double screenWidth = SystemParameters.VirtualScreenWidth;
+            Height = SystemParameters.VirtualScreenHeight - 46;
+            Left = screenWidth - Width - 2;
+            Top = 2;
             SetContextMenuVisibility(Visibility.Hidden);
         }
 
@@ -335,6 +346,30 @@ namespace Program_Viewer_3
         private void ExitToolTipButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void DesktopLV_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Enter)
+            {
+                int selectedIndex = DesktopLV.SelectedIndex;
+                if (selectedIndex != -1)
+                {
+                    itemManager.OpenItem(selectedIndex, ItemType.Desktop);
+                }
+            }
+        }
+
+        private void HotLV_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                int selectedIndex = HotLV.SelectedIndex;
+                if (selectedIndex != -1)
+                {
+                    itemManager.OpenItem(selectedIndex, ItemType.Hot);
+                }
+            }
         }
     }
 }

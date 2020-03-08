@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using Shell32;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
 using System.Windows;
+using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using QuickZip.Tools;
+using IWshRuntimeLibrary;
 
 namespace Program_Viewer_3
 {
     public static class IconExtractor
     {
         public static ImageSource BaseExeIcon;
+        public static Dispatcher Dispatcher;
 
-        private static FileToIconConverter fic = new FileToIconConverter();
         private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
-        private static readonly int DefaultIconSize = 192;
         private static readonly HashSet<string> imageExtensions = 
             new HashSet<string>(new string[] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
@@ -33,7 +32,11 @@ namespace Program_Viewer_3
             {
                 try
                 {
-                    var icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo);
+                    Icon icon = null;
+                    Dispatcher.Invoke(() =>
+                    {
+                        icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo);
+                    });
                     BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
                                 new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
                     image.Freeze();
@@ -53,7 +56,15 @@ namespace Program_Viewer_3
                 }
                 else
                 {
-                    ImageSource image = fic.GetImage(fileName, DefaultIconSize);
+                    Icon icon = null;
+                    Dispatcher.Invoke(() =>
+                    {
+                        icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo);
+                    });
+                    BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
+                                new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
+                    image.Freeze();
+                    icon.Dispose();
                     if (!imageExtensions.Contains(extension))
                         cachedImages.Add(extension, image);
                     return image;
@@ -63,19 +74,10 @@ namespace Program_Viewer_3
 
         private static string GetShortcutTargetFile(string shortcutFilename)
         {
-            string pathOnly = Path.GetDirectoryName(shortcutFilename);
-            string filenameOnly = Path.GetFileName(shortcutFilename);
+            WshShell shell = new WshShell();
+            IWshShortcut link = (IWshShortcut)shell.CreateShortcut(shortcutFilename);
 
-            Shell shell = new Shell();
-            Folder folder = shell.NameSpace(pathOnly);
-            FolderItem folderItem = folder.ParseName(filenameOnly);
-            if (folderItem != null)
-            {
-                Shell32.ShellLinkObject link = (Shell32.ShellLinkObject)folderItem.GetLink;
-                return link.Path;
-            }
-
-            return string.Empty;
+            return link.TargetPath;
         }
     }
 }

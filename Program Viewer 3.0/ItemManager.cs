@@ -61,6 +61,21 @@ namespace Program_Viewer_3
             desktopItems = new ObservableCollection<ItemData>();
             hotItems = new ObservableCollection<ItemData>();
 
+            LoadFiles();
+
+            desktopFileWatcher = new FileSystemWatcher(DesktopFolderPath)
+            {
+                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.DirectoryName
+            };
+            desktopFileWatcher.Created += DesktopFileWatcher_Created;
+            desktopFileWatcher.Deleted += DesktopFileWatcher_Deleted;
+            desktopFileWatcher.Renamed += DesktopFileWatcher_Renamed;
+
+            desktopFileWatcher.EnableRaisingEvents = true;
+        }
+
+        private void LoadFiles()
+        {
             // if hotItems json file does not exist create it and write an empty json content
             if (!File.Exists(HotItemsJSONFilename))
             {
@@ -81,6 +96,7 @@ namespace Program_Viewer_3
 
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
             List<string> hotItemsToRemove = new List<string>();
+
             foreach (var item in hotItemsJsonData)
             {
                 if (Directory.Exists(item.Key) || File.Exists(item.Key))
@@ -88,6 +104,7 @@ namespace Program_Viewer_3
                 else
                     hotItemsToRemove.Add(item.Key);
             }
+
             for (int i = 0; i < hotItemsToRemove.Count; i++)
             {
                 hotItemsJsonData.Remove(hotItemsToRemove[i]);
@@ -95,6 +112,7 @@ namespace Program_Viewer_3
             HotItemsSave();
 
             FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
+
             for (int i = 0; i < fileInfos.Length; i++)
             {
                 FileInfo info = fileInfos[i];
@@ -102,6 +120,8 @@ namespace Program_Viewer_3
                 AddSorted(desktopItems, itemData, itemDataComparer);
                 desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
             }
+
+
             DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
             for (int i = 0; i < directoryInfos.Length; i++)
             {
@@ -111,15 +131,6 @@ namespace Program_Viewer_3
                 desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
             }
 
-            desktopFileWatcher = new FileSystemWatcher(DesktopFolderPath)
-            {
-                NotifyFilter = NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.DirectoryName
-            };
-            desktopFileWatcher.Created += DesktopFileWatcher_Created;
-            desktopFileWatcher.Deleted += DesktopFileWatcher_Deleted;
-            desktopFileWatcher.Renamed += DesktopFileWatcher_Renamed;
-
-            desktopFileWatcher.EnableRaisingEvents = true;
         }
 
         private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)

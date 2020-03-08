@@ -41,7 +41,7 @@
             </controls:PiButton>
 
             <!--Desktop ListView-->
-            <ListView x:Name="DesktopLV" VerticalAlignment="Top" Margin="0,0,115,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="453" Background="{x:Null}" BorderThickness="0">
+            <ListView x:Name="DesktopLV" VerticalAlignment="Top" Margin="0,0,115,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="453" Background="{x:Null}" BorderThickness="0" KeyDown="DesktopLV_KeyDown">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="4" HorizontalAlignment="Center"/>
@@ -65,7 +65,7 @@
                 </ListView.ItemTemplate>
             </ListView>
             <!--Hot ListView-->
-            <ListView x:Name="HotLV" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center">
+            <ListView x:Name="HotLV" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center" KeyDown="HotLV_KeyDown">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="1" HorizontalAlignment="Center"/>

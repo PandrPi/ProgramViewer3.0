@@ -24,3 +24,4 @@ D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\New
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Release\Interop.Shell32.dll
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Release\Program Viewer 3.csproj.ResolveComReference.cache
 D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Release\Program Viewer 3.csproj.CopyComplete
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Release\Interop.IWshRuntimeLibrary.dll

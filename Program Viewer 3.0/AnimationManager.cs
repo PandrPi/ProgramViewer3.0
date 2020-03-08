@@ -7,16 +7,27 @@ namespace Program_Viewer_3
     public class AnimationManager
     {
         private FrameworkElement frameworkElement;
-        private Storyboard shirkSB               = new Storyboard();
-        private Storyboard expandSB              = new Storyboard();
-        private Storyboard addItemWindowShowSB   = new Storyboard();
-        private Storyboard addItemWindowHideSB   = new Storyboard();
-        private Storyboard contextMenuShowSB   = new Storyboard();
-        private Storyboard contextMenuHideSB = new Storyboard();
+        private Storyboard shirkSB;
+        private Storyboard expandSB;
+        private Storyboard addItemWindowShowSB;
+        private Storyboard addItemWindowHideSB;
+        private Storyboard contextMenuShowSB;
+        private Storyboard contextMenuHideSB;
 
-        private TimeSpan addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
+        private TimeSpan addItemWindowSHAnimDuration;
 
-        public AnimationManager(FrameworkElement frameworkElement, TimeSpan duration, Point expandArea)
+        public AnimationManager()
+        {
+            shirkSB = new Storyboard();
+            expandSB = new Storyboard();
+            addItemWindowShowSB = new Storyboard();
+            addItemWindowHideSB = new Storyboard();
+            contextMenuShowSB = new Storyboard();
+            contextMenuHideSB = new Storyboard();
+            addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
+        }
+
+        public void Initiallize(FrameworkElement frameworkElement, TimeSpan duration, Point expandArea)
         {
             this.frameworkElement = frameworkElement;
 
@@ -47,18 +58,10 @@ namespace Program_Viewer_3
         private DoubleAnimation CreateDoubleAnimation(double from, double to, TimeSpan duration,
             string targetProperty, string propertyPath, IEasingFunction easingFunction)
         {
-            DoubleAnimation da = CreateDoubleAnimation(from, to, duration, targetProperty, propertyPath);
-            da.EasingFunction = easingFunction;
-
-            return da;
-        }
-
-        private DoubleAnimation CreateDoubleAnimation(double from, double to, TimeSpan duration,
-            string targetProperty, string propertyPath)
-        {
             DoubleAnimation da = new DoubleAnimation(from, to, duration);
             da.SetValue(Storyboard.TargetNameProperty, targetProperty);
             Storyboard.SetTargetProperty(da, new PropertyPath(propertyPath));
+            da.EasingFunction = easingFunction;
 
             return da;
         }
