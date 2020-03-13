@@ -60,19 +60,27 @@ namespace Program_Viewer_3
                 AddItemGrid.Visibility = Visibility.Hidden;
                 PiContextMenu.Visibility = Visibility.Hidden;
 
-                RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
-                if (registryKey.GetValue(assemblyName) == null)
-                {
-                    registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
-                }
-                registryKey.Dispose();
+                RegisterAssembly();
             }
             catch(Exception exc)
             {
                 MessageBox.Show(exc.StackTrace, exc.Message);
             }
         }
+
+		/// <summary>
+		/// Creates a key in Registry for application's autorun
+		/// </summary>
+		private void RegisterAssembly()
+		{
+			RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+			string assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+			if (registryKey.GetValue(assemblyName) == null)
+			{
+				registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
+			}
+			registryKey.Dispose();
+		}
 
         private void ToggleDesktop()
         {

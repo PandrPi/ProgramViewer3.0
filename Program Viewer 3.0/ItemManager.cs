@@ -43,6 +43,7 @@ namespace Program_Viewer_3
         public ObservableCollection<ItemData> desktopItems { get; private set; }
         public ObservableCollection<ItemData> hotItems { get; private set; }
 
+		private CacheManager cacheManager;
         private Dispatcher mainDispatcher;
         private Dictionary<string, dynamic> hotItemsJsonData;       // used to store loaded json data for hot items
         private Dictionary<string, ItemData> desktopKeyValuePair = new Dictionary<string, ItemData>();   // used to store to get ItemData fast by file name
@@ -60,6 +61,8 @@ namespace Program_Viewer_3
             this.mainDispatcher = dispatcher;
             desktopItems = new ObservableCollection<ItemData>();
             hotItems = new ObservableCollection<ItemData>();
+			cacheManager = new CacheManager();
+
 
             LoadFiles();
 
@@ -76,34 +79,19 @@ namespace Program_Viewer_3
 
         private void LoadFiles()
         {
-            // if hotItems json file does not exist create it and write an empty json content
-            if (!File.Exists(HotItemsJSONFilename))
-            {
-                using (StreamWriter sw = File.CreateText(HotItemsJSONFilename))
-                {
-                    sw.WriteLine("{"); sw.WriteLine(""); sw.WriteLine("}");
-                }
-            }
-
-            if (!Directory.Exists(DesktopFolderPath))
-            {
-                desktopDirectoryInfo = Directory.CreateDirectory(DesktopFolderPath);
-            }
-            else
-            {
-                desktopDirectoryInfo = new DirectoryInfo(DesktopFolderPath);
-            }
+			CacheManager.InitializeJSONFile(HotItemsJSONFilename);
+			desktopDirectoryInfo = CacheManager.InitiallizeDirectory(DesktopFolderPath);
 
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
             List<string> hotItemsToRemove = new List<string>();
 
-            foreach (var item in hotItemsJsonData)
-            {
-                if (Directory.Exists(item.Key) || File.Exists(item.Key))
-                    AddSorted(hotItems, new ItemData(item.Value, item.Key, IconExtractor.GetIcon(item.Key)), itemDataComparer);
-                else
-                    hotItemsToRemove.Add(item.Key);
-            }
+			Parallel.ForEach(hotItemsJsonData, (item) =>
+			{
+				if (Directory.Exists(item.Key) || File.Exists(item.Key))
+					AddSorted(hotItems, new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key)), itemDataComparer);
+				else
+					hotItemsToRemove.Add(item.Key);
+			});
 
             for (int i = 0; i < hotItemsToRemove.Count; i++)
             {
@@ -113,27 +101,28 @@ namespace Program_Viewer_3
 
             FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
 
-            for (int i = 0; i < fileInfos.Length; i++)
-            {
-                FileInfo info = fileInfos[i];
-                ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name), info.FullName, IconExtractor.GetIcon(info.FullName));
-                AddSorted(desktopItems, itemData, itemDataComparer);
-                desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
-            }
+			Parallel.For(0, fileInfos.Length, (i) =>
+			{
+				FileInfo info = fileInfos[i];
+				ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name),
+					info.FullName, cacheManager.GetFileIcon(info.FullName));
+				AddSorted(desktopItems, itemData, itemDataComparer);
+				desktopKeyValuePair.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+			});
 
 
             DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
-            for (int i = 0; i < directoryInfos.Length; i++)
-            {
-                DirectoryInfo info = directoryInfos[i];
-                ItemData itemData = new ItemData(info.Name, info.FullName, IconExtractor.GetIcon(info.FullName));
-                AddSorted(desktopItems, itemData, itemDataComparer);
-                desktopKeyValuePair.Add(DesktopFolderPath + "\\" + info.Name, itemData);
-            }
+			Parallel.For(0, directoryInfos.Length, (i) =>
+			{
+				DirectoryInfo info = directoryInfos[i];
+				ItemData itemData = new ItemData(info.Name, info.FullName, cacheManager.GetFileIcon(info.FullName));
+				AddSorted(desktopItems, itemData, itemDataComparer);
+				desktopKeyValuePair.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+			});
 
         }
 
-        private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
+		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
         {
             ItemData oldItem = desktopKeyValuePair[e.OldFullPath];
             int index = desktopItems.IndexOf(oldItem);
@@ -233,6 +222,7 @@ namespace Program_Viewer_3
         {
             desktopFileWatcher.Dispose();
             HotItemsSave();
+			cacheManager.PackIcons(hotItems, desktopItems);
         }
 
         private void StartProcess(string filename)
