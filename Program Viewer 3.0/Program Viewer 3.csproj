@@ -79,6 +79,7 @@
     </ApplicationDefinition>
     <Compile Include="CacheManager.cs" />
     <Compile Include="FileManager.cs" />
+    <Compile Include="LogManager.cs" />
     <Compile Include="ObservableCollectionExtension.cs" />
     <Compile Include="SysImageList.cs" />
     <Page Include="MainWindow.xaml">

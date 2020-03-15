@@ -17,6 +17,7 @@ namespace Program_Viewer_3
 
         private AnimationManager animationManager;
         private ItemManager itemManager;
+
         private bool isWindowExpanded = true;
         private bool shouldShirkWindowAfterContextMenuClosing = false;
         /// <summary>
@@ -30,6 +31,7 @@ namespace Program_Viewer_3
         {
             try
             {
+				LogManager.Initiallize();
                 IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
                 IconExtractor.Dispatcher = Dispatcher;
 
@@ -64,6 +66,7 @@ namespace Program_Viewer_3
             }
             catch(Exception exc)
             {
+
                 MessageBox.Show(exc.StackTrace, exc.Message);
             }
         }
@@ -216,6 +219,7 @@ namespace Program_Viewer_3
         {
             TaskbarIcon.Dispose();
             itemManager.DisposeManager();
+			LogManager.Close();
         }
 
 

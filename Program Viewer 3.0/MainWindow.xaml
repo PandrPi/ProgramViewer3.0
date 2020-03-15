@@ -34,7 +34,7 @@
                 </tb:TaskbarIcon.ContextMenu>
             </tb:TaskbarIcon>
 
-            <controls:PiButton x:Name="desktopShirkExpandButton" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFA200" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
+            <controls:PiButton x:Name="desktopShirkExpandButton" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFB900" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
                 <controls:PiButton.Effect>
                     <DropShadowEffect ShadowDepth="3"/>
                 </controls:PiButton.Effect>

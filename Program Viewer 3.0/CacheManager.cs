@@ -76,6 +76,7 @@ namespace Program_Viewer_3
 				File.Delete(CacheZip);
 
 			ZipFile.CreateFromDirectory(SourceIconsFolder, CacheZip);
+			LogManager.Write($"Icons packed successfully!");
 			string json = JsonConvert.SerializeObject(cache, Formatting.Indented);
 			File.WriteAllText(CacheJSON, json);
 
@@ -92,10 +93,12 @@ namespace Program_Viewer_3
 		{
 			if (cachedIcons.ContainsKey(path))
 			{
+				LogManager.Write($"Image [{path}] was returned from dictionary!");
 				return cachedIcons[path];
 			}
 			else
 			{
+				LogManager.Write($"Image [{path}] was extracted from file!");
 				return IconExtractor.GetIcon(path);
 			}
 		}
@@ -108,10 +111,12 @@ namespace Program_Viewer_3
 		{
 			if (!Directory.Exists(path))
 			{
+				LogManager.Write($"Directory created: {path}");
 				return Directory.CreateDirectory(path);
 			}
 			else
 			{
+				LogManager.Write($"Directory exist: {path}");
 				return new DirectoryInfo(path);
 			}
 		}
@@ -122,7 +127,7 @@ namespace Program_Viewer_3
 		/// <param name="path"></param>
 		public static void InitializeJSONFile(string path)
 		{
-			bool temp = false;
+			bool temp;
 			if (!File.Exists(path))
 			{
 				temp = true;
@@ -134,12 +139,14 @@ namespace Program_Viewer_3
 			}
 			if (temp)
 			{
+				LogManager.Write($"{path} file has no basic json structure, fixing...");
 				File.WriteAllText(path, string.Empty);
 				using (StreamWriter sw = File.CreateText(path))
 				{
 					sw.WriteLine("{"); sw.WriteLine(""); sw.WriteLine("}");
 				}
 			}
+			LogManager.Write($"Json [{path}] was successfully initiallized!");
 		}
 
 		/// <summary>
@@ -154,19 +161,28 @@ namespace Program_Viewer_3
 			{
 				File.Delete(fileInfos[i].FullName);
 			}
+			LogManager.Write($"All files deleted from directory: {path}");
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void InitiallizeCacheDictionary()
 		{
 			ZipFile.ExtractToDirectory(CacheZip, SourceIconsFolder);
+			LogManager.Write($"Zip unpacked: {CacheZip}");
 			var cacheData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(CacheJSON));
 			FileInfo[] fileInfos = new DirectoryInfo(SourceIconsFolder).GetFiles();
 			for(int i = 0; i < fileInfos.Length; i++)
 			{
 				string nameWithoutExt = Path.GetFileNameWithoutExtension(fileInfos[i].Name);
 				if (cacheData.ContainsKey(nameWithoutExt))
+				{
 					cachedIcons.Add(cacheData[nameWithoutExt], LoadImageFromFile(fileInfos[i].FullName));
+					LogManager.Write($"Cache icon [{nameWithoutExt}] assigned with image: {fileInfos[i].FullName}");
+				}
+				else
+				{
+					LogManager.Write($"Cache icon [{nameWithoutExt}] is not presented in dictionary");
+				}
 				File.Delete(fileInfos[i].FullName);
 			}
 		}
@@ -176,15 +192,26 @@ namespace Program_Viewer_3
 		/// </summary>
 		/// <param name="path">Path of image file to load from.</param>
 		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private BitmapSource LoadImageFromFile(string path)
 		{
-			Bitmap bmp = Bitmap.FromFile(path) as Bitmap;
-			BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(bmp.GetHicon(),
-						new System.Windows.Int32Rect(0, 0, bmp.Width, bmp.Height), BitmapSizeOptions.FromEmptyOptions());
-			image.Freeze();
-			bmp.Dispose();
+			try
+			{
+				Bitmap bmp = Bitmap.FromFile(path) as Bitmap;
+				BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(bmp.GetHicon(),
+							new System.Windows.Int32Rect(0, 0, bmp.Width, bmp.Height), BitmapSizeOptions.FromEmptyOptions());
+				image.Freeze();
+				bmp.Dispose();
 
-			return image;
+				LogManager.Write($"Image [{path}] was successfully loaded!");
+
+				return image;
+			}
+			catch(Exception e)
+			{
+				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
+				return null;
+			}
 		}
 
 		/// <summary>
@@ -192,13 +219,22 @@ namespace Program_Viewer_3
 		/// </summary>
 		/// <param name="path">Path of image file to save</param>
 		/// <param name="image">Image object to save</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SaveImageToFile(string path, BitmapSource image)
 		{
-			using (var fileStream = new FileStream(path, FileMode.Create))
+			try
 			{
-				BitmapEncoder encoder = new PngBitmapEncoder();
-				encoder.Frames.Add(BitmapFrame.Create(image));
-				encoder.Save(fileStream);
+				using (var fileStream = new FileStream(path, FileMode.Create))
+				{
+					BitmapEncoder encoder = new PngBitmapEncoder();
+					encoder.Frames.Add(BitmapFrame.Create(image));
+					encoder.Save(fileStream);
+					LogManager.Write($"Image [{path}] was successfully saved!");
+				}
+			}
+			catch(Exception e)
+			{
+				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
 			}
 		}
 
@@ -206,6 +242,7 @@ namespace Program_Viewer_3
 		/// Generates random string.
 		/// </summary>
 		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetRandomString()
 		{
 			int stringLength = 64;
