@@ -31,23 +31,31 @@ namespace Program_Viewer_3
         {
             try
             {
+				System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+				stopwatch.Start();
+
 				LogManager.Initiallize();
                 IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
                 IconExtractor.Dispatcher = Dispatcher;
 
-                System.Threading.Tasks.Task.Run(() =>
-                {
-                    itemManager = new ItemManager(Dispatcher);
-                    Dispatcher.Invoke(() =>
-                    {
-                        DesktopLV.ItemsSource = itemManager.desktopItems;
-                        HotLV.ItemsSource = itemManager.hotItems;
-                        DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
-                        HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
-                    });
-                });
+				TaskAsync(() =>
+				{
+					System.Diagnostics.Stopwatch itemStopwatch = new System.Diagnostics.Stopwatch();
+					itemStopwatch.Start();
 
-                animationManager = new AnimationManager();
+					itemManager = new ItemManager(Dispatcher);
+					Dispatcher.Invoke(() =>
+					{
+						DesktopLV.ItemsSource = itemManager.desktopItems;
+						HotLV.ItemsSource = itemManager.hotItems;
+						DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
+						HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
+					});
+					itemStopwatch.Stop();
+					LogManager.Write($"Item loading time : {itemStopwatch.Elapsed.TotalMilliseconds} ms");
+				});
+
+				animationManager = new AnimationManager();
                 animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
                 animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
                 animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
@@ -63,11 +71,18 @@ namespace Program_Viewer_3
                 PiContextMenu.Visibility = Visibility.Hidden;
 
                 RegisterAssembly();
+
+				stopwatch.Stop();
+				LogManager.Write($"Application starting time : {stopwatch.Elapsed.TotalMilliseconds} ms");
             }
             catch(Exception exc)
             {
-
-                MessageBox.Show(exc.StackTrace, exc.Message);
+				string excMessage = $"{exc.GetType().Name}. Message: {exc.Message}. Stack trace: {exc.StackTrace}";
+				Clipboard.SetText(excMessage);
+				LogManager.Write(excMessage);
+				MessageBox.Show(exc.StackTrace, exc.Message);
+				DisposeAndCloseAll();
+				Application.Current.Shutdown();
             }
         }
 
@@ -85,7 +100,19 @@ namespace Program_Viewer_3
 			registryKey.Dispose();
 		}
 
-        private void ToggleDesktop()
+		private async void TaskAsync(Action todo)
+		{
+			try
+			{
+				await System.Threading.Tasks.Task.Run(() => todo());
+			}
+			catch (Exception e)
+			{
+				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
+			}
+		}
+
+		private void ToggleDesktop()
         {
             if (isWindowExpanded)
             {
@@ -217,11 +244,15 @@ namespace Program_Viewer_3
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            TaskbarIcon.Dispose();
-            itemManager.DisposeManager();
-			LogManager.Close();
+			DisposeAndCloseAll();
         }
 
+		private void DisposeAndCloseAll()
+		{
+			TaskbarIcon.Dispose();
+			itemManager.DisposeManager();
+			LogManager.Close();
+		}
 
         private delegate void ExecuteContextCommand(int index, ItemType itemType);
         private void ExexuteContextMenuCommand(ExecuteContextCommand command)

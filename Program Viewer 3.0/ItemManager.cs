@@ -16,6 +16,7 @@ namespace Program_Viewer_3
         public string Title { get; set; }
         public string Path { get; set; }
         public ImageSource ImageData { get; set; }
+		public PathType PathType { get; set; }
 
 
 
@@ -24,33 +25,61 @@ namespace Program_Viewer_3
             this.Title = title;
             this.Path = path;
             this.ImageData = imageSource;
+			this.PathType = PathType.File;
+			this.PathType = GetPathType(path);
         }
+
+		/// <summary>
+		/// Gets a type of path(folder or file)
+		/// </summary>
+		/// <param name="path">Item full path</param>
+		/// <returns></returns>
+		private PathType GetPathType(string path)
+		{
+			if (File.GetAttributes(path).HasFlag(FileAttributes.Directory))
+			{
+				return PathType.Folder;
+			}
+			else
+			{
+				return PathType.File;
+			}
+		}
+
+		public int CompareTo(ItemData that)
+		{
+			int pathCompare = PathType.CompareTo(that.PathType) * 2;
+			int titleCompare = Title.CompareTo(that.Title) + pathCompare;
+			
+			return titleCompare;
+		}
     }
 
-    public class ItemDataComparer : IComparer<ItemData>
-    {
-        public int Compare(ItemData x, ItemData y)
-        {
-            return x.Title.CompareTo(y.Title);
-        }
-    }
+	public class ItemDataComparer : IComparer<ItemData>
+	{
+		public int Compare(ItemData x, ItemData y)
+		{
+			return x.CompareTo(y);
+		}
+	}
 
-    public enum ItemType { Desktop, Hot};
+	public enum ItemType { Desktop, Hot};
+    public enum PathType { Folder = 0, File = 1};
 
     public class ItemManager
     {
         public ObservableCollection<ItemData> desktopItems { get; private set; }
         public ObservableCollection<ItemData> hotItems { get; private set; }
 
-		private CacheManager cacheManager;
-        private Dispatcher mainDispatcher;
-        private Dictionary<string, dynamic> hotItemsJsonData;       // used to store loaded json data for hot items
-        private Dictionary<string, ItemData> desktopKeyValuePair = new Dictionary<string, ItemData>();   // used to store to get ItemData fast by file name
-        private DirectoryInfo desktopDirectoryInfo;
-        private FileSystemWatcher desktopFileWatcher;
-        private ItemDataComparer itemDataComparer = new ItemDataComparer();
+		private CacheManager					cacheManager;
+        private Dispatcher						mainDispatcher;
+        private Dictionary<string, dynamic>		hotItemsJsonData; // used to store loaded json data for hot items
+        private Dictionary<string, ItemData>	desktopItemsData = new Dictionary<string, ItemData>(); // used to store to get ItemData fast by file name
+        private DirectoryInfo					desktopDirectoryInfo;
+        private FileSystemWatcher				desktopFileWatcher;
+		private ItemDataComparer				itemDataComparer = new ItemDataComparer();
 
-        private static readonly string ApplicationPath = Path.GetDirectoryName(
+        public static readonly string ApplicationPath = Path.GetDirectoryName(
             System.Reflection.Assembly.GetExecutingAssembly().Location);
         private static readonly string HotItemsJSONFilename = Path.Combine(ApplicationPath, "HotItems.json");
         private static readonly string DesktopFolderPath = Path.Combine(ApplicationPath, "PV Desktop");
@@ -87,7 +116,7 @@ namespace Program_Viewer_3
 			Parallel.ForEach(hotItemsJsonData, (item) =>
 			{
 				if (Directory.Exists(item.Key) || File.Exists(item.Key))
-					AddSorted(hotItems, new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key)), itemDataComparer);
+					AddSorted(hotItems, new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key)));
 				else
 					hotItemsToRemove.Add(item.Key);
 			});
@@ -100,39 +129,37 @@ namespace Program_Viewer_3
 
             FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
 
-			Parallel.For(0, fileInfos.Length, (i) =>
+			for(int i = 0; i < fileInfos.Length; i++)
 			{
 				FileInfo info = fileInfos[i];
 				ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name),
 					info.FullName, cacheManager.GetFileIcon(info.FullName));
-				AddSorted(desktopItems, itemData, itemDataComparer);
-				desktopKeyValuePair.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
-			});
-
+				AddSorted(desktopItems, itemData);
+				desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+			}
 
             DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
-			Parallel.For(0, directoryInfos.Length, (i) =>
+			for (int i = 0; i < directoryInfos.Length; i++)
 			{
 				DirectoryInfo info = directoryInfos[i];
 				ItemData itemData = new ItemData(info.Name, info.FullName, cacheManager.GetFileIcon(info.FullName));
-				AddSorted(desktopItems, itemData, itemDataComparer);
-				desktopKeyValuePair.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
-			});
-
+				AddSorted(desktopItems, itemData);
+				desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+			}
         }
 
 		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
         {
-            ItemData oldItem = desktopKeyValuePair[e.OldFullPath];
+            ItemData oldItem = desktopItemsData[e.OldFullPath];
             int index = desktopItems.IndexOf(oldItem);
             string newTitle = Path.GetFileNameWithoutExtension(e.Name);
             ItemData newItem = new ItemData(newTitle, e.FullPath, oldItem.ImageData);
-            desktopKeyValuePair.Remove(e.OldFullPath);
+            desktopItemsData.Remove(e.OldFullPath);
 
             Action action = () => 
             {
                 desktopItems[index] = newItem;
-                desktopKeyValuePair.Add(e.FullPath, newItem);
+                desktopItemsData.Add(e.FullPath, newItem);
             };
             mainDispatcher.BeginInvoke(action);
         }
@@ -141,8 +168,8 @@ namespace Program_Viewer_3
         {
             Action action = () =>
             {
-                desktopItems.Remove(desktopKeyValuePair[e.FullPath]);
-                desktopKeyValuePair.Remove(e.FullPath);
+                desktopItems.Remove(desktopItemsData[e.FullPath]);
+                desktopItemsData.Remove(e.FullPath);
             };
             mainDispatcher.BeginInvoke(action);
         }
@@ -158,32 +185,29 @@ namespace Program_Viewer_3
             Action action = () =>
             {
                 ItemData itemData = new ItemData(title, e.FullPath, IconExtractor.GetIcon(e.FullPath));
-                AddSorted(desktopItems, itemData, itemDataComparer);
-                desktopKeyValuePair.Add(e.FullPath, itemData);
+                AddSorted(desktopItems, itemData);
+                desktopItemsData.Add(e.FullPath, itemData);
             };
             mainDispatcher.BeginInvoke(action);
         }
 
 
-        private void AddSorted<T>(Collection<T> list, T item, IComparer<T> comparer)
-        {
-            if (comparer == null)
-                comparer = Comparer<T>.Default;
+		private void AddSorted(Collection<ItemData> list, ItemData item)
+		{
+			int i = 0;
+			while (i < list.Count && itemDataComparer.Compare(list[i], item) < 0)
+				i++;
 
-            int i = 0;
-            while (i < list.Count && comparer.Compare(list[i], item) < 0)
-                i++;
+			list.Insert(i, item);
+		}
 
-            list.Insert(i, item);
-        }
-
-        public void AddItem(string title, string path, ItemType itemType)
+		public void AddItem(string title, string path, ItemType itemType)
         {
             if (itemType == ItemType.Hot)
             {
                 if (!hotItemsJsonData.ContainsKey(path))
                 {
-                    AddSorted(hotItems, new ItemData(title, path, IconExtractor.GetIcon(path)), itemDataComparer);
+                    AddSorted(hotItems, new ItemData(title, path, IconExtractor.GetIcon(path)));
                     hotItemsJsonData.Add(path, title);
                     HotItemsSave();
                 }

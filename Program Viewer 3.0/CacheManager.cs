@@ -20,7 +20,7 @@ namespace Program_Viewer_3
 		private Dictionary<string, ImageSource> cachedIcons = new Dictionary<string, ImageSource>();
 
 
-		private static readonly string IconsCacheFolder = "IconsCache";
+		private static readonly string IconsCacheFolder = Path.Combine(ItemManager.ApplicationPath, "IconsCache");
 		private static readonly string SourceIconsFolder = $"{IconsCacheFolder}/SourceIcons";
 		private static readonly string CacheJSON = $"{IconsCacheFolder}/cacheFilesNames.json";
 		private static readonly string CacheZip = $"{IconsCacheFolder}/cachedImages.zip";
