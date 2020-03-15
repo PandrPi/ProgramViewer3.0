@@ -7,5 +7,5 @@ wasting the time. So Interface is divided into two sections: "hot" and "desktop"
 designed for containing not very frequently used items. Hot section is used to contain the most frequently used items(preffered exe), 
 it is always visible ( if not overlayed by another programs ).
 
-![Alt text](https://i.postimg.cc/k203wF5R/Screenshot-1.png "Optional title")
-![Alt text](https://i.postimg.cc/yDgCFr7z/Screenshot-2.png "Optional title")
+![Alt text](https://i.postimg.cc/PqxXXSsy/Screenshot-1.png "Optional title")
+![Alt text](https://i.postimg.cc/pLkVMg7y/Screenshot-2.png "Optional title")
