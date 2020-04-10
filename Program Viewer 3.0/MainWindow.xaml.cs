@@ -304,7 +304,7 @@ namespace Program_Viewer_3
         private void PiContextOpenFileButton_Click(object sender, RoutedEventArgs e)
         {
             ExecuteContextCommand command = itemManager.OpenItem;
-            ExexuteContextMenuCommand(command);            
+            ExexuteContextMenuCommand(command);
         }
 
         private void PiContextRemoveButton_Click(object sender, RoutedEventArgs e)
@@ -337,11 +337,10 @@ namespace Program_Viewer_3
                 lastCursorPoint = cursorPosition;
                 if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Hot)
                 {
-                    PiContextRemoveButton.Text = "   Remove From List";
+                    PiContextRemoveButton.Text = "Remove From List";
                     if (!isWindowExpanded)
                     {
                         ToggleDesktop();
-                        shouldShirkWindowAfterContextMenuClosing = true;
                     }
                     SetContextMenuVisibility(Visibility.Visible);
                     PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Hot);
@@ -358,7 +357,7 @@ namespace Program_Viewer_3
                 lastCursorPoint = cursorPosition;
                 if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Desktop)
                 {
-                    PiContextRemoveButton.Text = "   Remove From Drive";
+                    PiContextRemoveButton.Text = "Remove From Drive";
                     SetContextMenuVisibility(Visibility.Visible);
                     PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Desktop);
                 }
@@ -368,15 +367,17 @@ namespace Program_Viewer_3
         /// <summary>
         /// Determines the point(Margin) where the context menu will be shown
         /// </summary>
-        /// <param name="point"></param>
-        /// <param name="itemType"></param>
+        /// <param name="point">Cursor click point</param>
+        /// <param name="itemType">Determines the type of clicked item</param>
         /// <returns></returns>
         private Thickness GetContextMenuMarginFromCursorPosition(Point point, ItemType itemType)
         {
             double xDelta = PiContextMenu.Width * ((point.X + PiContextMenu.Width > MyGrid.Width)
                 ? -1 : (itemType == ItemType.Desktop) ? 0 : 1);
+			double contextHeight = PiContextMenu.Height;
+			double yDelta = (contextHeight + point.Y > Height) ? -contextHeight : 0;
 
-            return new Thickness(point.X + xDelta, point.Y, 0, 0);
+			return new Thickness(point.X + xDelta, point.Y + yDelta, 0, 0);
         }
         
         private void WindowBorder_MouseDown(object sender, MouseButtonEventArgs e)

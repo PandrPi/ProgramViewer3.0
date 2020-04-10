@@ -1,0 +1,49 @@
+10.04.2020 19:41:10 : Application starting time : 147,1687 ms
+10.04.2020 19:41:14 : Directory exist: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache
+10.04.2020 19:41:14 : Directory exist: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons
+10.04.2020 19:41:14 : Json [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/cacheFilesNames.json] was successfully initiallized!
+10.04.2020 19:41:14 : Zip unpacked: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/cachedImages.zip
+10.04.2020 19:41:17 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\2ClRyZhu8DeFK9MU9cRZI32kIDH6W0bzlM5bbGya48f6SI1a73Zr9zQDwBSk3egL.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [2ClRyZhu8DeFK9MU9cRZI32kIDH6W0bzlM5bbGya48f6SI1a73Zr9zQDwBSk3egL] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\2ClRyZhu8DeFK9MU9cRZI32kIDH6W0bzlM5bbGya48f6SI1a73Zr9zQDwBSk3egL.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\C0i50zewg0vrVy2hL2ebIL9q7tQH2707i0HG8J93xB7LQhrBh63kc2xulx69M500.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [C0i50zewg0vrVy2hL2ebIL9q7tQH2707i0HG8J93xB7LQhrBh63kc2xulx69M500] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\C0i50zewg0vrVy2hL2ebIL9q7tQH2707i0HG8J93xB7LQhrBh63kc2xulx69M500.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\cJDKI1311J7mXRUs6xgronNVDR28sDQM1c9pn2YQ1y846YKaZ0B3nHsspyJ9Xg6f.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [cJDKI1311J7mXRUs6xgronNVDR28sDQM1c9pn2YQ1y846YKaZ0B3nHsspyJ9Xg6f] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\cJDKI1311J7mXRUs6xgronNVDR28sDQM1c9pn2YQ1y846YKaZ0B3nHsspyJ9Xg6f.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\KuEILbgtINZg2rFt5M764G2sxFfdI75A6YB3m51T6CLRAn21EiMnT0uwC1e3m1je.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [KuEILbgtINZg2rFt5M764G2sxFfdI75A6YB3m51T6CLRAn21EiMnT0uwC1e3m1je] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\KuEILbgtINZg2rFt5M764G2sxFfdI75A6YB3m51T6CLRAn21EiMnT0uwC1e3m1je.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\MOUbX3ur40KLU1n7razpW6nQy71VqK25C7LV2Hl7gk12rubvHinb97UAo7g8SP4W.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [MOUbX3ur40KLU1n7razpW6nQy71VqK25C7LV2Hl7gk12rubvHinb97UAo7g8SP4W] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\MOUbX3ur40KLU1n7razpW6nQy71VqK25C7LV2Hl7gk12rubvHinb97UAo7g8SP4W.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\S2AF3258yIR37ZTJ0eyazrp7kQAOPN3CPuRPc1AI4trTWBbC3uZ8NDWbal3jr2d3.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [S2AF3258yIR37ZTJ0eyazrp7kQAOPN3CPuRPc1AI4trTWBbC3uZ8NDWbal3jr2d3] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\S2AF3258yIR37ZTJ0eyazrp7kQAOPN3CPuRPc1AI4trTWBbC3uZ8NDWbal3jr2d3.png
+10.04.2020 19:41:18 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\x58fe4dpf0z9dQb8Ix4w4f8OD1j3XRtibC690YoO7mowc8UZ06d4TmW5q8D93p99.png] was successfully loaded!
+10.04.2020 19:41:18 : Cache icon [x58fe4dpf0z9dQb8Ix4w4f8OD1j3XRtibC690YoO7mowc8UZ06d4TmW5q8D93p99] assigned with image: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache\SourceIcons\juJuu0H1O77Us85VYJTxLGk7OB37UKp881PMViwd92bVKFeOgmrnsZ5Kcs6p1Tw8.png
+23.03.2020 12:12:43 : Json [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\HotItems.json] was successfully initiallized!
+23.03.2020 12:12:43 : Directory exist: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\PV Desktop
+23.03.2020 12:12:43 : Image [C:\Users\Андрушко\Desktop\The Sims 3 The Complete Collection.lnk] was returned from dictionary!
+23.03.2020 12:12:43 : Image [C:\Users\Андрушко\Desktop\Дополнения-The Sims 3 The Complete Collection.lnk] was returned from dictionary!
+23.03.2020 12:12:43 : Image [C:\Users\Андрушко\Desktop\µTorrent.lnk] was returned from dictionary!
+23.03.2020 12:12:43 : Image [C:\Users\Public\Desktop\Google Chrome.lnk] was returned from dictionary!
+23.03.2020 12:12:43 : Image [C:\Users\Андрушко\Desktop\Браузер Opera.lnk] was returned from dictionary!
+23.03.2020 12:12:43 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\Hardcodet.Wpf.TaskbarNotification.pdb] was returned from dictionary!
+23.03.2020 12:12:43 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\Hardcodet.Wpf.TaskbarNotification.dll] was returned from dictionary!
+23.03.2020 12:12:43 : Item loading time : 1204,0997 ms
+146 607 722 True
+146 697 722 True
+146 84 722 False
+146 191 722 False
+146 343 722 False
+146 435 722 False
+146 521 722 False
+146 643 722 True
+146 665 722 True
+146 684 722 True
+146 435 722 False
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/C0i50zewg0vrVy2hL2ebIL9q7tQH2707i0HG8J93xB7LQhrBh63kc2xulx69M500.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/2ClRyZhu8DeFK9MU9cRZI32kIDH6W0bzlM5bbGya48f6SI1a73Zr9zQDwBSk3egL.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/cJDKI1311J7mXRUs6xgronNVDR28sDQM1c9pn2YQ1y846YKaZ0B3nHsspyJ9Xg6f.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/x58fe4dpf0z9dQb8Ix4w4f8OD1j3XRtibC690YoO7mowc8UZ06d4TmW5q8D93p99.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/S2AF3258yIR37ZTJ0eyazrp7kQAOPN3CPuRPc1AI4trTWBbC3uZ8NDWbal3jr2d3.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/MOUbX3ur40KLU1n7razpW6nQy71VqK25C7LV2Hl7gk12rubvHinb97UAo7g8SP4W.png] was successfully saved!
+23.03.2020 12:12:59 : Image [D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons/KuEILbgtINZg2rFt5M764G2sxFfdI75A6YB3m51T6CLRAn21EiMnT0uwC1e3m1je.png] was successfully saved!
+23.03.2020 12:12:59 : Icons packed successfully!
+23.03.2020 12:12:59 : All files deleted from directory: D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Release\IconsCache/SourceIcons

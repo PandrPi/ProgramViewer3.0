@@ -27,7 +27,9 @@
     <Grid MouseDown="Grid_MouseDown">
         <Image x:Name="ButtonImage" Source="{Binding Path=Source}"/>
         <TextBlock x:Name="ButtonText" Text="{Binding Path=Text}" Foreground="{Binding Path=Foreground}"
-                   HorizontalAlignment="{Binding Path=TextHorizontalAlignment}" VerticalAlignment="{Binding Path=TextVerticalAlignment}"/>
+                   HorizontalAlignment="{Binding Path=TextHorizontalAlignment}"
+                   VerticalAlignment="{Binding Path=TextVerticalAlignment}"
+                   Margin="{Binding Path=TextMargin}"/>
         <!--Style-->
         <Grid.Style>
             <Style TargetType="Grid">

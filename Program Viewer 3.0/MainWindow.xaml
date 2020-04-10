@@ -5,7 +5,7 @@
         xmlns:controls="clr-namespace:Program_Viewer_3"
         Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000" Closing="Window_Closing" ShowInTaskbar="False">
 
-    
+
     <Border x:Name="WindowBorder" HorizontalAlignment="Right" Width="600" BorderThickness="2" CornerRadius="2" BorderBrush="White" MouseDown="WindowBorder_MouseDown">
         <Grid x:Name="MyGrid" HorizontalAlignment="Right" Width="598" Margin="0" AllowDrop="True" Drop="MyGrid_Drop">
             <Grid.Background>
@@ -36,7 +36,7 @@
 
             <controls:PiButton x:Name="desktopShirkExpandButton" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="#FF232323" Background="#FFFFB900" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="Button_Click" HoverColor="#FFBEE6FD">
                 <controls:PiButton.Effect>
-                    <DropShadowEffect ShadowDepth="3"/>
+                    <DropShadowEffect ShadowDepth="3" Direction="-10" Opacity="0.8"/>
                 </controls:PiButton.Effect>
             </controls:PiButton>
 
@@ -91,7 +91,7 @@
             <!--SettingsGrid-->
             <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="30" Background="#FF171717" Margin="0,0,0,1">
                 <Grid.Effect>
-                    <DropShadowEffect/>
+                    <DropShadowEffect Direction="-10" Opacity="0.8"/>
                 </Grid.Effect>
                 <!--SettingsButton-->
                 <controls:PiButton x:Name="SettingsButton" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="24" RenderTransformOrigin="0,-0.25"
@@ -101,26 +101,33 @@
             <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Width="97"/>
             <Slider HorizontalAlignment="Left" Margin="667,335,-169,0" VerticalAlignment="Top" Width="100"/>
             <!--PiContextMenu-->
-            <Grid x:Name="PiContextMenu" Margin="449,10,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left">
-                <Rectangle Fill="#FF171717" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2"/>
+            <Grid x:Name="PiContextMenu" Margin="449,10,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left" Height="146">
+                <Rectangle Fill="#FF171717" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2">
+                    <Rectangle.Effect>
+                        <DropShadowEffect Opacity="0.7"/>
+                    </Rectangle.Effect>
+                </Rectangle>
                 <ListBox x:Name="ContextListBox" Margin="3" BorderBrush="{x:Null}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="#FF171717">
-                    <controls:PiButton x:Name="PiContextOpenFileButton"         Text="   Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"        Click="PiContextOpenFileButton_Click"/>
-                    <controls:PiButton x:Name="PiContextRemoveButton"           Text="   Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click"/>
-                    <controls:PiButton x:Name="PiContextShowInExlorerButton"    Text="   Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click"/>
-                    <controls:PiButton x:Name="PiContextRefreshButton"          Text="   Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"          Click="PiContextRefreshButton_Click"/>
+                    <controls:PiButton x:Name="PiContextOpenFileButton"         Text="Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"        Click="PiContextOpenFileButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextRefreshButton"          Text="Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"          Click="PiContextRefreshButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextShowInExlorerButton"    Text="Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextRemoveButton"           Text="Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
                 </ListBox>
             </Grid>
             <!--AddItemGrid-->
             <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="#FF171717" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230">
+                <Grid.Effect>
+                    <DropShadowEffect Opacity="0.7"/>
+                </Grid.Effect>
                 <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038" IsReadOnly="True"/>
                 <Label Content="File Window" HorizontalAlignment="Left" Height="28" Margin="18,129,0,0" VerticalAlignment="Top" Width="75" Foreground="White"/>
                 <Rectangle Fill="#FF0F0F0F" Height="26" Stroke="Black" VerticalAlignment="Top" Width="375"/>
-                <controls:PiButton x:Name="AddWindowCloseButton" HorizontalAlignment="Left" Height="26" Margin="349,0,0,0" VerticalAlignment="Top" Width="26" Source="Pictures/CloseIcon.png" Click="AddWindowCloseButton_Click"/>
+                <controls:PiButton x:Name="AddWindowCloseButton" HorizontalAlignment="Left" Height="26" Margin="349,0,0,0" VerticalAlignment="Top" Width="26" Source="Pictures/CloseIcon.png" Click="AddWindowCloseButton_Click" Cursor="Hand"/>
                 <ComboBox x:Name="AddWindowFileWindow" HorizontalAlignment="Left" Margin="101,131,0,0" VerticalAlignment="Top" Width="249" SelectedIndex="0" Foreground="Black" Background="#FF293038" IsReadOnly="True">
                     <ComboBoxItem Content="Hot Window"/>
                     <ComboBoxItem Content="Desktop Window"/>
                 </ComboBox>
-                <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click"/>
+                <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click" Cursor="Hand"/>
                 <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038"/>
                 <Label x:Name="AddFileWindowFilesCount" Content="" HorizontalAlignment="Left" Height="28" VerticalAlignment="Top" Width="166" Foreground="White" FontWeight="Bold" Margin="10,0,0,0" FontSize="13"/>
                 <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,86,0,0" VerticalAlignment="Top" Width="60" Foreground="White"/>
