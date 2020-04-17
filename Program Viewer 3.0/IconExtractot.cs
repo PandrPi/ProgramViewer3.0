@@ -14,7 +14,9 @@ namespace Program_Viewer_3
         public static ImageSource BaseExeIcon;
         public static Dispatcher Dispatcher;
 
-        private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
+		private static FileToIconConverter fic = new FileToIconConverter();
+		private static int DefaultIconSize = 256;
+		private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
         private static readonly HashSet<string> imageExtensions = 
             new HashSet<string>(new [] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
@@ -50,13 +52,17 @@ namespace Program_Viewer_3
                 }
                 else
                 {
-					BitmapSource image = LoadIcon(fileName);
-
-                    if (!imageExtensions.Contains(extension))
-                        cachedImages.Add(extension, image);
-
-                    return image;
-                }
+					if (!imageExtensions.Contains(extension))
+					{
+						BitmapSource image = LoadIcon(fileName);
+						cachedImages.Add(extension, image);
+						return image;
+					}
+					else
+					{
+						return LoadIconFromImageFile(fileName);
+					}
+				}
             }
         }
 
@@ -73,6 +79,16 @@ namespace Program_Viewer_3
 			icon.Dispose();
 
 			return image;
+		}
+
+		private static ImageSource LoadIconFromImageFile(string fileName)
+		{
+			ImageSource temp = null;
+			Dispatcher.Invoke(() =>
+			{
+				temp = fic.GetImage(fileName, DefaultIconSize);
+			});
+			return temp;
 		}
 
         private static string GetShortcutTargetFile(string shortcutFilename)
