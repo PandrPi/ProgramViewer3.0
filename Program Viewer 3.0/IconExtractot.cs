@@ -16,13 +16,17 @@ namespace Program_Viewer_3
 
         private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
         private static readonly HashSet<string> imageExtensions = 
-            new HashSet<string>(new string[] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
+            new HashSet<string>(new [] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
         public static ImageSource GetIcon(string fileName)
         {
             string extension = Path.GetExtension(fileName);
             if (extension == ".lnk")
             {
+				var tempIcon = LoadIcon(fileName);
+				if (tempIcon != BaseExeIcon)
+					return tempIcon;
+
                 fileName = GetShortcutTargetFile(Path.GetFullPath(fileName));
                 extension = Path.GetExtension(fileName);
             }
@@ -50,6 +54,7 @@ namespace Program_Viewer_3
 
                     if (!imageExtensions.Contains(extension))
                         cachedImages.Add(extension, image);
+
                     return image;
                 }
             }
