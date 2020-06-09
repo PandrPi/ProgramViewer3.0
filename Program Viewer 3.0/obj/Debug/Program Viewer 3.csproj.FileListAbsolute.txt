@@ -1,0 +1,28 @@
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Program Viewer 3.exe.config
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Program Viewer 3.exe
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Program Viewer 3.pdb
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\MainWindow.baml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\MainWindow.g.cs
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\App.g.cs
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3_MarkupCompile.cache
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.g.resources
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program_Viewer_3.Properties.Resources.resources
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.GenerateResource.cache
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.CoreCompileInputs.cache
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.exe
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.pdb
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\PiButton.g.cs
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3_MarkupCompile.lref
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\PiButton.baml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Newtonsoft.Json.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Newtonsoft.Json.xml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.CopyComplete
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Interop.Shell32.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csproj.ResolveComReference.cache
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Hardcodet.Wpf.TaskbarNotification.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Hardcodet.Wpf.TaskbarNotification.pdb
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\Hardcodet.Wpf.TaskbarNotification.xml
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Interop.IWshRuntimeLibrary.dll
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\obj\Debug\Program Viewer 3.csprojAssemblyReference.cache
+D:\Павла\VS  Projects\Program Viewer 3.0\Program Viewer 3.0\bin\Debug\VirtualizingWrapPanel.dll
