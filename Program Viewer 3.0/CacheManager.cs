@@ -21,9 +21,9 @@ namespace Program_Viewer_3
 
 
 		private static readonly string IconsCacheFolder = Path.Combine(ItemManager.ApplicationPath, "IconsCache");
-		private static readonly string SourceIconsFolder = $"{IconsCacheFolder}/SourceIcons";
-		private static readonly string CacheJSON = $"{IconsCacheFolder}/cacheFilesNames.json";
-		private static readonly string CacheZip = $"{IconsCacheFolder}/cachedImages.zip";
+		private static readonly string SourceIconsFolder = Path.Combine(IconsCacheFolder, "SourceIcons");
+		private static readonly string CacheJSON = Path.Combine(IconsCacheFolder, "cacheFilesNames.json");
+		private static readonly string CacheZip = Path.Combine(IconsCacheFolder, "cachedImages.zip");
 
 		private static readonly Point[] RandomCharsEntry = { new Point(26, 65), new Point(26, 97), new Point(10, 48) };
 
@@ -48,6 +48,7 @@ namespace Program_Viewer_3
 		public void PackIcons(ObservableCollection<ItemData> hotItems, ObservableCollection<ItemData> desktopItems)
 		{
 			Dictionary<string, dynamic> cache = new Dictionary<string, dynamic>();
+
 			Parallel.For(0, hotItems.Count, (i) =>
 			{
 				string randomName = GetRandomString();
@@ -58,6 +59,7 @@ namespace Program_Viewer_3
 				var item = hotItems[i];
 				cache.Add(randomName, item.Path);
 				SaveImageToFile($"{SourceIconsFolder}/{randomName}.png", item.ImageData as BitmapSource);
+				
 			});
 
 			Parallel.For(0, desktopItems.Count, (i) =>
@@ -197,13 +199,21 @@ namespace Program_Viewer_3
 		{
 			try
 			{
-				Bitmap bmp = Bitmap.FromFile(path) as Bitmap;
+				Image loadedImage = Image.FromFile(path);
+				float aspectRatio = (float)loadedImage.Width / (float)loadedImage.Height; 
+				Bitmap bmp;
+				if (loadedImage.Width > 256)
+					bmp = new Bitmap(loadedImage, 256, (int)(loadedImage.Height / aspectRatio));
+				else
+					bmp = new Bitmap(loadedImage);
+
 				BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(bmp.GetHicon(),
 							new System.Windows.Int32Rect(0, 0, bmp.Width, bmp.Height), BitmapSizeOptions.FromEmptyOptions());
 				image.Freeze();
 				bmp.Dispose();
+				loadedImage.Dispose();
 
-				LogManager.Write($"Image [{path}] was successfully loaded!");
+				LogManager.Write($"Image '{path}' was successfully loaded!");
 
 				return image;
 			}
@@ -229,7 +239,7 @@ namespace Program_Viewer_3
 					BitmapEncoder encoder = new PngBitmapEncoder();
 					encoder.Frames.Add(BitmapFrame.Create(image));
 					encoder.Save(fileStream);
-					LogManager.Write($"Image [{path}] was successfully saved!");
+					LogManager.Write($"Image '{path}' was successfully saved!");
 				}
 			}
 			catch(Exception e)
@@ -254,7 +264,7 @@ namespace Program_Viewer_3
 				var p = RandomCharsEntry[random.Next(0, 3)];
 				sb.Append(Convert.ToChar(Convert.ToInt32(Math.Floor(p.X * random.NextDouble() + p.Y))));
 			}
-
+			
 			return sb.ToString();
 		}
 	}

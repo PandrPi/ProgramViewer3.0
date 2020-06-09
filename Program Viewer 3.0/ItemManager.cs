@@ -113,13 +113,13 @@ namespace Program_Viewer_3
             hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
             List<string> hotItemsToRemove = new List<string>();
 
-			Parallel.ForEach(hotItemsJsonData, (item) =>
+			foreach(var item in hotItemsJsonData)
 			{
 				if (Directory.Exists(item.Key) || File.Exists(item.Key))
 					AddSorted(hotItems, new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key)));
 				else
 					hotItemsToRemove.Add(item.Key);
-			});
+			}
 
             for (int i = 0; i < hotItemsToRemove.Count; i++)
             {
@@ -271,6 +271,7 @@ namespace Program_Viewer_3
                     process.Start();
                 }
             }
+			process.Dispose();
         }
 
         public void OpenItem(int index, ItemType itemType)
@@ -316,7 +317,7 @@ namespace Program_Viewer_3
 
             try
             {
-                Task.Run(() => Process.Start("explorer.exe", argument));
+                Task.Run(() => Process.Start("explorer.exe", argument).Dispose());
             }
             catch { }
         }

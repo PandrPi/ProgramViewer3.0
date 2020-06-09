@@ -34,8 +34,8 @@ namespace Program_Viewer_3
 				System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 				stopwatch.Start();
 
-				LogManager.Initiallize();
-                IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
+				LogManager.Initiallize(true);
+				IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
                 IconExtractor.Dispatcher = Dispatcher;
 
 				TaskAsync(() =>
@@ -61,6 +61,8 @@ namespace Program_Viewer_3
                 animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
                 animationManager.SetContextMenuShowCallback(() => PiContextMenu.Visibility = Visibility.Visible);
                 animationManager.SetContextMenuHideCallback(() => PiContextMenu.Visibility = Visibility.Hidden);
+				DesktopLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
+				HotLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
 
                 double screenWidth = SystemParameters.PrimaryScreenWidth;
                 Height = SystemParameters.PrimaryScreenHeight - 46;
@@ -116,7 +118,7 @@ namespace Program_Viewer_3
         {
             if (isWindowExpanded)
             {
-                animationManager.ShirkDesktop();
+                animationManager.ShrinkDesktop();
                 isWindowExpanded = false;
             }
             else
@@ -415,5 +417,5 @@ namespace Program_Viewer_3
                 }
             }
         }
-    }
+	}
 }
