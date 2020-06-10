@@ -34,7 +34,7 @@ namespace Program_Viewer_3
 				System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 				stopwatch.Start();
 
-				LogManager.Initiallize(true);
+				LogManager.Initiallize(false);
 				IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
                 IconExtractor.Dispatcher = Dispatcher;
 

@@ -49,7 +49,7 @@ namespace Program_Viewer_3
 		{
 			Dictionary<string, dynamic> cache = new Dictionary<string, dynamic>();
 
-			Parallel.For(0, hotItems.Count, (i) =>
+			for (int i = 0; i < hotItems.Count; i++)
 			{
 				string randomName = GetRandomString();
 				while (cache.ContainsKey(randomName))
@@ -58,11 +58,11 @@ namespace Program_Viewer_3
 				}
 				var item = hotItems[i];
 				cache.Add(randomName, item.Path);
-				SaveImageToFile($"{SourceIconsFolder}/{randomName}.png", item.ImageData as BitmapSource);
-				
-			});
+				SaveImageToFile(Path.Combine(SourceIconsFolder, $"{randomName}.png"), item.ImageData as BitmapSource);
 
-			Parallel.For(0, desktopItems.Count, (i) =>
+			}
+
+			for (int i = 0; i < desktopItems.Count; i++)
 			{
 				string randomName = GetRandomString();
 				while (cache.ContainsKey(randomName))
@@ -71,8 +71,8 @@ namespace Program_Viewer_3
 				}
 				var item = desktopItems[i];
 				cache.Add(randomName, item.Path);
-				SaveImageToFile($"{SourceIconsFolder}/{randomName}.png", item.ImageData as BitmapSource);
-			});
+				SaveImageToFile(Path.Combine(SourceIconsFolder, $"{randomName}.png"), item.ImageData as BitmapSource);
+			}
 
 			if (File.Exists(CacheZip))
 				File.Delete(CacheZip);
@@ -200,7 +200,7 @@ namespace Program_Viewer_3
 			try
 			{
 				Image loadedImage = Image.FromFile(path);
-				float aspectRatio = (float)loadedImage.Width / (float)loadedImage.Height; 
+				float aspectRatio = (float)loadedImage.Width / (float)loadedImage.Height;
 				Bitmap bmp;
 				if (loadedImage.Width > 256)
 					bmp = new Bitmap(loadedImage, 256, (int)(loadedImage.Height / aspectRatio));
@@ -232,6 +232,18 @@ namespace Program_Viewer_3
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SaveImageToFile(string path, BitmapSource image)
 		{
+#if DEBUG
+			using (var fileStream = new FileStream(path, FileMode.Create))
+			{
+
+				BitmapEncoder encoder = new PngBitmapEncoder();
+				encoder.Frames.Add(BitmapFrame.Create(image));
+				encoder.Save(fileStream);
+				LogManager.Write($"Image '{path}' was successfully saved!");
+			}
+
+#else
+
 			try
 			{
 				using (var fileStream = new FileStream(path, FileMode.Create))
@@ -246,6 +258,7 @@ namespace Program_Viewer_3
 			{
 				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
 			}
+#endif
 		}
 
 		/// <summary>
