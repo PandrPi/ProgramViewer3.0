@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using QuickZip.Tools;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     public static class IconExtractor
     {

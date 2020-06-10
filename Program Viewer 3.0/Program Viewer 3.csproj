@@ -84,6 +84,7 @@
     <Compile Include="FileManager.cs" />
     <Compile Include="LogManager.cs" />
     <Compile Include="ObservableCollectionExtension.cs" />
+    <Compile Include="SettingsManager.cs" />
     <Compile Include="SysImageList.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

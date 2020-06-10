@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Win32;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     public partial class MainWindow : Window
     {
@@ -17,9 +17,11 @@ namespace Program_Viewer_3
 
         private AnimationManager animationManager;
         private ItemManager itemManager;
+		private SettingsManager settingsManager = new SettingsManager();
 
         private bool isWindowExpanded = true;
         private bool shouldShirkWindowAfterContextMenuClosing = false;
+		private bool isSettingsExpanded = false;
         /// <summary>
         /// Used to store cursor position at the moment when PiContextMenu was shown
         /// </summary>
@@ -34,7 +36,9 @@ namespace Program_Viewer_3
 				System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
 				stopwatch.Start();
 
-				LogManager.Initiallize(false);
+				settingsManager.Initialize();
+
+				LogManager.Initiallize(settingsManager.GetSettingValue<bool>("RedirectMessageLogging"));
 				IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
                 IconExtractor.Dispatcher = Dispatcher;
 
@@ -116,21 +120,24 @@ namespace Program_Viewer_3
 
 		private void ToggleDesktop()
         {
-            if (isWindowExpanded)
-            {
-                animationManager.ShrinkDesktop();
-                isWindowExpanded = false;
-            }
-            else
-            {
-                animationManager.ExpandDesktop();
-                isWindowExpanded = true;
-            }
+			animationManager.ToggleDesktop(isWindowExpanded);
+			isWindowExpanded = !isWindowExpanded;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+		private void ToggleSettings()
+        {
+			animationManager.ToggleSettings(isSettingsExpanded);
+			isSettingsExpanded = !isSettingsExpanded;
+        }
+
+        private void OnToggleDesktopClick(object sender, RoutedEventArgs e)
         {
             ToggleDesktop();
+        }
+
+		private void OnToggleSettingsClick(object sender, RoutedEventArgs e)
+        {
+			ToggleSettings();
         }
 
         private void MyGrid_Drop(object sender, DragEventArgs e)
@@ -251,6 +258,7 @@ namespace Program_Viewer_3
 
 		private void DisposeAndCloseAll()
 		{
+			settingsManager.CloseManager();
 			TaskbarIcon.Dispose();
 			itemManager.DisposeManager();
 			LogManager.Close();

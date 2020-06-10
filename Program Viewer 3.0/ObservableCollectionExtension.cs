@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     [Serializable]
     public sealed class ObservableCollectionExtension<T> : ObservableCollection<T>

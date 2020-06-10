@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     /// <summary>
     /// Interaction logic for PiButton.xaml

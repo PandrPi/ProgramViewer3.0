@@ -3,30 +3,23 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     public class AnimationManager
     {
         private FrameworkElement frameworkElement;
-        private Storyboard shrinkSB;
-        private Storyboard expandSB;
-        private Storyboard addItemWindowShowSB;
-        private Storyboard addItemWindowHideSB;
-        private Storyboard contextMenuShowSB;
-        private Storyboard contextMenuHideSB;
+        private Storyboard desktopShrinkSB = new Storyboard();
+		private Storyboard desktopExpandSB = new Storyboard();
+		private Storyboard settingsShrinkSB= new Storyboard();
+        private Storyboard settingsExpandSB = new Storyboard();
+        private Storyboard addItemWindowShowSB = new Storyboard();
+        private Storyboard addItemWindowHideSB = new Storyboard();
+        private Storyboard contextMenuShowSB = new Storyboard();
+		private Storyboard contextMenuHideSB = new Storyboard();
 
-        private TimeSpan addItemWindowSHAnimDuration;
+        private TimeSpan addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
 
-        public AnimationManager()
-        {
-            shrinkSB = new Storyboard();
-            expandSB = new Storyboard();
-            addItemWindowShowSB = new Storyboard();
-            addItemWindowHideSB = new Storyboard();
-            contextMenuShowSB = new Storyboard();
-            contextMenuHideSB = new Storyboard();
-            addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
-        }
+		private Point settingsGridResizeArea = new Point(31, 491);
 
 		/// <summary>
 		/// Initializes animation manager
@@ -40,42 +33,51 @@ namespace Program_Viewer_3
 
             ExponentialEase exponentialEase = new ExponentialEase();
             exponentialEase.EasingMode = EasingMode.EaseIn;
-            DoubleAnimation widthDA = CreateDoubleAnimation(resizeArea.Y, resizeArea.X, resizeDuration, "WindowBorder", "Width", exponentialEase);
-            DoubleAnimation opacityDA = CreateDoubleAnimation(1, 0, resizeDuration, "DesktopLV", "Opacity", exponentialEase);
-            DoubleAnimation addItemWindowDA = CreateDoubleAnimation(0, 1, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
-            DoubleAnimation contextMenuDA = CreateDoubleAnimation(0, 1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
+            DoubleAnimation desktopWidthDA = CreateDoubleAnimation(resizeArea.X, resizeDuration, "WindowBorder", "Width", exponentialEase);
+            DoubleAnimation settingsWidthDA = CreateDoubleAnimation(settingsGridResizeArea.X, resizeDuration, "SettingsGrid", "Width", exponentialEase);
+            DoubleAnimation opacityDA = CreateDoubleAnimation(0, resizeDuration, "DesktopLV", "Opacity", exponentialEase);
+			DoubleAnimation settingsShadowOpacityDA = CreateDoubleAnimation(0, resizeDuration, "SettingsGrid", "(Effect).Opacity", exponentialEase);
+			DoubleAnimation addItemWindowDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
+            DoubleAnimation contextMenuDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
 
-            shrinkSB.Children.Add(widthDA);
-            shrinkSB.Children.Add(opacityDA);
+            desktopShrinkSB.Children.Add(desktopWidthDA);
+            desktopShrinkSB.Children.Add(opacityDA);
+			settingsShrinkSB.Children.Add(settingsWidthDA);
+            settingsExpandSB.Children.Add(opacityDA);
+            settingsExpandSB.Children.Add(settingsShadowOpacityDA);
             addItemWindowShowSB.Children.Add(addItemWindowDA);
             contextMenuShowSB.Children.Add(contextMenuDA);
 
             exponentialEase.EasingMode = EasingMode.EaseOut;
-            widthDA = CreateDoubleAnimation(resizeArea.X, resizeArea.Y, resizeDuration, "WindowBorder", "Width", exponentialEase);
-            opacityDA = CreateDoubleAnimation(0, 1, resizeDuration, "DesktopLV", "Opacity", exponentialEase);
-            addItemWindowDA = CreateDoubleAnimation(1, 0, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
-            contextMenuDA = CreateDoubleAnimation(1, 0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
+            desktopWidthDA = CreateDoubleAnimation(resizeArea.Y, resizeDuration, "WindowBorder", "Width", exponentialEase);
+			settingsWidthDA = CreateDoubleAnimation(settingsGridResizeArea.Y, resizeDuration, "SettingsGrid", "Width", exponentialEase);
+			opacityDA = CreateDoubleAnimation(1, resizeDuration, "DesktopLV", "Opacity", exponentialEase);
+			settingsShadowOpacityDA = CreateDoubleAnimation(0.5, resizeDuration, "SettingsGrid", "(Effect).Opacity", exponentialEase);
+            addItemWindowDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
+            contextMenuDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
 
-            expandSB.Children.Add(widthDA);
-            expandSB.Children.Add(opacityDA);
-            addItemWindowHideSB.Children.Add(addItemWindowDA);
+            desktopExpandSB.Children.Add(desktopWidthDA);
+            desktopExpandSB.Children.Add(opacityDA);
+			settingsExpandSB.Children.Add(settingsWidthDA);
+			settingsShrinkSB.Children.Add(opacityDA);
+			settingsShrinkSB.Children.Add(settingsShadowOpacityDA);
+			addItemWindowHideSB.Children.Add(addItemWindowDA);
             contextMenuHideSB.Children.Add(contextMenuDA);
         }
 
 		/// <summary>
 		/// Medhod to create new Double Animation object
 		/// </summary>
-		/// <param name="from"></param>
 		/// <param name="to"></param>
 		/// <param name="duration"></param>
 		/// <param name="targetProperty"></param>
 		/// <param name="propertyPath"></param>
 		/// <param name="easingFunction"></param>
 		/// <returns></returns>
-        private DoubleAnimation CreateDoubleAnimation(double from, double to, TimeSpan duration,
+        private DoubleAnimation CreateDoubleAnimation(double to, TimeSpan duration,
             string targetProperty, string propertyPath, IEasingFunction easingFunction)
         {
-            DoubleAnimation da = new DoubleAnimation(from, to, duration);
+            DoubleAnimation da = new DoubleAnimation(to, duration);
             da.SetValue(Storyboard.TargetNameProperty, targetProperty);
             Storyboard.SetTargetProperty(da, new PropertyPath(propertyPath));
             da.EasingFunction = easingFunction;
@@ -83,14 +85,20 @@ namespace Program_Viewer_3
             return da;
         }
 
-        public void ShrinkDesktop()
-        {
-            shrinkSB.Begin(frameworkElement);
-        }
+		public void ToggleDesktop(bool value)
+		{
+			if (value)
+				desktopShrinkSB.Begin(frameworkElement);
+			else
+				desktopExpandSB.Begin(frameworkElement);
+		}
 
-        public void ExpandDesktop()
+		public void ToggleSettings(bool value)
         {
-            expandSB.Begin(frameworkElement);
+			if (value)
+				settingsShrinkSB.Begin(frameworkElement);
+			else
+				settingsExpandSB.Begin(frameworkElement);
         }
 
         public void AddItemWindowShow()

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Program_Viewer_3._0
+namespace ProgramViewer3._0
 {
     /// <summary>
     /// Логика взаимодействия для App.xaml

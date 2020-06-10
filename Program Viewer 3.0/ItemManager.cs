@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using Newtonsoft.Json;
 
-namespace Program_Viewer_3
+namespace ProgramViewer3
 {
     public struct ItemData
     {
