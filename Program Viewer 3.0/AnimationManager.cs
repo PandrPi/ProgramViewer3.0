@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace ProgramViewer3
@@ -40,11 +41,14 @@ namespace ProgramViewer3
 			DoubleAnimation addItemWindowDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
             DoubleAnimation contextMenuDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
 
+			ColorAnimation settingsRectCA = CreateColorAnimation(Color.FromArgb(255, 111, 140, 156), resizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEase);
+
             desktopShrinkSB.Children.Add(desktopWidthDA);
             desktopShrinkSB.Children.Add(opacityDA);
 			settingsShrinkSB.Children.Add(settingsWidthDA);
             settingsExpandSB.Children.Add(opacityDA);
             settingsExpandSB.Children.Add(settingsShadowOpacityDA);
+            settingsExpandSB.Children.Add(settingsRectCA);
             addItemWindowShowSB.Children.Add(addItemWindowDA);
             contextMenuShowSB.Children.Add(contextMenuDA);
 
@@ -56,11 +60,14 @@ namespace ProgramViewer3
             addItemWindowDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEase);
             contextMenuDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEase);
 
-            desktopExpandSB.Children.Add(desktopWidthDA);
+			settingsRectCA = CreateColorAnimation(Color.FromArgb(255, 28, 28, 28), resizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEase);
+
+			desktopExpandSB.Children.Add(desktopWidthDA);
             desktopExpandSB.Children.Add(opacityDA);
 			settingsExpandSB.Children.Add(settingsWidthDA);
 			settingsShrinkSB.Children.Add(opacityDA);
 			settingsShrinkSB.Children.Add(settingsShadowOpacityDA);
+			settingsShrinkSB.Children.Add(settingsRectCA);
 			addItemWindowHideSB.Children.Add(addItemWindowDA);
             contextMenuHideSB.Children.Add(contextMenuDA);
         }
@@ -84,6 +91,17 @@ namespace ProgramViewer3
 
             return da;
         }
+
+		private ColorAnimation CreateColorAnimation(Color to, TimeSpan duration,
+			string targetProperty, string propertyPath, IEasingFunction easingFunction)
+		{
+			ColorAnimation ca = new ColorAnimation(to, duration);
+			ca.SetValue(Storyboard.TargetNameProperty, targetProperty);
+			Storyboard.SetTargetProperty(ca, new PropertyPath(propertyPath));
+			ca.EasingFunction = easingFunction;
+
+			return ca;
+		}
 
 		public void ToggleDesktop(bool value)
 		{
