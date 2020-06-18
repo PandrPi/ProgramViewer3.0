@@ -18,8 +18,9 @@ namespace ProgramViewer3
 			{
 				try
 				{
-					fileStream = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.Write);
+					fileStream = new FileStream(logFileName, FileMode.OpenOrCreate | FileMode.Truncate, FileAccess.Write);
 					newWriter = new StreamWriter(fileStream);
+					
 				}
 				catch (Exception e)
 				{

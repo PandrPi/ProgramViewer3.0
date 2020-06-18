@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ProgramViewer3">
+
+    <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF5D747E" Offset="0"/>
+        <GradientStop Color="#FF12131A" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="HotRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF688293" Offset="0"/>
+        <GradientStop Color="#FF2C363C" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <SolidColorBrush x:Key="ListViewItem.MouseOver.Background"          Color="#3F1B1B1B"/>
+    <SolidColorBrush x:Key="ListViewItem.MouseOver.Border"              Color="#3F1B1B1B"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedInactive.Background"   Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedInactive.Border"       Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedActive.Background"     Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedActive.Border"         Color="#3DDADADA"/>
+
+    <SolidColorBrush x:Key="ComboBox.Foreground"        Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Foreground"  Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.Background"        Color="White"/>
+    <SolidColorBrush x:Key="ComboBox.Border"            Color="White"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Background"  Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Border"      Color="#FFABCEE2"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.ArrowPath"   Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.ArrowPath"         Color="#FF606060"/>
+
+    <SolidColorBrush x:Key="ComboBoxItem.Hover.Background"      Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Hover.Border"          Color="#FFABCEE2"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="Red"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Background"   Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Border"       Color="#FFABCEE2"/>
+</ResourceDictionary>

@@ -5,27 +5,13 @@ using Newtonsoft.Json;
 
 namespace ProgramViewer3
 {
-	public struct SettingField
-	{
-		public string Name;
-		public object Value;
-		public object DefalutValue;
-
-		public SettingField(string name, object defalutValue)
-		{
-			Name = name;
-			Value = defalutValue;
-			DefalutValue = defalutValue;
-		}
-	}
-
 	class SettingsManager
 	{
 		private Dictionary<string, dynamic> settingsJson;
 		private readonly Dictionary<string, SettingField> settingFields = new Dictionary<string, SettingField>();
 		private readonly Dictionary<string, object> settingValues = new Dictionary<string, object>();
 
-		private static string SettingFilename = "Settings.json";
+		private static string SettingFilename = Path.Combine(ItemManager.ApplicationPath, "Settings.json");
 
 		public void Initialize()
 		{
@@ -44,6 +30,18 @@ namespace ProgramViewer3
 		{
 			if (settingFields.ContainsKey(parameterName))
 				return (T)settingFields[parameterName].Value;
+			else
+				throw new KeyNotFoundException($"Key '{parameterName}' is not presented in settings dictionary");
+		}
+
+		public void SetSettingValue<T>(string parameterName, T value)
+		{
+			if (settingFields.ContainsKey(parameterName))
+			{
+				var temp = settingFields[parameterName];
+				temp.Value = (object)value;
+				settingFields[parameterName] = temp;
+			}
 			else
 				throw new KeyNotFoundException($"Key '{parameterName}' is not presented in settings dictionary");
 		}
@@ -67,4 +65,19 @@ namespace ProgramViewer3
 			settingValues.Add(name, field.Value);
 		}
 	}
+
+	public struct SettingField
+	{
+		public string Name;
+		public object Value;
+		public object DefalutValue;
+
+		public SettingField(string name, object defalutValue)
+		{
+			Name = name;
+			Value = defalutValue;
+			DefalutValue = defalutValue;
+		}
+	}
+
 }

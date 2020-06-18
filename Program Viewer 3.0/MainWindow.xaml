@@ -1,31 +1,25 @@
-﻿<Window x:Class="ProgramViewer3.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:controls="clr-namespace:ProgramViewer3"
+        x:Class="ProgramViewer3.MainWindow"
         Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000" Closing="Window_Closing" ShowInTaskbar="False">
 
 
+    <!--Window Resources-->
+    <Window.Resources>
+        <Image x:Key="BaseExeImage" HorizontalAlignment="Left" Height="100" Margin="30,0,0,0" VerticalAlignment="Top" Width="100" IsEnabled="False" Visibility="Hidden" Source="Pictures/BaseExeIcon.png"/>
+    </Window.Resources>
+
+    <!--Main Border-->
     <Border x:Name="WindowBorder" HorizontalAlignment="Right" Width="600" BorderThickness="2" CornerRadius="2" BorderBrush="White" MouseDown="WindowBorder_MouseDown">
-        <Grid x:Name="MyGrid" HorizontalAlignment="Right" Width="598" Margin="0" AllowDrop="True" Drop="MyGrid_Drop">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#FF5D747E" Offset="0"/>
-                    <GradientStop Color="#FF12131A" Offset="1"/>
-                </LinearGradientBrush>
-            </Grid.Background>
+        <Grid x:Name="MyGrid" HorizontalAlignment="Right" Width="598" Margin="0" AllowDrop="True" Drop="MyGrid_Drop" Background="{DynamicResource DesktopRect.Background}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Rectangle HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="0" Margin="0,2,1,1">
-                <Rectangle.Fill>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FF688293" Offset="0"/>
-                        <GradientStop Color="#FF2C363C" Offset="1"/>
-                    </LinearGradientBrush>
-                </Rectangle.Fill>
-            </Rectangle>
+            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="0" Margin="0,2,1,1"/>
 
             <tb:TaskbarIcon x:Name="TaskbarIcon" ToolTipText="Program Viewer 3.0" IconSource="Pictures/Icon.ico">
                 <tb:TaskbarIcon.ContextMenu>
@@ -42,7 +36,7 @@
             </controls:PiButton>
 
             <!--Desktop ListView-->
-            <ListView x:Name="DesktopLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,0,112,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="445" Background="{x:Null}" BorderThickness="0" KeyDown="DesktopLV_KeyDown">
+            <ListView x:Name="DesktopLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,0,112,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="445" Background="{x:Null}" BorderThickness="0" KeyDown="ListView_KeyDown">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <vwp:VirtualizingWrapPanel HorizontalAlignment="Center" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" ChildrenSize="100, 110" StretchItems="True" MouseWheelDelta="100" Grid.IsSharedSizeScope="True" SpacingMode="Uniform">
@@ -73,10 +67,10 @@
                 </ListView.ItemTemplate>
             </ListView>
             <!--Hot ListView-->
-            <ListView x:Name="HotLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center" KeyDown="HotLV_KeyDown">
+            <ListView x:Name="HotLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center" KeyDown="ListView_KeyDown">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <VirtualizingStackPanel VirtualizingStackPanel.IsVirtualizing="True" VirtualizingStackPanel.VirtualizationMode="Recycling" Orientation="Vertical" HorizontalAlignment="Center">
+                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" HorizontalAlignment="Center">
                             <VirtualizingStackPanel.CacheMode>
                                 <BitmapCache/>
                             </VirtualizingStackPanel.CacheMode>
@@ -107,39 +101,39 @@
             <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Width="97"/>
             <Slider HorizontalAlignment="Left" Margin="667,335,-169,0" VerticalAlignment="Top" Width="100"/>
             <!--PiContextMenu-->
-            <Grid x:Name="PiContextMenu" Margin="449,10,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left" Height="146">
+            <Grid x:Name="PiContextMenu" Margin="131,308,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left" Height="146">
                 <Rectangle Fill="#FF171717" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2">
                     <Rectangle.Effect>
                         <DropShadowEffect Opacity="0.7"/>
                     </Rectangle.Effect>
                 </Rectangle>
-                <ListBox x:Name="ContextListBox" Margin="3" BorderBrush="{x:Null}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="#FF1D2128">
-                    <controls:PiButton x:Name="PiContextOpenFileButton"         Text="Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"        Click="PiContextOpenFileButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
-                    <controls:PiButton x:Name="PiContextRefreshButton"          Text="Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"          Click="PiContextRefreshButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
-                    <controls:PiButton x:Name="PiContextShowInExlorerButton"    Text="Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
-                    <controls:PiButton x:Name="PiContextRemoveButton"           Text="Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
-                </ListBox>
+                <StackPanel Margin="3" ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" Background="#FF1D2128">
+                    <controls:PiButton x:Name="PiContextOpenFileButton"         Margin="0,4,0,0" Text="Open File" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"        Click="PiContextOpenFileButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextRefreshButton"          Margin="0,4,0,0" Text="Refresh" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top"          Click="PiContextRefreshButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextShowInExlorerButton"    Margin="0,4,0,0" Text="Show In Explorer" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextShowInExlorerButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                    <controls:PiButton x:Name="PiContextRemoveButton"           Margin="0,4,0,0" Text="Remove From List" TextVerticalAlignment="Center" Height="30" HoverColor="#99BEE6FD" Foreground="White" VerticalAlignment="Top" Click="PiContextRemoveButton_Click" Cursor="Hand" TextMargin="10,0,0,0"/>
+                </StackPanel>
             </Grid>
             <!--AddItemGrid-->
             <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="#FF1D2128" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230">
                 <Grid.Effect>
                     <DropShadowEffect Opacity="0.7"/>
                 </Grid.Effect>
-                <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038" IsReadOnly="True"/>
+                <TextBox x:Name="AddWindowFilePath" HorizontalAlignment="Left" Height="23" Margin="101,49,0,0" VerticalAlignment="Top" Width="249" Foreground="#FF1D2128" Background="White" IsReadOnly="True" FontSize="14"/>
                 <Label Content="File Window" HorizontalAlignment="Left" Height="28" Margin="18,129,0,0" VerticalAlignment="Top" Width="75" Foreground="White"/>
-                <Rectangle Fill="#FF1C1C1C" Height="26" Stroke="Black" VerticalAlignment="Top" Width="375"/>
+                <Rectangle Fill="#FF1C1C1C" Height="26" Stroke="Black" VerticalAlignment="Top"/>
                 <controls:PiButton x:Name="AddWindowCloseButton" HorizontalAlignment="Left" Height="18" Margin="353,4,0,0" VerticalAlignment="Top" Width="18" Source="Pictures/CloseIcon.png" Click="AddWindowCloseButton_Click" Cursor="Hand"/>
-                <ComboBox x:Name="AddWindowFileWindow" HorizontalAlignment="Left" Margin="101,131,0,0" VerticalAlignment="Top" Width="249" SelectedIndex="0" Foreground="Black" Background="#FF293038" IsReadOnly="True">
+                <ComboBox x:Name="AddWindowFileWindow" HorizontalAlignment="Left" Margin="101,129,0,0" VerticalAlignment="Top" Width="249" SelectedIndex="0" Foreground="Black" Background="#FF293038" IsReadOnly="True" Template="{DynamicResource MyComboBoxControlTemplate}" FontSize="14" ItemContainerStyle="{DynamicResource ComboBoxItemStyle1}">
                     <ComboBoxItem Content="Hot Window"/>
                     <ComboBoxItem Content="Desktop Window"/>
                 </ComboBox>
                 <controls:PiButton x:Name="AddFileButton" HorizontalAlignment="Center" Height="40" Margin="24,166,25,0" VerticalAlignment="Top" Width="326" Background="White" Text="Add File" TextHorizontalAlignment="Center" TextVerticalAlignment="Center" FontSize="20" Click="AddFileButton_Click" Cursor="Hand"/>
-                <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="White" Background="#FF293038"/>
+                <TextBox x:Name="AddWindowFileTitle" HorizontalAlignment="Left" Height="23" Margin="101,91,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="249" Foreground="#FF1D2128" Background="White" FontSize="14"/>
                 <Label x:Name="AddFileWindowFilesCount" Content="" HorizontalAlignment="Left" Height="28" VerticalAlignment="Top" Width="166" Foreground="White" FontWeight="Bold" Margin="10,0,0,0" FontSize="13"/>
                 <Label Content="File Title" HorizontalAlignment="Left" Height="28" Margin="18,86,0,0" VerticalAlignment="Top" Width="60" Foreground="White"/>
                 <Label Content="File Path" HorizontalAlignment="Left" Height="28" Margin="18,44,0,0" VerticalAlignment="Top" Width="60" Foreground="White"/>
             </Grid>
-            <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="31" Background="#FF1D2128">
+            <Grid x:Name="SettingsGrid" HorizontalAlignment="Left" Width="31" Background="#FF1D2128" AllowDrop="False">
                 <Grid.Effect>
                     <DropShadowEffect Direction="0" Opacity="0.5" RenderingBias="Quality"/>
                 </Grid.Effect>
@@ -156,148 +150,21 @@
                         <DropShadowEffect ShadowDepth="0" RenderingBias="Quality" BlurRadius="7"/>
                     </controls:PiButton.Effect>
                 </controls:PiButton>
-                <Label Content="Settings" Margin="213,5,180,0" VerticalAlignment="Top" Foreground="White" FontSize="16" Width="67" HorizontalAlignment="Left"/>
                 <Separator HorizontalAlignment="Left" Height="9" Margin="31,36,0,0" VerticalAlignment="Top" Width="460"/>
                 <Label Content="Redirect Message Logging" HorizontalAlignment="Left" Margin="36,50,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" BorderBrush="#7FFFFFFF" BorderThickness="1,0,0,0" Width="258"/>
-                <Label Content="Redirect Message Logging" HorizontalAlignment="Left" Margin="36,85,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" BorderBrush="#7FFFFFFF" BorderThickness="1,0,0,0" Width="258"/>
-                <ComboBox HorizontalAlignment="Left" Margin="381,54,0,0" VerticalAlignment="Top" Width="100" SelectedIndex="1" Foreground="Black">
-                    <ComboBox.Background>
-                        <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                            <GradientStop Color="Red" Offset="0"/>
-                            <GradientStop Color="#FF251C1C" Offset="1"/>
-                        </LinearGradientBrush>
-                    </ComboBox.Background>
-                    <ComboBoxItem Content="To Fiile"/>
+                <Label Content="Redirect Message Logging" HorizontalAlignment="Left" Margin="36,84,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" BorderBrush="#7FFFFFFF" BorderThickness="1,0,0,0" Width="258"/>
+                <ComboBox HorizontalAlignment="Left" Margin="356,54,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="1" Foreground="#FF95BB8A" Template="{DynamicResource MyComboBoxControlTemplate}" BorderBrush="{x:Null}" Background="{x:Null}" FontSize="14" ItemContainerStyle="{DynamicResource MyComboBoxItemStyle}">
+                    <ComboBoxItem Content="To File"/>
                     <ComboBoxItem Content="To Console"/>
                     <ComboBoxItem Content="No logging"/>
                 </ComboBox>
+                <TextBlock HorizontalAlignment="Left" Margin="213,10,0,0" Text="Settings" VerticalAlignment="Top" FontSize="16" Foreground="White"/>
+                <TextBox HorizontalAlignment="Left" Height="23" Margin="356,90,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="120" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Padding="0,0,2,0" BorderBrush="White" FontSize="14"/>
+                <Slider HorizontalAlignment="Left" Margin="356,126,0,0" VerticalAlignment="Top" Width="120" Foreground="#FFD42222" Background="Transparent" Height="21" Value="5"/>
+                <Label Content="Redirect Message Logging" HorizontalAlignment="Left" Margin="36,118,0,0" VerticalAlignment="Top" Foreground="White" FontSize="14" BorderBrush="#7FFFFFFF" BorderThickness="1,0,0,0" Width="258"/>
             </Grid>
 
         </Grid>
     </Border>
 
-    <!--Window Resources-->
-    <Window.Resources>
-        <Image x:Key="BaseExeImage" HorizontalAlignment="Left" Height="100" Margin="30,0,0,0" VerticalAlignment="Top" Width="100" IsEnabled="False" Visibility="Hidden" Source="Pictures/BaseExeIcon.png"/>
-        <Style x:Key="FocusVisual">
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <Rectangle Margin="2" SnapsToDevicePixels="true" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" StrokeDashArray="1 2"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <!--<Color x:Key="Item.MouseOver.Background">#3F1B1B1B</Color>
-        <Color x:Key="Item.MouseOver.Border">#3F1B1B1B</Color>-->
-        <SolidColorBrush x:Key="Item.MouseOver.Background" Color="#3F1B1B1B"/>
-        <SolidColorBrush x:Key="Item.MouseOver.Border" Color="#3F1B1B1B"/>
-        <SolidColorBrush x:Key="Item.SelectedInactive.Background" Color="#3DDADADA"/>
-        <SolidColorBrush x:Key="Item.SelectedInactive.Border" Color="#3DDADADA"/>
-        <SolidColorBrush x:Key="Item.SelectedActive.Background" Color="#3DDADADA"/>
-        <SolidColorBrush x:Key="Item.SelectedActive.Border" Color="#3DDADADA"/>
-        <Style TargetType="{x:Type ListViewItem}">
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Padding" Value="4,1"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ListViewItem}">
-                        <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.MouseOver.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.MouseOver.Border}"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
-                                    <Condition Property="IsSelected" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.SelectedInactive.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.SelectedInactive.Border}"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Selector.IsSelectionActive" Value="True"/>
-                                    <Condition Property="IsSelected" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="Bd" Value="{StaticResource Item.SelectedActive.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="Bd" Value="{StaticResource Item.SelectedActive.Border}"/>
-                            </MultiTrigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="TextElement.Foreground" TargetName="Bd" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <SolidColorBrush x:Key="LBItem.MouseOver.Background" Color="Transparent"/>
-        <SolidColorBrush x:Key="LBItem.MouseOver.Border" Color="Transparent"/>
-        <SolidColorBrush x:Key="LBItem.SelectedInactive.Background" Color="Transparent"/>
-        <SolidColorBrush x:Key="LBItem.SelectedInactive.Border" Color="Transparent"/>
-        <SolidColorBrush x:Key="LBItem.SelectedActive.Background" Color="Transparent"/>
-        <SolidColorBrush x:Key="LBItem.SelectedActive.Border" Color="Transparent"/>
-        <Style TargetType="{x:Type ListBoxItem}">
-            <Setter Property="SnapsToDevicePixels" Value="True"/>
-            <Setter Property="Padding" Value="4,1"/>
-            <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                        <Border x:Name="LBBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="LBBorder" Value="{StaticResource LBItem.MouseOver.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="LBBorder" Value="{StaticResource LBItem.MouseOver.Border}"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
-                                    <Condition Property="IsSelected" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="LBBorder" Value="{StaticResource LBItem.SelectedInactive.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="LBBorder" Value="{StaticResource LBItem.SelectedInactive.Border}"/>
-                            </MultiTrigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="Selector.IsSelectionActive" Value="True"/>
-                                    <Condition Property="IsSelected" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" TargetName="LBBorder" Value="{StaticResource LBItem.SelectedActive.Background}"/>
-                                <Setter Property="BorderBrush" TargetName="LBBorder" Value="{StaticResource LBItem.SelectedActive.Border}"/>
-                            </MultiTrigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="TextElement.Foreground" TargetName="LBBorder" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-    </Window.Resources>
 </Window>

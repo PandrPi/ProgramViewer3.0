@@ -15,18 +15,16 @@ namespace ProgramViewer3
             InitializeComponent();
         }
 
-        private AnimationManager animationManager;
+		private readonly AnimationManager animationManager = new AnimationManager();
+		private readonly SettingsManager settingsManager = new SettingsManager();
         private ItemManager itemManager;
-		private SettingsManager settingsManager = new SettingsManager();
 
         private bool isWindowExpanded = true;
         private bool shouldShirkWindowAfterContextMenuClosing = false;
 		private bool isSettingsExpanded = false;
-        /// <summary>
-        /// Used to store cursor position at the moment when PiContextMenu was shown
-        /// </summary>
-        private Point lastCursorPoint;
-        private Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
+        private Point lastCursorPoint;  // Used to store cursor position at the moment when PiContextMenu was shown
+
+		private readonly Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
         private int filesToAddCounter = 0;
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -59,7 +57,6 @@ namespace ProgramViewer3
 					LogManager.Write($"Item loading time : {itemStopwatch.Elapsed.TotalMilliseconds} ms");
 				});
 
-				animationManager = new AnimationManager();
                 animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
                 animationManager.SetAddItemWindowShowCallback(() => AddItemGrid.Visibility = Visibility.Visible);
                 animationManager.SetAddItemWindowHideCallback(() => AddItemGrid.Visibility = Visibility.Hidden);
@@ -69,7 +66,7 @@ namespace ProgramViewer3
 				HotLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
 
                 double screenWidth = SystemParameters.PrimaryScreenWidth;
-                Height = SystemParameters.PrimaryScreenHeight - 46;
+                Height = SystemParameters.PrimaryScreenHeight - 44;
                 Left = screenWidth - Width - 2;
                 Top = 2;
                 ToggleDesktop();
@@ -84,7 +81,6 @@ namespace ProgramViewer3
             catch(Exception exc)
             {
 				string excMessage = $"{exc.GetType().Name}. Message: {exc.Message}. Stack trace: {exc.StackTrace}";
-				Clipboard.SetText(excMessage);
 				LogManager.Write(excMessage);
 				MessageBox.Show(exc.StackTrace, exc.Message);
 				DisposeAndCloseAll();
@@ -161,7 +157,12 @@ namespace ProgramViewer3
                 if (!isWindowExpanded)
                     ToggleDesktop();
 
-                filesToAddCounter = filesToAdd.Count + 1;
+				if (isSettingsExpanded)
+				{
+					ToggleSettings();
+				}
+
+				filesToAddCounter = filesToAdd.Count + 1;
                 AddFileWindowFilesCount.Content = $"Files to proceed - {filesToAddCounter}";
                 SetAddItemGridVisibility(Visibility.Visible);
             }
@@ -291,24 +292,9 @@ namespace ProgramViewer3
         {
             if(e.ClickCount == 2)
             {
-                ItemType itemType = GetWindowTypeFromPoint(Mouse.GetPosition(MyGrid));
-                if (itemType == ItemType.Hot)
-                {
-                    int selectedIndex = HotLV.SelectedIndex;
-                    if (selectedIndex != -1)
-                    {
-                        itemManager.OpenItem(selectedIndex, itemType);
-                    }
-                }
-                else
-                {
-                    int selectedIndex = DesktopLV.SelectedIndex;
-                    if (selectedIndex != -1)
-                    {
-                        itemManager.OpenItem(selectedIndex, itemType);
-                    }
-                }
-            }
+				ExecuteContextCommand command = itemManager.OpenItem;
+				ExexuteContextMenuCommand(command);
+			}
         }
 
         private void PiContextOpenFileButton_Click(object sender, RoutedEventArgs e)
@@ -353,6 +339,10 @@ namespace ProgramViewer3
                         ToggleDesktop();
                     }
                     SetContextMenuVisibility(Visibility.Visible);
+					if (isSettingsExpanded)
+					{
+						ToggleSettings();
+					}
                     PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Hot);
                 }
             }
@@ -402,27 +392,17 @@ namespace ProgramViewer3
             Close();
         }
 
-        private void DesktopLV_KeyDown(object sender, KeyEventArgs e)
+        private void ListView_KeyDown(object sender, KeyEventArgs e)
         {
             if(e.Key == Key.Enter)
             {
-                int selectedIndex = DesktopLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.OpenItem(selectedIndex, ItemType.Desktop);
-                }
-            }
-        }
+				ListView listView = sender as ListView;
+				int selectedIndex = listView.SelectedIndex;
 
-        private void HotLV_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-            {
-                int selectedIndex = HotLV.SelectedIndex;
-                if (selectedIndex != -1)
-                {
-                    itemManager.OpenItem(selectedIndex, ItemType.Hot);
-                }
+				if (selectedIndex != -1)
+				{
+					itemManager.OpenItem(selectedIndex, listView.Name == HotLV.Name ? ItemType.Hot : ItemType.Desktop);
+				}
             }
         }
 	}

@@ -80,28 +80,36 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="CacheManager.cs" />
-    <Compile Include="FileManager.cs" />
-    <Compile Include="LogManager.cs" />
+    <Compile Include="Managers\CacheManager.cs" />
+    <Compile Include="Managers\FileManager.cs" />
+    <Compile Include="Managers\LogManager.cs" />
     <Compile Include="ObservableCollectionExtension.cs" />
-    <Compile Include="SettingsManager.cs" />
+    <Compile Include="Managers\SettingsManager.cs" />
     <Compile Include="SysImageList.cs" />
+    <Page Include="Dictionary1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="AnimationManager.cs" />
+    <Compile Include="Managers\AnimationManager.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FileToIcon.cs" />
     <Compile Include="IconExtractot.cs" />
-    <Compile Include="ItemManager.cs" />
+    <Compile Include="Managers\ItemManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MyResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PiButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

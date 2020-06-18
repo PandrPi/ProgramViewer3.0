@@ -163,9 +163,8 @@ namespace ProgramViewer3
 
 			DoubleAnimation verticalAnimation = new DoubleAnimation
 			{
-				From = scrollViewer.VerticalOffset,
-				To = scrollViewer.VerticalOffset - (150 * Math.Sign(e.Delta)),
-				Duration = TimeSpan.FromSeconds(0.5),
+				To = scrollViewer.VerticalOffset - (200 * Math.Sign(e.Delta)),
+				Duration = TimeSpan.FromSeconds(0.4),
 				EasingFunction = new ExponentialEase()
 				{
 					EasingMode = EasingMode.EaseOut
@@ -203,9 +202,9 @@ namespace ProgramViewer3
 			if (o is ScrollViewer)
 				return o;
 
-			for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(o); i++)
+			for (int i = 0; i < VisualTreeHelper.GetChildrenCount(o); i++)
 			{
-				var child = System.Windows.Media.VisualTreeHelper.GetChild(o, i);
+				var child = VisualTreeHelper.GetChild(o, i);
 
 				var result = GetScrollViewer(child);
 				if (result == null)
