@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace ProgramViewer3
+namespace ProgramViewer3.Managers
 {
 	class SettingsManager
 	{

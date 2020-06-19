@@ -2,7 +2,7 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace ProgramViewer3
+namespace ProgramViewer3.Managers
 {
     public class FileManager
     {

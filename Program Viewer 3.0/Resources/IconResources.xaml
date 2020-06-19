@@ -1,0 +1,42 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ProgramViewer3"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <DrawingImage x:Key="PaletteIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="{DynamicResource PaletteIcon.Background}" Geometry="M 96.21703 113.32228 53.9386 102.02347 51.619653 58.322767 92.464896 42.613059 120.02759 76.604626 Z">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="{DynamicResource PaletteIcon.Background.Thickness}" Brush="{DynamicResource PaletteIcon.Background.Thickness.Brush}"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{DynamicResource PaletteIcon.Figure}" Geometry="m 80.773012 77.81902 c -0.01856 1.820745 -2.57718 1.542603 -3.536967 0.79647 -2.329043 -1.810584 -1.560538 -5.350009 0.396944 -7.09971 3.218368 -2.876745 8.204584 -1.633871 10.662453 1.59036 3.473283 4.556249 1.719142 11.089328 -2.783774 14.225195 -5.873289 4.090205 -13.986479 1.810457 -17.787938 -3.977189 -4.717093 -7.181683 -1.905127 -16.890034 5.170604 -21.35068 8.485721 -5.349526 19.797354 -2.001814 24.913422 6.364018 5.985344 9.787272 2.099798 22.707082 -7.557432 28.476165 -2.374663 1.418587 -5.013129 2.38327 -7.739873 2.844913">
+                    <GeometryDrawing.Pen>
+                        <Pen Thickness="{DynamicResource PaletteIcon.Figure.Thickness}" Brush="{DynamicResource PaletteIcon.Figure.Thickness.Brush}"/>
+                    </GeometryDrawing.Pen>
+                </GeometryDrawing>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="CloseIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="{DynamicResource CloseIcon.Background}" Geometry="M13.198 0H0.901C0.404 0 0 0.403 0 0.9v12.299c0 0.496 0.404 0.9 0.901 0.9h12.298    c0.497 0 0.9-0.404 0.9-0.9V0.901C14.098 0.403 13.694 0 13.198 0z M11.209 9.601l-1.608 1.607c-0.078 0.078-0.202 0.078-0.28 0    L7.049 8.936l-2.272 2.273c-0.078 0.077-0.202 0.077-0.28 0L2.889 9.601c-0.077-0.078-0.077-0.202 0-0.28L5.16 7.049L2.888 4.777    c-0.077-0.078-0.077-0.202 0-0.28l1.608-1.608c0.078-0.078 0.202-0.078 0.28 0l2.272 2.272L9.32 2.889    c0.078-0.078 0.202-0.078 0.28 0l1.607 1.608c0.078 0.078 0.078 0.202 0 0.28l-2.27 2.272l2.272 2.272    C11.286 9.399 11.286 9.523 11.209 9.601z"/>
+                <GeometryDrawing Brush="{DynamicResource CloseIcon.Foreground}" Geometry="M 4.4952657 2.8895158 2.8878439 4.4969376 c -0.077 0.078 -0.077 0.2032499 0 0.28125 L 5.1593281 7.0496719 2.8878439 9.3211563 c -0.077 0.078 -0.077 0.20325 0 0.28125 l 1.6074218 1.6074217 c 0.078 0.077 0.2032499 0.077 0.28125 0 L 7.048 8.9363907 9.3194844 11.207875 c 0.078 0.078 0.20325 0.078 0.28125 0 L 11.208156 9.6024063 c 0.077 -0.078 0.077 -0.20325 0 -0.28125 L 8.9366719 7.0496719 11.206203 4.7781876 c 0.078 -0.078 0.078 -0.20325 0 -0.28125 L 9.5987813 2.8895158 c -0.078 -0.078 -0.2012969 -0.078 -0.2792969 0 L 7.048 5.161 4.7745625 2.8895158 c -0.078 -0.078 -0.2012968 -0.078 -0.2792968 0 z"/>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="MenuIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="{DynamicResource MenuIcon.Background}" Geometry="M 5.3814648e-7 5.4118078e-7 H 93.000001 V 93.000001 H 5.3814648e-7 Z"/>
+                <GeometryDrawing Brush="{DynamicResource MenuIcon.Foreground}" Geometry="M 77.608236 18.283381 H 15.225483 c -1.188256 0 -2.155241 0.696183 -2.155241 1.551671 v 6.896658 c 0 0.855488 0.966985 1.551671 2.155241 1.551671 h 62.382035 c 1.187538 0 2.15524 -0.696183 2.15524 -1.551671 v -6.896658 c 7.19e-4 -0.855488 -0.966266 -1.551671 -2.154522 -1.551671 z"/>
+                <GeometryDrawing Brush="{DynamicResource MenuIcon.Foreground}" Geometry="M 77.608236 38.75 H 15.225483 c -1.188256 0 -2.155241 0.696183 -2.155241 1.551671 v 6.896658 c 0 0.855488 0.966985 1.551671 2.155241 1.551671 h 62.382035 c 1.187538 0 2.15524 -0.696183 2.15524 -1.551671 V 40.301671 C 79.763477 39.446183 78.796492 38.75 77.608236 38.75 Z"/>
+                <GeometryDrawing Brush="{DynamicResource MenuIcon.Foreground}" Geometry="M 77.608236 59.75 H 15.225483 c -1.188256 0 -2.155241 0.696183 -2.155241 1.551671 v 6.896658 c 0 0.855488 0.966985 1.551671 2.155241 1.551671 h 62.382035 c 1.187538 0 2.15524 -0.696183 2.15524 -1.551671 V 61.301671 C 79.763477 60.445666 78.796492 59.75 77.608236 59.75 Z"/>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+</ResourceDictionary>

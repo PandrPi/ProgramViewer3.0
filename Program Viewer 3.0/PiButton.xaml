@@ -11,14 +11,14 @@
         <EventTrigger RoutedEvent="MouseDown">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation From="1" To="0.7" Duration="0:0:0.15" Storyboard.TargetProperty="Opacity"/>
+                    <DoubleAnimation To="0.7" Duration="0:0:0.15" Storyboard.TargetProperty="Opacity"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
         <EventTrigger RoutedEvent="MouseUp">
             <BeginStoryboard>
                 <Storyboard>
-                    <DoubleAnimation From="0.7" To="1" Duration="0:0:0.15" Storyboard.TargetProperty="Opacity"/>
+                    <DoubleAnimation To="1" Duration="0:0:0.15" Storyboard.TargetProperty="Opacity"/>
                 </Storyboard>
             </BeginStoryboard>
         </EventTrigger>
@@ -44,15 +44,22 @@
             <EventTrigger RoutedEvent="MouseEnter">
                 <BeginStoryboard>
                     <Storyboard>
-                        <ColorAnimation To="{Binding RelativeSource={RelativeSource FindAncestor,
-            AncestorType=local:PiButton}, Path=HoverColor}" Duration="0:0:0.1" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)"/>
+                        <ColorAnimation To="{Binding Path=HoverBrush.Color}" Duration="{Binding Path=HoverDuration}" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)">
+                            <ColorAnimation.EasingFunction>
+                                <ExponentialEase EasingMode="EaseOut" />
+                            </ColorAnimation.EasingFunction>
+                        </ColorAnimation>
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>
             <EventTrigger RoutedEvent="MouseLeave">
                 <BeginStoryboard>
                     <Storyboard>
-                        <ColorAnimation To="Transparent" Duration="0:0:0.1" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)"/>
+                        <ColorAnimation To="{Binding Path=Background.Color}" Duration="{Binding Path=HoverDuration}" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)">
+                        <ColorAnimation.EasingFunction>
+                            <ExponentialEase EasingMode="EaseOut" />
+                        </ColorAnimation.EasingFunction>
+                        </ColorAnimation>
                     </Storyboard>
                 </BeginStoryboard>
             </EventTrigger>

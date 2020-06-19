@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace ProgramViewer3
+namespace ProgramViewer3.Managers
 {
 	public static class LogManager
 	{

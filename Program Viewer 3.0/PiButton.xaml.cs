@@ -21,22 +21,25 @@ namespace ProgramViewer3
     public partial class PiButton : UserControl
     {
         public static readonly DependencyProperty SourceProperty = 
-            DependencyProperty.Register("Source", typeof(string), typeof(PiButton), new UIPropertyMetadata(string.Empty));
+            DependencyProperty.Register("Source", typeof(ImageSource), typeof(PiButton), new UIPropertyMetadata(default(ImageSource)));
         public static readonly DependencyProperty TextProperty = 
             DependencyProperty.Register("Text", typeof(string), typeof(PiButton), new UIPropertyMetadata(string.Empty));
         public static readonly DependencyProperty HoverColorProperty = 
-            DependencyProperty.Register("HoverColor", typeof(Color), typeof(PiButton), new UIPropertyMetadata(default(Color)));
+            DependencyProperty.Register("HoverBrush", typeof(Brush), typeof(PiButton), new UIPropertyMetadata(default(Brush)));
+		public static readonly DependencyProperty HoverDurationProperty =
+			DependencyProperty.Register("HoverDuration", typeof(Duration), typeof(PiButton), new UIPropertyMetadata(default(Duration)));
         public static readonly DependencyProperty TextHorizontalAlignmentProperty = 
             DependencyProperty.Register("TextHorizontalAlignment", typeof(HorizontalAlignment), typeof(PiButton), new UIPropertyMetadata(default(HorizontalAlignment)));
         public static readonly DependencyProperty TextVerticalAlignmentProperty = 
             DependencyProperty.Register("TextVerticalAlignment", typeof(VerticalAlignment), typeof(PiButton), new UIPropertyMetadata(default(VerticalAlignment)));
 		public static readonly DependencyProperty TextMarginProperty = 
             DependencyProperty.Register("TextMargin", typeof(Thickness), typeof(PiButton), new UIPropertyMetadata(default(Thickness)));
-
-        public string Source { get { return (string)GetValue(SourceProperty); } set { SetValue(SourceProperty, value); } }
+		
+        public ImageSource Source { get { return (ImageSource)GetValue(SourceProperty); } set { SetValue(SourceProperty, value); } }
         public string Text { get { return (string)GetValue(TextProperty); } set { SetValue(TextProperty, value); } }
-        public Color HoverColor { get { return (Color)GetValue(HoverColorProperty); } set { SetValue(HoverColorProperty, value); } }
-        public HorizontalAlignment TextHorizontalAlignment { get { return (HorizontalAlignment)GetValue(TextHorizontalAlignmentProperty); }
+		public Brush HoverBrush	{ get {	return (Brush)GetValue(HoverColorProperty);	} set { SetValue(HoverColorProperty, value); } }
+		public Duration HoverDuration { get	{ return (Duration)GetValue(HoverDurationProperty);	} set {	SetValue(HoverDurationProperty, value);	} }
+		public HorizontalAlignment TextHorizontalAlignment { get { return (HorizontalAlignment)GetValue(TextHorizontalAlignmentProperty); }
             set { SetValue(TextHorizontalAlignmentProperty, value); } }
         public VerticalAlignment TextVerticalAlignment { get { return (VerticalAlignment)GetValue(TextVerticalAlignmentProperty); }
             set { SetValue(TextVerticalAlignmentProperty, value); } }
@@ -47,7 +50,7 @@ namespace ProgramViewer3
         {
             InitializeComponent();
             LostMouseCapture += PiButton_LostMouseCapture;
-        }
+		}
 
         private void PiButton_LostMouseCapture(object sender, MouseEventArgs e)
         {
@@ -57,10 +60,7 @@ namespace ProgramViewer3
         public event RoutedEventHandler Click;
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (this.Click != null)
-            {
-                this.Click(this, e);
-            }
-        }
+			Click?.Invoke(this, e);
+		}
     }
 }

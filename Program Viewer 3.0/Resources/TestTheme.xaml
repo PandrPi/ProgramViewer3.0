@@ -1,0 +1,73 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:ProgramViewer3">
+
+    <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF5D747E" Offset="0"/>
+        <GradientStop Color="#FF12131A" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="DesktopRect.Item.Label.Foreground"          Color="White"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background"        Color="#FFFFB900"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border"            Color="#FF232323"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background"  Color="#FFBEE6FD"/>
+
+    <LinearGradientBrush x:Key="HotRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FF688293" Offset="0"/>
+        <GradientStop Color="#FF2C363C" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground"  Color="White"/>
+
+    <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="Green"/>
+    <!--#FF1C1C1C-->
+
+    <SolidColorBrush x:Key="ContextWindow.Button.Hover.Background" Color="#99BEE6FD"/>
+
+    <SolidColorBrush x:Key="PaletteIcon.Background" Color="Blue" />
+    <system:Double x:Key="PaletteIcon.Background.Thickness">1</system:Double>
+    <SolidColorBrush x:Key="PaletteIcon.Background.Thickness.Brush" Color="Black"/>
+    <SolidColorBrush x:Key="PaletteIcon.Figure" Color="White" />
+    <system:Double x:Key="PaletteIcon.Figure.Thickness">0</system:Double>
+    <SolidColorBrush x:Key="PaletteIcon.Figure.Thickness.Brush" Color="Black"/>
+
+    <SolidColorBrush x:Key="CloseIcon.Background" Color="Red"/>
+    <SolidColorBrush x:Key="CloseIcon.Foreground" Color="White"/>
+
+    <SolidColorBrush x:Key="MenuIcon.Background" Color="Transparent"/>
+    <SolidColorBrush x:Key="MenuIcon.Foreground" Color="White"/>
+
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Background"   Color="Red"/>
+    <!--#FF1C1C1C-->
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Border"       Color="#FF151515"/>
+    <!--#FF151515-->
+    <SolidColorBrush x:Key="CustomWindow.Background"            Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="CustomWindow.Border"                Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="CustomWindow.Label.Foreground"      Color="White"/>
+    <SolidColorBrush x:Key="CustomWindow.TextBox.Background"    Color="White"/>
+    <SolidColorBrush x:Key="CustomWindow.TextBox.Border"        Color="White"/>
+    <SolidColorBrush x:Key="CustomWindow.Button.Foreground"     Color="Black"/>
+    <SolidColorBrush x:Key="CustomWindow.Button.Background"     Color="White"/>
+    <SolidColorBrush x:Key="CustomWindow.Button.Border"         Color="White"/>
+
+    <SolidColorBrush x:Key="ListViewItem.MouseOver.Background"          Color="#3F1B1B1B"/>
+    <SolidColorBrush x:Key="ListViewItem.MouseOver.Border"              Color="#3F1B1B1B"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedInactive.Background"   Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedInactive.Border"       Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedActive.Background"     Color="#3DDADADA"/>
+    <SolidColorBrush x:Key="ListViewItem.SelectedActive.Border"         Color="#3DDADADA"/>
+
+    <SolidColorBrush x:Key="ComboBox.Foreground"        Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Foreground"  Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.Background"        Color="White"/>
+    <SolidColorBrush x:Key="ComboBox.Border"            Color="White"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Background"  Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.Border"      Color="#FFABCEE2"/>
+    <SolidColorBrush x:Key="ComboBox.Hover.ArrowPath"   Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="ComboBox.ArrowPath"         Color="#FF606060"/>
+
+    <SolidColorBrush x:Key="ComboBoxItem.Hover.Background"      Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Hover.Border"          Color="#FFABCEE2"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="Red"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Background"   Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Border"       Color="#FFABCEE2"/>
+</ResourceDictionary>
