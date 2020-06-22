@@ -6,8 +6,6 @@ using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using QuickZip.Tools;
-using System;
-using System.Threading.Tasks;
 
 namespace ProgramViewer3
 {

@@ -6,7 +6,6 @@ using System.IO;
 using System.Windows;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
-using Gat.Controls;
 
 namespace ProgramViewer3.Managers
 {
