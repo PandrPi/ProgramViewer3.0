@@ -19,7 +19,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="0" Margin="0,2,1,1"/>
+            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="1" Stroke="Black"/>
 
             <tb:TaskbarIcon x:Name="TaskbarIcon" ToolTipText="Program Viewer 3.0" IconSource="Pictures/Icon.ico">
                 <tb:TaskbarIcon.ContextMenu>
@@ -29,7 +29,7 @@
                 </tb:TaskbarIcon.ContextMenu>
             </tb:TaskbarIcon>
 
-            <controls:PiButton x:Name="desktopShirkExpandButton" HoverDuration="0:0:0.3" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="{DynamicResource DesktopRect.ResizeButton.Border}" Background="{DynamicResource DesktopRect.ResizeButton.Background}" BorderThickness="0.7,0,1,0" Cursor="Hand" Click="OnToggleDesktopClick" HoverBrush="{DynamicResource DesktopRect.ResizeButton.Hover.Background}">
+            <controls:PiButton x:Name="desktopResizeButton" HoverDuration="0:0:0.3" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="{DynamicResource DesktopRect.ResizeButton.Border}" Background="{DynamicResource DesktopRect.ResizeButton.Background}" BorderThickness="{DynamicResource DesktopRect.ResizeButton.Border.Thickness}" Cursor="Hand" Click="OnToggleDesktopClick" HoverBrush="{DynamicResource DesktopRect.ResizeButton.Hover.Background}">
                 <controls:PiButton.Effect>
                     <DropShadowEffect ShadowDepth="3" Direction="-10" Opacity="0.8"/>
                 </controls:PiButton.Effect>
@@ -52,16 +52,8 @@
                             <VirtualizingStackPanel.CacheMode>
                                 <BitmapCache/>
                             </VirtualizingStackPanel.CacheMode>
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
-                                <Image.Effect>
-                                    <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
-                                </Image.Effect>
-                            </Image>
-                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource DesktopRect.Item.Label.Foreground}" >
-                                <TextBlock.Effect>
-                                    <DropShadowEffect ShadowDepth="5"/>
-                                </TextBlock.Effect>
-                            </TextBlock>
+                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Effect="{DynamicResource DesktopRect.Item.Image.Shadow}"/>
+                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource DesktopRect.Item.Label.Foreground}" Effect="{DynamicResource DesktopRect.Item.Label.Shadow}" />
                         </VirtualizingStackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -83,26 +75,16 @@
                             <VirtualizingStackPanel.CacheMode>
                                 <BitmapCache/>
                             </VirtualizingStackPanel.CacheMode>
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform">
-                                <Image.Effect>
-                                    <DropShadowEffect Direction="-45" Color="#FF424242" ShadowDepth="8" BlurRadius="5" />
-                                </Image.Effect>
-                            </Image>
-                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="75" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource HotRect.Item.Label.Foreground}" >
-                                <TextBlock.Effect>
-                                    <DropShadowEffect ShadowDepth="5"/>
-                                </TextBlock.Effect>
-                            </TextBlock>
+                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Effect="{DynamicResource HotRect.Item.Image.Shadow}"/>
+                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="75" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource HotRect.Item.Label.Foreground}" Effect="{DynamicResource HotRect.Item.Label.Shadow}" />
                         </VirtualizingStackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
             <!--MenuGrid-->
-            <Border BorderBrush="#FF2E2E2E" BorderThickness="0,1.2,1,1" HorizontalAlignment="Right" Width="97"/>
-            <Slider HorizontalAlignment="Left" Margin="667,335,-169,0" VerticalAlignment="Top" Width="100"/>
             <!--PiContextMenu-->
             <Grid x:Name="PiContextMenu" Margin="458,278,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left" Height="146">
-                <Rectangle Fill="{DynamicResource CustomWindow.TitleBar.Border}" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2">
+                <Rectangle Fill="{DynamicResource CustomWindow.Border}" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2">
                     <Rectangle.Effect>
                         <DropShadowEffect Opacity="0.7"/>
                     </Rectangle.Effect>
@@ -158,7 +140,7 @@
                     <Slider HorizontalAlignment="Left" Margin="325,123,0,0" VerticalAlignment="Top" Width="120" Foreground="#FFD42222" Background="Transparent" Height="21" Value="5"/>
                     <Label Content="Redirect Message Logging" HorizontalAlignment="Left" Margin="5,115,0,0" VerticalAlignment="Top" Foreground="{DynamicResource CustomWindow.Label.Foreground}" FontSize="14" BorderBrush="#7FFFFFFF" BorderThickness="1,0,0,0" Width="258" Background="{x:Null}"/>
                 </Grid>
-                <Grid x:Name="ThemeGrid" Margin="31,0,0,0" Width="460" Opacity="0">
+                <Grid x:Name="ThemeGrid" Margin="31,0,0,0" Width="460">
                     <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" Foreground="White" FontSize="16" Text="Themes" VerticalAlignment="Top"/>
                     <Separator Height="8" Margin="0,36,0,0" VerticalAlignment="Top">
                         <Separator.Effect>
@@ -178,48 +160,48 @@
                                 </VirtualizingStackPanel>
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
-                        <ListView.Resources>
-                            <SolidColorBrush x:Key="Test1" Color="AliceBlue"/>
-                        </ListView.Resources>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Width="445" Height="100" Background="{DynamicResource ThemeView.Item.Background}">
+                                <Grid Width="445" Height="100" Background="{DynamicResource ThemeView.Item.Background}" Tag="{Binding Name}">
+                                    <Grid.CacheMode>
+                                        <BitmapCache/>
+                                    </Grid.CacheMode>
                                     <Grid.Effect>
                                         <DropShadowEffect ShadowDepth="0" BlurRadius="15"/>
                                     </Grid.Effect>
-                                    <TextBlock HorizontalAlignment="Stretch" Margin="10,10,10,0" FontSize="14" TextWrapping="NoWrap" Text="The main theme of program viewer application" VerticalAlignment="Top" Foreground="{DynamicResource ThemeView.Item.Foreground}" Width="Auto" TextTrimming="CharacterEllipsis"/>
-                                    <controls:PiButton HorizontalAlignment="Right" Cursor="Hand" Height="20" VerticalAlignment="Bottom" Width="90" TextHorizontalAlignment="Center" Margin="0,0,10,10" Text="Select Theme" TextVerticalAlignment="Center" Foreground="{DynamicResource ThemeView.Item.SelectButton.Foreground}" HoverBrush="{DynamicResource ThemeView.Item.SelectButton.Hover.Background}" HoverDuration="0:0:0.5" Background="{DynamicResource CustomWindow.Background}" BorderThickness="{DynamicResource ThemeView.Item.SelectButton.Border.Thickness}" BorderBrush="{DynamicResource ThemeView.Item.SelectButton.Border}">
+                                    <TextBlock HorizontalAlignment="Stretch" Margin="10,10,10,0" FontSize="14" TextWrapping="NoWrap" Text="{Binding Name}" VerticalAlignment="Top" Foreground="{DynamicResource ThemeView.Item.Foreground}" Width="Auto" TextTrimming="CharacterEllipsis"/>
+                                    <controls:PiButton Click="SelectThemeButton_Click" HorizontalAlignment="Right" Cursor="Hand" Height="20" VerticalAlignment="Bottom" Width="90" TextHorizontalAlignment="Center" Margin="0,0,10,10" Text="Select Theme" TextVerticalAlignment="Center" Foreground="{DynamicResource ThemeView.Item.SelectButton.Foreground}" HoverBrush="{DynamicResource ThemeView.Item.SelectButton.Hover.Background}" HoverDuration="{StaticResource ThemeView.Item.SelectButton.Hover.Duration}" Background="{DynamicResource ThemeView.Item.SelectButton.Background}" BorderThickness="{DynamicResource ThemeView.Item.SelectButton.Border.Thickness}" BorderBrush="{DynamicResource ThemeView.Item.SelectButton.Border}">
                                         <controls:PiButton.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </controls:PiButton.Effect>
                                     </controls:PiButton>
-                                    <TextBlock HorizontalAlignment="Left" Margin="20,40,0,0" TextWrapping="Wrap" Text="Start tf ytfyt fytoih uhiu ygbiygu yguuyguoy guyguyg  fyt fyt fy tfy tfyt fy u uoimpo ju grt ex t i ,  . p kn ug v rtd x r v hnm  ko  mioujbvytctfvuh ni b yf c t fv  ug b uy bv yfg jn ib 8 un  8 b u  b u8 b   bvv 7t f 56 c6t f  kj m lokniyvtyrcvy tc6tc 6c6t c6t cc6 c6t" VerticalAlignment="Top" Width="300" Height="50" FontStyle="Italic" FontSize="12" Foreground="{DynamicResource ThemeView.Item.Description.Foreground}" ScrollViewer.CanContentScroll="True" TextAlignment="Justify" Padding="0"/>
+                                    <TextBlock HorizontalAlignment="Left" Margin="20,40,0,0" TextWrapping="Wrap" Text="{Binding Description}" VerticalAlignment="Top" Width="300" Height="50" FontStyle="Italic" FontSize="12" Foreground="{DynamicResource ThemeView.Item.Description.Foreground}" ScrollViewer.CanContentScroll="True" TextAlignment="Justify" Padding="0"/>
                                     <Separator HorizontalAlignment="Stretch" Height="3" Margin="0,32,0,0" VerticalAlignment="Top" Width="Auto" Background="{DynamicResource DesktopRect.ResizeButton.Background}">
                                         <Separator.Effect>
                                             <DropShadowEffect ShadowDepth="2"/>
                                         </Separator.Effect>
                                     </Separator>
-                                    <Ellipse Fill="White" HorizontalAlignment="Left" Height="14" Margin="345,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
+                                    <Ellipse Fill="{Binding FirstBrush}" HorizontalAlignment="Left" Height="14" Margin="345,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
                                         <Ellipse.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
-                                    <Ellipse Fill="#FF85709E" HorizontalAlignment="Left" Height="14" Margin="421,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
+                                    <Ellipse Fill="{Binding SecondBrush}" HorizontalAlignment="Left" Height="14" Margin="364,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
                                         <Ellipse.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
-                                    <Ellipse Fill="#FF0CFF00" HorizontalAlignment="Left" Height="14" Margin="364,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
+                                    <Ellipse Fill="{Binding ThirdBrush}" HorizontalAlignment="Left" Height="14" Margin="383,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
                                         <Ellipse.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
-                                    <Ellipse Fill="Red" HorizontalAlignment="Left" Height="14" Margin="383,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
+                                    <Ellipse Fill="{Binding FourthBrush}" HorizontalAlignment="Left" Height="14" Margin="402,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
                                         <Ellipse.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </Ellipse.Effect>
                                     </Ellipse>
-                                    <Ellipse Fill="Blue" HorizontalAlignment="Left" Height="14" Margin="402,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
+                                    <Ellipse Fill="{Binding FifthBrush}" HorizontalAlignment="Left" Height="14" Margin="421,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
                                         <Ellipse.Effect>
                                             <DropShadowEffect Opacity="0.5"/>
                                         </Ellipse.Effect>
@@ -228,6 +210,11 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+                    <controls:PiButton x:Name="LoadThemesButton" Click="LoadThemesButton_Click" Margin="330,0,0,10" HorizontalAlignment="Left" Width="120" Height="41" VerticalAlignment="Bottom" Background="{DynamicResource ThemeView.Item.Background}" TextHorizontalAlignment="Center" Text="Load themes" TextVerticalAlignment="Center" Foreground="{DynamicResource ThemeView.Item.Foreground}" FontSize="14" SnapsToDevicePixels="True" HoverDuration="{StaticResource ThemeView.Item.SelectButton.Hover.Duration}" HoverBrush="{DynamicResource ThemeView.Item.SelectButton.Hover.Background}">
+                        <controls:PiButton.Effect>
+                            <DropShadowEffect Opacity="0.7"/>
+                        </controls:PiButton.Effect>
+                    </controls:PiButton>
                 </Grid>
                 <controls:PiButton x:Name="ThemeResizeButton" Tag="ThemeGrid" HorizontalAlignment="Left" Height="21" VerticalAlignment="Top" Width="21" Margin="7,50,0,0" Cursor="Hand" Click="OnToggleSettingsClick" Source="{DynamicResource PaletteIcon}">
                     <controls:PiButton.Effect>

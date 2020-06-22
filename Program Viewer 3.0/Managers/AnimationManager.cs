@@ -17,8 +17,6 @@ namespace ProgramViewer3.Managers
 		private readonly Storyboard desktopExpandSB = new Storyboard();
 		private readonly Storyboard menuShrinkSB= new Storyboard();
         private readonly Storyboard menuExpandSB = new Storyboard();
-        private readonly Storyboard settingGridExpandSB = new Storyboard();
-        private readonly Storyboard themeGridExpandSB = new Storyboard();
         private readonly Storyboard addItemWindowShowSB = new Storyboard();
         private readonly Storyboard addItemWindowHideSB = new Storyboard();
         private readonly Storyboard contextMenuShowSB = new Storyboard();
@@ -52,7 +50,7 @@ namespace ProgramViewer3.Managers
             frameworkElement = mainWindow;
 			windowResizeDuration = resizeDuration;
 
-			mainWindow.SettingsVerticalRect.Fill = (mainWindow.TryFindResource("CustomWindow.TitleBar.Background") as Brush).Clone();
+			mainWindow.RefreshControlsAfterThemeChanging();
 
 			var desktopWidthDA = CreateDoubleAnimation(resizeArea.X, resizeDuration, "WindowBorder", "Width", exponentialEaseIn);
             var settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.X, resizeDuration, "MenuGrid", "Width", exponentialEaseIn);
@@ -131,7 +129,7 @@ namespace ProgramViewer3.Managers
 			ca.EasingFunction = easingFunction;
 
 			return ca;
-		}
+		}		
 
 		public void ToggleDesktop(bool value)
 		{
@@ -177,6 +175,7 @@ namespace ProgramViewer3.Managers
 			{
 				EasingFunction = exponentialEaseOut
 			};
+			mainWindow.SettingGrid.Visibility = Visibility.Visible;
 			mainWindow.SettingGrid.BeginAnimation(UIElement.OpacityProperty, animation);
 		}
 
@@ -186,6 +185,7 @@ namespace ProgramViewer3.Managers
 			{
 				EasingFunction = exponentialEaseOut
 			};
+			mainWindow.ThemeGrid.Visibility = Visibility.Visible;
 			mainWindow.ThemeGrid.BeginAnimation(UIElement.OpacityProperty, animation);
 		}
 
@@ -207,9 +207,20 @@ namespace ProgramViewer3.Managers
             contextMenuHideSB.Begin(frameworkElement);
         }
 
-		public void SetStoryboardCompletedCallback(string storyboardFieldName, Action callback)
+		public void SetStoryboardCompletedCallback(string key, Action callback)
 		{
-			storyboards[storyboardFieldName].Completed += (sender, e) => callback();
+			if (storyboards.ContainsKey(key))
+				storyboards[key].Completed += (sender, e) => callback();
+		}
+
+		public void SetStoryboardCompletedCallback(Action callback, params string[] keys)
+		{
+			for (int i = 0; i < keys.Length; i++)
+			{
+				var key = keys[i];
+				if (storyboards.ContainsKey(key))
+					storyboards[key].Completed += (sender, e) => callback();
+			}
 		}
 
 		public void ListView_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
@@ -218,10 +229,11 @@ namespace ProgramViewer3.Managers
 
 			ScrollViewer scrollViewer = ScrollAnimationBehavior.GetScrollViewer(sender as ListView) as ScrollViewer;
 			scrollViewer.IsDeferredScrollingEnabled = true;
+			int offset = 200;
 
 			DoubleAnimation verticalAnimation = new DoubleAnimation
 			{
-				To = scrollViewer.VerticalOffset - (200 * Math.Sign(e.Delta)),
+				To = scrollViewer.VerticalOffset - (offset * Math.Sign(e.Delta)),
 				Duration = TimeSpan.FromSeconds(0.4),
 				EasingFunction = new ExponentialEase()
 				{

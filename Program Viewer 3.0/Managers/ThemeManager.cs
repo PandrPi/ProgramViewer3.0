@@ -5,16 +5,20 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Text.RegularExpressions;
+using System.Windows.Media;
+using Gat.Controls;
 
 namespace ProgramViewer3.Managers
 {
 	class ThemeManager
 	{
+		public static List<ResourceDictionary> DefaultResourceCollection { get; private set; }
+		public static ResourceDictionary DefaultThemeDictionary { get; private set; }
+		public static int DefaultResourcesNumber { get; private set; }
+
 		public ObservableCollection<ThemeItem> themeItems = new ObservableCollection<ThemeItem>();
 
 		private readonly Dictionary<string, ResourceDictionary> themeResources = new Dictionary<string, ResourceDictionary>();
-		private readonly List<ResourceDictionary> DefaultResourceCollection = Application.Current.Resources.MergedDictionaries.ToList();
-		private ResourceDictionary DefaultThemeDictionary;
 
 		private static readonly string ThemeFolder = Path.Combine(ItemManager.ApplicationPath, "Themes");
 		private static readonly string DefaultThemeName = "Default Theme";
@@ -22,8 +26,11 @@ namespace ProgramViewer3.Managers
 
 		public void Initialize()
 		{
-			CacheManager.InitiallizeDirectory(ThemeFolder);
+			DefaultResourceCollection = Application.Current.Resources.MergedDictionaries.ToList();
 			DefaultThemeDictionary = DefaultResourceCollection.Where(i => i.Source.OriginalString.Contains(Regex.Replace(DefaultThemeName, @"\s+", ""))).First();
+			DefaultResourcesNumber = DefaultResourceCollection.Count;
+
+			CacheManager.InitiallizeDirectory(ThemeFolder);
 
 			LoadThemes();
 		}
@@ -31,23 +38,35 @@ namespace ProgramViewer3.Managers
 		public void LoadThemes()
 		{
 			FileInfo[] fileInfos = new DirectoryInfo(ThemeFolder).GetFiles("*.xaml", SearchOption.TopDirectoryOnly);
+			themeItems.Clear();
 			themeResources.Clear();
 			themeResources.Add(DefaultThemeName, DefaultThemeDictionary);
+			themeItems.Add(new ThemeItem(DefaultThemeName, DefaultThemeDictionary));
 
 			for (int i = 0; i < fileInfos.Length; i++)
 			{
 				FileInfo current = fileInfos[i];
-				string title = ToTitle(Path.GetFileNameWithoutExtension(current.Name));
+				try
+				{
+					string title = ToTitle(Path.GetFileNameWithoutExtension(current.Name));
 
-				themeItems.Add(new ThemeItem(title, current.FullName));
-				themeResources.Add(title, new ResourceDictionary() { Source = new Uri(current.FullName, UriKind.Absolute) });
+					var dictionary = new ResourceDictionary() { Source = new Uri(current.FullName, UriKind.Absolute) };
+					themeResources.Add(title, dictionary);
+					themeItems.Add(new ThemeItem(title, dictionary));
+				}
+				catch(Exception e)
+				{
+					MessageBox.Show(e.Message, $"{e.GetType().Name} occured in file 'Themes/{current.Name}'");
+				}
 			}
 			themeItems = new ObservableCollection<ThemeItem>(themeItems.OrderBy(i => i.Name).ToList());
 		}
 
 		public void ApplyTheme(string name)
 		{
-			var collection = DefaultResourceCollection;
+			var collection = DefaultResourceCollection.Take(DefaultResourcesNumber).ToList();
+			DefaultResourceCollection = null;
+			DefaultResourceCollection = new List<ResourceDictionary>(collection);
 
 			if (name != DefaultThemeName)
 				collection.Add(GetThemeRecource(name));
@@ -57,6 +76,7 @@ namespace ProgramViewer3.Managers
 			{
 				Application.Current.Resources.MergedDictionaries.Add(item);
 			}
+
 			RefreshIconResources();
 		}
 
@@ -79,13 +99,36 @@ namespace ProgramViewer3.Managers
 
 	public struct ThemeItem
 	{
-		public string Name;
-		public string Path;
+		public string Name { get; set; }
+		public string Description { get; set; }
+		public Brush FirstBrush { get; set; }
+		public Brush SecondBrush { get; set; }
+		public Brush ThirdBrush { get; set; }
+		public Brush FourthBrush { get; set; }
+		public Brush FifthBrush { get; set; }
 
-		public ThemeItem(string name, string path)
+		private static readonly string DefaultDescription = "The description is not available...";
+		private static readonly string DescriptionKey = "Description";
+		private static readonly string FirstBrushKey = "HotRect.Background";
+		private static readonly string SecondBrushKey = "DesktopRect.Background";
+		private static readonly string ThirdBrushKey = "CustomWindow.TitleBar.Background";
+		private static readonly string FourthBrushKey = "CustomWindow.Background";
+		private static readonly string FifthBrushKey = "DesktopRect.ResizeButton.Background";
+
+		public ThemeItem(string name, ResourceDictionary resource)
 		{
 			Name = name;
-			Path = path;
+			Description = resource.Contains(DescriptionKey) ? (string)resource[DescriptionKey] : DefaultDescription;
+			FirstBrush = GetResource<Brush>(resource, FirstBrushKey);
+			SecondBrush = GetResource<Brush>(resource, SecondBrushKey);
+			ThirdBrush = GetResource<Brush>(resource, ThirdBrushKey);
+			FourthBrush = GetResource<Brush>(resource, FourthBrushKey);
+			FifthBrush = GetResource<Brush>(resource, FifthBrushKey);
+		}
+
+		private static T GetResource<T>(ResourceDictionary resource, string key)
+		{
+			return resource.Contains(key) ? (T)resource[key] : (T)ThemeManager.DefaultThemeDictionary[key];
 		}
 	}
 }

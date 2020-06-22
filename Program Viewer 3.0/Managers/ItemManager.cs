@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.IO;
@@ -17,8 +18,6 @@ namespace ProgramViewer3.Managers
 		public string Path { get; set; }
 		public ImageSource ImageData { get; set; }
 		public PathType PathType { get; set; }
-
-
 
 		public ItemData(string title, string path, ImageSource imageSource)
 		{
@@ -79,10 +78,7 @@ namespace ProgramViewer3.Managers
 			this.mainDispatcher = dispatcher;
 			desktopItems = new ObservableCollection<ItemData>();
 			hotItems = new ObservableCollection<ItemData>();
-			cacheManager = new CacheManager();
-
-
-			LoadFiles();
+			cacheManager = new CacheManager(dispatcher);
 
 			desktopFileWatcher = new FileSystemWatcher(DesktopFolderPath)
 			{
@@ -95,7 +91,7 @@ namespace ProgramViewer3.Managers
 			desktopFileWatcher.EnableRaisingEvents = true;
 		}
 
-		private void LoadFiles()
+		public async Task LoadFilesAsync()
 		{
 			CacheManager.InitializeJSONFile(HotItemsJSONFilename);
 			desktopDirectoryInfo = CacheManager.InitiallizeDirectory(DesktopFolderPath);
@@ -103,12 +99,31 @@ namespace ProgramViewer3.Managers
 			hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
 			List<string> hotItemsToRemove = new List<string>();
 
+			var cacheWatch = Stopwatch.StartNew();
+			await cacheManager.InitiallizeCacheDictionary();
+			cacheWatch.Stop();
+			LogManager.Write($"Cache init time: {cacheWatch.Elapsed.TotalMilliseconds} ms");
+
+			List<Task> tasks = new List<Task>();
+
+			List<ItemData> tempHot = new List<ItemData>();
+			List<ItemData> tempDesktop = new List<ItemData>();
+
 			foreach (var item in hotItemsJsonData)
 			{
 				if (Directory.Exists(item.Key) || File.Exists(item.Key))
-					AddSorted(hotItems, new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key)));
+				{
+					tasks.Add(Task.Run(() =>
+					{
+						ItemData itemData = new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key));
+						tempHot.Add(itemData);
+					}));
+				}
 				else
+				{
 					hotItemsToRemove.Add(item.Key);
+				}
+
 			}
 
 			for (int i = 0; i < hotItemsToRemove.Count; i++)
@@ -119,23 +134,40 @@ namespace ProgramViewer3.Managers
 
 			FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
 
-			for (int i = 0; i < fileInfos.Length; i++)
+			foreach (FileInfo item in fileInfos)
 			{
-				FileInfo info = fileInfos[i];
-				ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name),
-					info.FullName, cacheManager.GetFileIcon(info.FullName));
-				AddSorted(desktopItems, itemData);
-				desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+				tasks.Add(Task.Run(async () =>
+				{
+					FileInfo info = item;
+					ItemData itemData = new ItemData(Path.GetFileNameWithoutExtension(info.Name),
+						info.FullName, cacheManager.GetFileIcon(info.FullName));
+					await mainDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+					{
+						tempDesktop.Add(itemData);
+						desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+					}));
+				}));
 			}
 
 			DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
-			for (int i = 0; i < directoryInfos.Length; i++)
+			foreach (DirectoryInfo item in directoryInfos)
 			{
-				DirectoryInfo info = directoryInfos[i];
-				ItemData itemData = new ItemData(info.Name, info.FullName, cacheManager.GetFileIcon(info.FullName));
-				AddSorted(desktopItems, itemData);
-				desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+				tasks.Add(Task.Run(async () =>
+				{
+					DirectoryInfo info = item;
+					ItemData itemData = new ItemData(info.Name, info.FullName, cacheManager.GetFileIcon(info.FullName));
+					await mainDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+					{
+						tempDesktop.Add(itemData);
+						desktopItemsData.Add($"{DesktopFolderPath}\\{info.Name}", itemData);
+					}));
+				}));
 			}
+
+			await Task.WhenAll(tasks);
+
+			hotItems = new ObservableCollection<ItemData>(tempHot.OrderBy(i => i, itemDataComparer));
+			desktopItems = new ObservableCollection<ItemData>(tempDesktop.OrderBy(i => i, itemDataComparer));
 		}
 
 		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
@@ -178,17 +210,17 @@ namespace ProgramViewer3.Managers
 				AddSorted(desktopItems, itemData);
 				desktopItemsData.Add(e.FullPath, itemData);
 			};
-			mainDispatcher.BeginInvoke(action);
+			mainDispatcher.Invoke(action);
 		}
 
 
-		private void AddSorted(Collection<ItemData> list, ItemData item)
+		private void AddSorted(ObservableCollection<ItemData> list, ItemData item)
 		{
 			int i = 0;
 			while (i < list.Count && itemDataComparer.Compare(list[i], item) < 0)
 				i++;
 
-			list.Insert(i, item);
+			mainDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => list.Insert(i, item)));
 		}
 
 		public void AddItem(string title, string path, ItemType itemType)
@@ -235,7 +267,8 @@ namespace ProgramViewer3.Managers
 		{
 			desktopFileWatcher.Dispose();
 			HotItemsSave();
-			cacheManager.PackIcons(hotItems, desktopItems);
+			
+			cacheManager.SaveIcons(hotItems, desktopItems);
 		}
 
 		private void StartProcess(string filename)

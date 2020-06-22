@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Drawing;
+using System.Linq;
 using System.IO;
-using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
+using System.Windows.Threading;
+using System.Diagnostics;
+using System.Text;
 
 namespace ProgramViewer3.Managers
 {
@@ -17,72 +19,88 @@ namespace ProgramViewer3.Managers
 	/// </summary>
 	public sealed class CacheManager
 	{
-		private Dictionary<string, ImageSource> cachedIcons = new Dictionary<string, ImageSource>();
+		private readonly Dictionary<string, ImageSource> cachedIcons = new Dictionary<string, ImageSource>();
+		private readonly Dictionary<string, Stream> iconStreams = new Dictionary<string, Stream>();
+		private Dictionary<string, dynamic> cacheJson;
+		private Dispatcher dispatcher;
+		private DirectoryInfo sourceIconsFolderInfo;
 
+		private static readonly string IconsCacheFolderPath = Path.Combine(ItemManager.ApplicationPath, "IconsCache");
+		private static readonly string SourceIconsFolderPath = Path.Combine(IconsCacheFolderPath, "SourceIcons");
+		private static readonly string CacheJSONPath = Path.Combine(IconsCacheFolderPath, "cacheFilesNames.json");
 
-		private static readonly string IconsCacheFolder = Path.Combine(ItemManager.ApplicationPath, "IconsCache");
-		private static readonly string SourceIconsFolder = Path.Combine(IconsCacheFolder, "SourceIcons");
-		private static readonly string CacheJSON = Path.Combine(IconsCacheFolder, "cacheFilesNames.json");
-		private static readonly string CacheZip = Path.Combine(IconsCacheFolder, "cachedImages.zip");
-
-		private static readonly Point[] RandomCharsEntry = { new Point(26, 65), new Point(26, 97), new Point(10, 48) };
-
-
-		public CacheManager()
+		public CacheManager(Dispatcher dispatcher)
 		{
-			InitiallizeDirectory(IconsCacheFolder);
-			InitiallizeDirectory(SourceIconsFolder);
+			this.dispatcher = dispatcher;
+			InitiallizeDirectory(IconsCacheFolderPath);
+			InitiallizeDirectory(SourceIconsFolderPath);
 
-			InitializeJSONFile(CacheJSON);
-			if (!File.Exists(CacheZip))
-				ZipFile.CreateFromDirectory(SourceIconsFolder, CacheZip);
+			InitializeJSONFile(CacheJSONPath);
 
-			InitiallizeCacheDictionary();
+			sourceIconsFolderInfo = new DirectoryInfo(SourceIconsFolderPath);
 		}
 
 		/// <summary>
-		/// This method is used to pack all items icons to zip archive(cache them)
+		/// This method is used to cache all icons into files in SourceIconsFolder
 		/// </summary>
 		/// <param name="hotItems"></param>
 		/// <param name="desktopItems"></param>
-		public void PackIcons(ObservableCollection<ItemData> hotItems, ObservableCollection<ItemData> desktopItems)
+		public void SaveIcons(ObservableCollection<ItemData> hotItems, ObservableCollection<ItemData> desktopItems)
 		{
-			Dictionary<string, dynamic> cache = new Dictionary<string, dynamic>();
+			var watch = Stopwatch.StartNew();
+			List<ItemData> items = hotItems.ToList();
+			items.AddRange(desktopItems);
 
-			for (int i = 0; i < hotItems.Count; i++)
+			sourceIconsFolderInfo.Refresh();
+			var infos = new Dictionary<string, FileInfo>();
+			foreach (var item in sourceIconsFolderInfo.GetFiles())
 			{
-				string randomName = GetRandomString();
-				while (cache.ContainsKey(randomName))
-				{
-					randomName = GetRandomString();
-				}
-				var item = hotItems[i];
-				cache.Add(randomName, item.Path);
-				SaveImageToFile(Path.Combine(SourceIconsFolder, $"{randomName}.png"), item.ImageData as BitmapSource);
-
+				infos.Add(Path.GetFileNameWithoutExtension(item.FullName), item);
 			}
 
-			for (int i = 0; i < desktopItems.Count; i++)
+			foreach (var item in items)
 			{
-				string randomName = GetRandomString();
-				while (cache.ContainsKey(randomName))
+				string hashedName = GetHash(item.Path);
+				bool needToSaveIcon = true;
+				if (infos.ContainsKey(hashedName) && cacheJson.ContainsKey(hashedName))
 				{
-					randomName = GetRandomString();
+					var info = infos[hashedName];
+					if (info.LastWriteTimeUtc == (DateTime)cacheJson[hashedName].LastWriteTime)
+					{
+						needToSaveIcon = false;
+					}
 				}
-				var item = desktopItems[i];
-				cache.Add(randomName, item.Path);
-				SaveImageToFile(Path.Combine(SourceIconsFolder, $"{randomName}.png"), item.ImageData as BitmapSource);
+				if (needToSaveIcon)
+				{
+					string fileName = Path.Combine(SourceIconsFolderPath, $"{hashedName}.png");
+					SaveImageToFile(fileName, item.ImageData as BitmapSource);
+					var info = new FileInfo(fileName);
+					var newIconData = new Dictionary<string, dynamic> { { "Path", item.Path },
+						{ "LastWriteTime", info.LastAccessTimeUtc } };
+
+					if (cacheJson.ContainsKey(hashedName)) // need to check contains as files can have different LastWrite times
+					{
+						cacheJson[hashedName] = null; // to get GC message that it can release previous dictionary resources
+						cacheJson[hashedName] = newIconData;
+					}
+					else
+					{
+						cacheJson.Add(hashedName, newIconData);
+					}
+				}
 			}
 
-			if (File.Exists(CacheZip))
-				File.Delete(CacheZip);
+			LogManager.Write($"Icons saved successfully!");
+			string json = JsonConvert.SerializeObject(cacheJson, Formatting.Indented);
+			File.WriteAllText(CacheJSONPath, json);
 
-			ZipFile.CreateFromDirectory(SourceIconsFolder, CacheZip);
-			LogManager.Write($"Icons packed successfully!");
-			string json = JsonConvert.SerializeObject(cache, Formatting.Indented);
-			File.WriteAllText(CacheJSON, json);
+			foreach (var item in iconStreams)
+			{
+				item.Value.Dispose();
+			}
 
-			DeleteAllFilesFromDirectory(SourceIconsFolder);
+			watch.Stop();
+			LogManager.Write($"Icons saving time: {watch.Elapsed.TotalMilliseconds} ms");
 		}
 
 		/// <summary>
@@ -95,12 +113,12 @@ namespace ProgramViewer3.Managers
 		{
 			if (cachedIcons.ContainsKey(path))
 			{
-				LogManager.Write($"Image [{path}] was returned from dictionary!");
+				LogManager.Write($"Image '{path}' was returned from dictionary!");
 				return cachedIcons[path];
 			}
 			else
 			{
-				LogManager.Write($"Image [{path}] was extracted from file!");
+				LogManager.Write($"Image '{path}' was extracted from file!");
 				return IconExtractor.GetIcon(path);
 			}
 		}
@@ -151,42 +169,39 @@ namespace ProgramViewer3.Managers
 			LogManager.Write($"Json [{path}] was successfully initiallized!");
 		}
 
-		/// <summary>
-		/// Deletes all files from directory
-		/// </summary>
-		/// <param name="path">Directory path</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void DeleteAllFilesFromDirectory(string path)
+		public async Task InitiallizeCacheDictionary()
 		{
-			FileInfo[] fileInfos = new DirectoryInfo(path).GetFiles();
-			for(int i = 0; i < fileInfos.Length; i++)
-			{
-				File.Delete(fileInfos[i].FullName);
-			}
-			LogManager.Write($"All files deleted from directory: {path}");
-		}
+			cacheJson = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(CacheJSONPath));
+			FileInfo[] fileInfos = new DirectoryInfo(SourceIconsFolderPath).GetFiles();
+			var tasks = new List<Task>();
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void InitiallizeCacheDictionary()
-		{
-			ZipFile.ExtractToDirectory(CacheZip, SourceIconsFolder);
-			LogManager.Write($"Zip unpacked: {CacheZip}");
-			var cacheData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(CacheJSON));
-			FileInfo[] fileInfos = new DirectoryInfo(SourceIconsFolder).GetFiles();
-			for(int i = 0; i < fileInfos.Length; i++)
+			foreach (FileInfo info in fileInfos)
 			{
-				string nameWithoutExt = Path.GetFileNameWithoutExtension(fileInfos[i].Name);
-				if (cacheData.ContainsKey(nameWithoutExt))
+				tasks.Add(Task.Run(() =>
 				{
-					cachedIcons.Add(cacheData[nameWithoutExt], LoadImageFromFile(fileInfos[i].FullName));
-					LogManager.Write($"Cache icon [{nameWithoutExt}] assigned with image: {fileInfos[i].FullName}");
-				}
-				else
-				{
-					LogManager.Write($"Cache icon [{nameWithoutExt}] is not presented in dictionary");
-				}
-				File.Delete(fileInfos[i].FullName);
+					string nameWithoutExt = Path.GetFileNameWithoutExtension(info.Name);
+					if (cacheJson.ContainsKey(nameWithoutExt))
+					{
+						string properName = cacheJson[nameWithoutExt].Path;
+						if (properName == null || properName == string.Empty)
+						{
+							LogManager.Write($"Error: Cache item '{nameWithoutExt}' has corrupted Path value!!!");
+						}
+						else
+						{
+							cachedIcons.Add(properName, LoadImageFromFile(info.FullName, properName));
+							LogManager.Write($"Cache icon '{nameWithoutExt}' assigned with image: {info.FullName}");
+						}
+					}
+					else
+					{
+						LogManager.Write($"Error: Cache icon '{nameWithoutExt}' is not presented in dictionary");
+					}
+				}));
 			}
+
+			await Task.WhenAll(tasks);
 		}
 
 		/// <summary>
@@ -195,29 +210,24 @@ namespace ProgramViewer3.Managers
 		/// <param name="path">Path of image file to load from.</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private BitmapSource LoadImageFromFile(string path)
+		private BitmapSource LoadImageFromFile(string path, string name)
 		{
 			try
 			{
-				Image loadedImage = Image.FromFile(path);
-				float aspectRatio = (float)loadedImage.Width / (float)loadedImage.Height;
-				Bitmap bmp;
-				if (loadedImage.Width > 256)
-					bmp = new Bitmap(loadedImage, 256, (int)(loadedImage.Height / aspectRatio));
-				else
-					bmp = new Bitmap(loadedImage);
+				var stream = new MemoryStream(File.ReadAllBytes(path));
 
-				BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(bmp.GetHicon(),
-							new System.Windows.Int32Rect(0, 0, bmp.Width, bmp.Height), BitmapSizeOptions.FromEmptyOptions());
+				var image = new BitmapImage();
+				image.BeginInit();
+				image.StreamSource = stream;
+				image.EndInit();
 				image.Freeze();
-				bmp.Dispose();
-				loadedImage.Dispose();
+
+				dispatcher.Invoke(() => iconStreams.Add(name, stream));
 
 				LogManager.Write($"Image '{path}' was successfully loaded!");
-
 				return image;
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
 				return null;
@@ -235,15 +245,12 @@ namespace ProgramViewer3.Managers
 #if DEBUG
 			using (var fileStream = new FileStream(path, FileMode.Create))
 			{
-
 				BitmapEncoder encoder = new PngBitmapEncoder();
 				encoder.Frames.Add(BitmapFrame.Create(image));
 				encoder.Save(fileStream);
 				LogManager.Write($"Image '{path}' was successfully saved!");
 			}
-
 #else
-
 			try
 			{
 				using (var fileStream = new FileStream(path, FileMode.Create))
@@ -266,19 +273,21 @@ namespace ProgramViewer3.Managers
 		/// </summary>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static string GetRandomString()
+		private static string GetHash(string input)
 		{
-			int stringLength = 64;
-			System.Text.StringBuilder sb = new System.Text.StringBuilder(stringLength);
-			Random random = new Random(Guid.NewGuid().GetHashCode());
-
-			for (int i = 0; i < stringLength; i++)
+			using (var hashAlgorithm = System.Security.Cryptography.SHA256.Create())
 			{
-				var p = RandomCharsEntry[random.Next(0, 3)];
-				sb.Append(Convert.ToChar(Convert.ToInt32(Math.Floor(p.X * random.NextDouble() + p.Y))));
-			}
-			
-			return sb.ToString();
+				byte[] data = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+				var sBuilder = new StringBuilder();
+
+				for (int i = 0; i < data.Length; i++)
+				{
+					sBuilder.Append(data[i].ToString("x2"));
+				}
+
+				return sBuilder.ToString();
+			}			
 		}
 	}
 }

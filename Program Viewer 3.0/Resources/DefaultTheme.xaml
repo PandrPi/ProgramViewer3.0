@@ -3,20 +3,27 @@
                     xmlns:system="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:ProgramViewer3">
 
+    <system:String x:Key="Description">The default theme of Program Viewer 3 application</system:String>
+
     <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FF5D747E" Offset="0"/>
         <GradientStop Color="#FF12131A" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="DesktopRect.Item.Label.Foreground"          Color="White"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background"        Color="#FFFFB900"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border"            Color="#FF232323"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background"  Color="#FFBEE6FD"/>
+    <SolidColorBrush x:Key="DesktopRect.Item.Label.Foreground" Color="White"/>
+    <DropShadowEffect x:Key="DesktopRect.Item.Label.Shadow" ShadowDepth="5"/>
+    <DropShadowEffect x:Key="DesktopRect.Item.Image.Shadow" ShadowDepth="8"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background" Color="#FFFFB900"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border" Color="#FF232323"/>
+    <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness" Left="1" Right="1"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background" Color="#FFBEE6FD"/>
 
     <LinearGradientBrush x:Key="HotRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FF688293" Offset="0"/>
         <GradientStop Color="#FF2C363C" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground"  Color="White"/>
+    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground" Color="White"/>
+    <DropShadowEffect x:Key="HotRect.Item.Label.Shadow" ShadowDepth="5"/>
+    <DropShadowEffect x:Key="HotRect.Item.Image.Shadow" ShadowDepth="8"/>
 
     <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="#FF6F8C9C"/>
 
@@ -29,7 +36,8 @@
     <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Border" Color="White"/>
     <Thickness x:Key="ThemeView.Item.SelectButton.Border.Thickness" Top="1"/>
     <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Foreground" Color="White"/>
-    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Hover.Background" Color="#FFFFB900"/>
+    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Hover.Background" Color="#FF2B323E"/>
+    <Duration x:Key="ThemeView.Item.SelectButton.Hover.Duration">0:0:0.1</Duration>
 
     <SolidColorBrush x:Key="PaletteIcon.Background" Color="#33FFFFFF" />
     <system:Double x:Key="PaletteIcon.Background.Thickness">1</system:Double>
@@ -44,8 +52,8 @@
     <SolidColorBrush x:Key="MenuIcon.Background" Color="Transparent"/>
     <SolidColorBrush x:Key="MenuIcon.Foreground" Color="White"/>
 
-    <SolidColorBrush x:Key="CustomWindow.TitleBar.Background"   Color="#FF1C1C1C"/> <!--#FF1C1C1C-->
-    <SolidColorBrush x:Key="CustomWindow.TitleBar.Border"       Color="#FF151515"/> <!--#FF151515-->
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Background"   Color="#FF1C1C1C"/>
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Border"       Color="#FF151515"/>
     <SolidColorBrush x:Key="CustomWindow.Background"            Color="#FF1D2128"/>
     <SolidColorBrush x:Key="CustomWindow.Border"                Color="#FF1D2128"/>
     <SolidColorBrush x:Key="CustomWindow.Label.Foreground"      Color="White"/>
@@ -53,8 +61,8 @@
     <SolidColorBrush x:Key="CustomWindow.TextBox.Border"        Color="White"/>
     <SolidColorBrush x:Key="CustomWindow.Button.Foreground"     Color="Black"/>
     <SolidColorBrush x:Key="CustomWindow.Button.Background"     Color="White"/>
-    <SolidColorBrush x:Key="CustomWindow.Button.Border"         Color="White"/>    
-    
+    <SolidColorBrush x:Key="CustomWindow.Button.Border"         Color="White"/>
+
     <SolidColorBrush x:Key="ListViewItem.MouseOver.Background"          Color="#3F1B1B1B"/>
     <SolidColorBrush x:Key="ListViewItem.MouseOver.Border"              Color="#3F1B1B1B"/>
     <SolidColorBrush x:Key="ListViewItem.SelectedInactive.Background"   Color="#3DDADADA"/>

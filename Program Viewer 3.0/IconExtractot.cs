@@ -6,6 +6,8 @@ using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using QuickZip.Tools;
+using System;
+using System.Threading.Tasks;
 
 namespace ProgramViewer3
 {
@@ -14,10 +16,10 @@ namespace ProgramViewer3
         public static ImageSource BaseExeIcon;
         public static Dispatcher Dispatcher;
 
-		private static FileToIconConverter fic = new FileToIconConverter();
-		private static int DefaultIconSize = 256;
-		private static Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
-        private static readonly HashSet<string> imageExtensions = 
+		private static readonly FileToIconConverter fic = new FileToIconConverter();
+		private static readonly int DefaultIconSize = 256;
+		private static readonly Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
+        public static readonly HashSet<string> imageExtensions = 
             new HashSet<string>(new [] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
         public static ImageSource GetIcon(string fileName)
@@ -55,7 +57,8 @@ namespace ProgramViewer3
 					if (!imageExtensions.Contains(extension))
 					{
 						BitmapSource image = LoadIcon(fileName);
-						cachedImages.Add(extension, image);
+						if (cachedImages.ContainsKey(extension))
+							cachedImages.Add(extension, image);
 						return image;
 					}
 					else
@@ -76,7 +79,7 @@ namespace ProgramViewer3
 			BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
 						new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
 			image.Freeze();
-			icon.Dispose();
+			icon?.Dispose();
 
 			return image;
 		}

@@ -7,6 +7,7 @@ using ProgramViewer3.Managers;
 using System.Windows.Input;
 using Microsoft.Win32;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProgramViewer3
 {
@@ -32,12 +33,11 @@ namespace ProgramViewer3
 		private readonly Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
 		private int filesToAddCounter = 0;
 
-		private void Window_Loaded(object sender, RoutedEventArgs e)
+		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			try
 			{
-				System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-				stopwatch.Start();
+				System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
 				settingsManager.Initialize();
 				menuGridChildren = new List<Grid>() { SettingGrid, ThemeGrid };
@@ -51,22 +51,24 @@ namespace ProgramViewer3
 				IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
 				IconExtractor.Dispatcher = Dispatcher;
 
-				TaskAsync(() =>
-				{
-					System.Diagnostics.Stopwatch itemStopwatch = new System.Diagnostics.Stopwatch();
-					itemStopwatch.Start();
+				AddItemGrid.Visibility = Visibility.Hidden;
+				PiContextMenu.Visibility = Visibility.Hidden;
+				RefreshWindow();
 
-					itemManager = new ItemManager(Dispatcher);
-					Dispatcher.Invoke(() =>
-					{
-						DesktopLV.ItemsSource = itemManager.desktopItems;
-						HotLV.ItemsSource = itemManager.hotItems;
-						DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
-						HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
-					});
-					itemStopwatch.Stop();
-					LogManager.Write($"Item loading time : {itemStopwatch.Elapsed.TotalMilliseconds} ms");
-				});
+				System.Diagnostics.Stopwatch managerStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+				itemManager = new ItemManager(Dispatcher);
+				await itemManager.LoadFilesAsync();
+
+				DesktopLV.ItemsSource = itemManager.desktopItems;
+				HotLV.ItemsSource = itemManager.hotItems;
+				DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
+				HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
+
+				managerStopwatch.Stop();
+				LogManager.Write($"Item loading time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
+				
+				managerStopwatch.Restart();
 
 				animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
 				animationManager.SetStoryboardCompletedCallback("addItemWindowShowSB", () => AddItemGrid.Visibility = Visibility.Visible);
@@ -79,15 +81,25 @@ namespace ProgramViewer3
 				HotLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
 				ThemeView.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
 
+				managerStopwatch.Stop();
+				LogManager.Write($"Animation managet init time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
+
+				managerStopwatch.Restart();
+
 				themeManager.Initialize();
 				ThemeView.ItemsSource = themeManager.themeItems;
 
-				RefreshWindow();
+				managerStopwatch.Stop();
+				LogManager.Write($"Theme managet init time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
+
 				ToggleDesktop();
-				AddItemGrid.Visibility = Visibility.Hidden;
-				PiContextMenu.Visibility = Visibility.Hidden;
+
+				managerStopwatch.Restart();
 
 				RegisterAssembly();
+
+				managerStopwatch.Stop();
+				LogManager.Write($"Assenmly register time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
 
 				stopwatch.Stop();
 				LogManager.Write($"Application starting time : {stopwatch.Elapsed.TotalMilliseconds} ms");
@@ -114,18 +126,6 @@ namespace ProgramViewer3
 				registryKey.SetValue(assemblyName, System.Reflection.Assembly.GetExecutingAssembly().Location);
 			}
 			registryKey.Dispose();
-		}
-
-		private async void TaskAsync(Action todo)
-		{
-			try
-			{
-				await System.Threading.Tasks.Task.Run(() => todo());
-			}
-			catch (Exception e)
-			{
-				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
-			}
 		}
 
 		private void ToggleDesktop()
@@ -174,12 +174,42 @@ namespace ProgramViewer3
 
 		private void MakeAllMenuChildrenGridsTransparent()
 		{
-			Console.WriteLine("Transparent");
-			foreach (var item in menuGridChildren)
+			for (int i = 0; i < menuGridChildren.Count; i++)
 			{
+				Grid item = menuGridChildren[i];
 				item.BeginAnimation(OpacityProperty, null);
 				item.Opacity = 0.0;
+				item.Visibility = Visibility.Hidden;
 			}
+		}
+
+		private void LoadThemesButton_Click(object sender, RoutedEventArgs e)
+		{
+			ThemeView.ItemsSource = null;
+			themeManager.LoadThemes();
+			ThemeView.ItemsSource = themeManager.themeItems;
+		}
+
+		private void SelectThemeButton_Click(object sender, RoutedEventArgs e)
+		{
+			string themeName = (string)((sender as PiButton).Parent as Grid).Tag;
+
+			themeManager.ApplyTheme(themeName);
+			RefreshControlsAfterThemeChanging();
+		}
+
+		public void RefreshControlsAfterThemeChanging()
+		{
+			SettingsVerticalRect.Fill = null;
+			const string expandBackground = "SettingVerticalRect.ExpandBackground";
+			const string background = "CustomWindow.TitleBar.Background";
+			SettingsVerticalRect.Fill = (TryFindResource(isMenuExpanded ? expandBackground : background)
+				as System.Windows.Media.Brush).Clone();
+
+			const string resizeButtonBackground = "DesktopRect.ResizeButton.Background";
+			desktopResizeButton.BeginAnimation(BackgroundProperty, null);
+			desktopResizeButton.Background = null;
+			desktopResizeButton.Background = (TryFindResource(resizeButtonBackground) as System.Windows.Media.Brush).Clone();
 		}
 
 		private void MyGrid_Drop(object sender, DragEventArgs e)
@@ -220,7 +250,7 @@ namespace ProgramViewer3
 		/// <returns></returns>
 		private ItemType GetWindowTypeFromPoint(Point point)
 		{
-			if (point.X >= Width - (desktopShirkExpandButton.Margin.Right + desktopShirkExpandButton.Width))
+			if (point.X >= Width - (desktopResizeButton.Margin.Right + desktopResizeButton.Width))
 				return ItemType.Hot;
 			else
 				return ItemType.Desktop;
@@ -305,9 +335,9 @@ namespace ProgramViewer3
 
 		private void DisposeAndCloseAll()
 		{
-			settingsManager.CloseManager();
-			TaskbarIcon.Dispose();
-			itemManager.DisposeManager();
+			settingsManager?.CloseManager();
+			TaskbarIcon?.Dispose();
+			itemManager?.DisposeManager();
 			LogManager.Close();
 		}
 
