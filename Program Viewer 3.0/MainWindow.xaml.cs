@@ -88,6 +88,8 @@ namespace ProgramViewer3
 
 				themeManager.Initialize();
 				ThemeView.ItemsSource = themeManager.themeItems;
+				themeManager.ApplyTheme(settingsManager.GetSettingValue<string>("LastUsedTheme"));
+				RefreshControlsAfterThemeChanging();
 
 				managerStopwatch.Stop();
 				LogManager.Write($"Theme managet init time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
@@ -196,6 +198,7 @@ namespace ProgramViewer3
 
 			themeManager.ApplyTheme(themeName);
 			RefreshControlsAfterThemeChanging();
+			settingsManager.SetSettingValue<string>("LastUsedTheme", themeName);
 		}
 
 		public void RefreshControlsAfterThemeChanging()
@@ -335,6 +338,7 @@ namespace ProgramViewer3
 
 		private void DisposeAndCloseAll()
 		{
+			settingsManager.SetSettingValue<string>("LastUsedTheme", themeManager.LastAppliedThemeName);
 			settingsManager?.CloseManager();
 			TaskbarIcon?.Dispose();
 			itemManager?.DisposeManager();

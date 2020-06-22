@@ -14,13 +14,12 @@ namespace ProgramViewer3.Managers
 		public static List<ResourceDictionary> DefaultResourceCollection { get; private set; }
 		public static ResourceDictionary DefaultThemeDictionary { get; private set; }
 		public static int DefaultResourcesNumber { get; private set; }
-
 		public ObservableCollection<ThemeItem> themeItems = new ObservableCollection<ThemeItem>();
-
 		private readonly Dictionary<string, ResourceDictionary> themeResources = new Dictionary<string, ResourceDictionary>();
+		public string LastAppliedThemeName { get; private set; } = DefaultThemeName;
 
 		private static readonly string ThemeFolder = Path.Combine(ItemManager.ApplicationPath, "Themes");
-		private static readonly string DefaultThemeName = "Default Theme";
+		public static readonly string DefaultThemeName = "Default Theme";
 		private static readonly string IconResourcesDictionarySourceString = "Resources/IconResources.xaml";
 
 		public void Initialize()
@@ -67,8 +66,23 @@ namespace ProgramViewer3.Managers
 			DefaultResourceCollection = null;
 			DefaultResourceCollection = new List<ResourceDictionary>(collection);
 
-			if (name != DefaultThemeName)
-				collection.Add(GetThemeRecource(name));
+			if (name != DefaultThemeName && name != null && name != string.Empty)
+			{
+				var resource = GetThemeRecource(name);
+				if (resource != null)
+				{
+					collection.Add(resource);
+					LastAppliedThemeName = name;
+				}
+				else
+				{
+					LastAppliedThemeName = DefaultThemeName;
+				}
+			}
+			else
+			{
+				LastAppliedThemeName = DefaultThemeName;
+			}
 
 			Application.Current.Resources.MergedDictionaries.Clear();
 			foreach (var item in collection)

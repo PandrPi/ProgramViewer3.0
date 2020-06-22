@@ -8,7 +8,6 @@ namespace ProgramViewer3.Managers
 		private static readonly string logFileName = "logout.txt";
 			    
 		private static TextWriter defaultWriter;
-		private static FileStream fileStream;
 		private static StreamWriter newWriter;
 
 		public static void Initiallize(bool redirectLogging)
@@ -18,14 +17,13 @@ namespace ProgramViewer3.Managers
 			{
 				try
 				{
-					fileStream = new FileStream(logFileName, FileMode.OpenOrCreate | FileMode.Truncate);
-					newWriter = new StreamWriter(fileStream);
+					if (!File.Exists(logFileName)) File.Create(logFileName).Close();
+					newWriter = new StreamWriter(logFileName, false);
 					Console.SetOut(newWriter);
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("Cannot open Redirect.txt for writing");
-					Console.WriteLine(e.Message);
+					Console.WriteLine($"Cannot open '{logFileName}' for writing: {e.Message}");
 					Close();
 				}
 			}
@@ -35,9 +33,6 @@ namespace ProgramViewer3.Managers
 		{
 			Console.SetOut(defaultWriter);
 			newWriter?.Close();
-			fileStream?.Close();
-			newWriter?.Dispose();
-			fileStream?.Dispose();
 		}
 
 		public static void Write(string message)

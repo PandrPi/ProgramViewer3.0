@@ -19,6 +19,7 @@ namespace ProgramViewer3.Managers
 			settingsJson = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(SettingFilename));
 
 			InitFieldFromJson("RedirectMessageLogging", true);
+			InitFieldFromJson("LastUsedTheme", ThemeManager.DefaultThemeName);
 		}
 
 		public void CloseManager()
@@ -41,6 +42,7 @@ namespace ProgramViewer3.Managers
 				var temp = settingFields[parameterName];
 				temp.Value = (object)value;
 				settingFields[parameterName] = temp;
+				settingValues[parameterName] = value;
 			}
 			else
 				throw new KeyNotFoundException($"Key '{parameterName}' is not presented in settings dictionary");
