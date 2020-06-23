@@ -5,7 +5,7 @@ namespace ProgramViewer3.Managers
 {
 	public static class LogManager
 	{
-		private static readonly string logFileName = "logout.txt";
+		private static readonly string logFileName = Path.Combine(ItemManager.ApplicationPath, "logout.txt");
 			    
 		private static TextWriter defaultWriter;
 		private static StreamWriter newWriter;

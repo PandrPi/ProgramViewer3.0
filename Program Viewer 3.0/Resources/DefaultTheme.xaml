@@ -81,7 +81,7 @@
 
     <SolidColorBrush x:Key="ComboBoxItem.Hover.Background"      Color="#FFBEE6FD"/>
     <SolidColorBrush x:Key="ComboBoxItem.Hover.Border"          Color="#FFABCEE2"/>
-    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="Red"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="#FF1D2128"/>
     <SolidColorBrush x:Key="ComboBoxItem.Selected.Background"   Color="#FFBEE6FD"/>
     <SolidColorBrush x:Key="ComboBoxItem.Selected.Border"       Color="#FFABCEE2"/>
 </ResourceDictionary>

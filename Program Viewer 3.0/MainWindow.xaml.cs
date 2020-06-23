@@ -261,6 +261,11 @@ namespace ProgramViewer3
 
 		private void AddFileButton_Click(object sender, RoutedEventArgs e)
 		{
+			AddFile();
+		}
+
+		private void AddFile()
+		{
 			string title = AddWindowFileTitle.Text;
 			string path = AddWindowFilePath.Text;
 			ItemType itemType = AddWindowFileWindow.SelectedIndex == 0 ? ItemType.Hot : ItemType.Desktop;
@@ -411,10 +416,10 @@ namespace ProgramViewer3
 		private void Hot_StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			SetContextMenuVisibility(Visibility.Hidden);
+			Point cursorPosition = e.GetPosition(MyGrid);
+			lastCursorPoint = cursorPosition;
 			if (e.RightButton == MouseButtonState.Pressed)
 			{
-				Point cursorPosition = e.GetPosition(MyGrid);
-				lastCursorPoint = cursorPosition;
 				if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Hot)
 				{
 					PiContextRemoveButton.Text = "Remove From List";
@@ -435,10 +440,10 @@ namespace ProgramViewer3
 		private void Desktop_StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
 		{
 			SetContextMenuVisibility(Visibility.Hidden);
+			Point cursorPosition = e.GetPosition(MyGrid);
+			lastCursorPoint = cursorPosition;
 			if (e.RightButton == MouseButtonState.Pressed)
 			{
-				Point cursorPosition = e.GetPosition(MyGrid);
-				lastCursorPoint = cursorPosition;
 				if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Desktop)
 				{
 					PiContextRemoveButton.Text = "Remove From Drive";
@@ -487,6 +492,14 @@ namespace ProgramViewer3
 				{
 					itemManager.OpenItem(selectedIndex, listView.Name == HotLV.Name ? ItemType.Hot : ItemType.Desktop);
 				}
+			}
+		}
+
+		private void AddItemGrid_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				AddFile();
 			}
 		}
 	}

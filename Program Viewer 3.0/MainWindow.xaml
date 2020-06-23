@@ -97,7 +97,7 @@
                 </StackPanel>
             </Grid>
             <!--AddItemGrid-->
-            <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="{DynamicResource CustomWindow.Background}" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230">
+            <Grid x:Name="AddItemGrid" Margin="73,133,149,133" Background="{DynamicResource CustomWindow.Background}" HorizontalAlignment="Center" Width="376" VerticalAlignment="Center" Height="230" KeyDown="AddItemGrid_KeyDown">
                 <Grid.Effect>
                     <DropShadowEffect Opacity="0.7"/>
                 </Grid.Effect>
