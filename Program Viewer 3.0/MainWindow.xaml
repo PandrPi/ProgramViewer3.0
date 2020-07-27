@@ -2,10 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tb="http://www.hardcodet.net/taskbar"
-        xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:controls="clr-namespace:ProgramViewer3"
         x:Class="ProgramViewer3.MainWindow"
-        Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000" Closing="Window_Closing" ShowInTaskbar="False">
+        Title="MainWindow" Height="500" Width="600" Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" BorderThickness="0" SnapsToDevicePixels="True" AllowsTransparency="True" Background="#00000000" Closing="Window_Closing" ShowInTaskbar="False" AllowDrop="False">
 
 
     <!--Window Resources-->
@@ -19,8 +18,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="1" Stroke="Black"/>
 
+            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="1" Stroke="Black"/>
+            
             <tb:TaskbarIcon x:Name="TaskbarIcon" ToolTipText="Program Viewer 3.0" IconSource="Pictures/Icon.ico">
                 <tb:TaskbarIcon.ContextMenu>
                     <ContextMenu Background="{DynamicResource CustomWindow.Background}" Foreground="White">
@@ -28,6 +28,9 @@
                     </ContextMenu>
                 </tb:TaskbarIcon.ContextMenu>
             </tb:TaskbarIcon>
+            
+            <!--Hot ListView-->
+            <controls:VirtualizingGridPanel x:Name="HotGridPanel" ColumnsCount="1" Width="105" Margin="0,0,-4,0" HorizontalAlignment="Right" ItemSize="105,110"/>
 
             <controls:PiButton x:Name="desktopResizeButton" HoverDuration="0:0:0.3" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="{DynamicResource DesktopRect.ResizeButton.Border}" Background="{DynamicResource DesktopRect.ResizeButton.Background}" BorderThickness="{DynamicResource DesktopRect.ResizeButton.Border.Thickness}" Cursor="Hand" Click="OnToggleDesktopClick" HoverBrush="{DynamicResource DesktopRect.ResizeButton.Hover.Background}">
                 <controls:PiButton.Effect>
@@ -36,52 +39,12 @@
             </controls:PiButton>
 
             <!--Desktop ListView-->
-            <ListView x:Name="DesktopLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,0,112,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="445" Background="{x:Null}" BorderThickness="0" KeyDown="ListView_KeyDown">
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <vwp:VirtualizingWrapPanel HorizontalAlignment="Center" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" ChildrenSize="100, 110" StretchItems="True" MouseWheelDelta="100" Grid.IsSharedSizeScope="True" SpacingMode="Uniform">
-                            <vwp:VirtualizingWrapPanel.CacheMode>
-                                <BitmapCache/>
-                            </vwp:VirtualizingWrapPanel.CacheMode>
-                        </vwp:VirtualizingWrapPanel>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <VirtualizingStackPanel Width="105" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" Margin="10,10,10,0" ToolTip="{Binding Title}" VerticalAlignment="Top" Cursor="Hand" MouseDown="Desktop_StackPanel_MouseDown" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown" Background="#02000000">
-                            <VirtualizingStackPanel.CacheMode>
-                                <BitmapCache/>
-                            </VirtualizingStackPanel.CacheMode>
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Effect="{DynamicResource DesktopRect.Item.Image.Shadow}"/>
-                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="80" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource DesktopRect.Item.Label.Foreground}" Effect="{DynamicResource DesktopRect.Item.Label.Shadow}" />
-                        </VirtualizingStackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <!--Hot ListView-->
-            <ListView x:Name="HotLV" VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.IsDeferredScrollingEnabled="True" VerticalAlignment="Top" Margin="0,1,-2,0" BorderBrush="{x:Null}" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="100" Background="{x:Null}" BorderThickness="0" HorizontalContentAlignment="Center" KeyDown="ListView_KeyDown">
-                <ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" HorizontalAlignment="Center">
-                            <VirtualizingStackPanel.CacheMode>
-                                <BitmapCache/>
-                            </VirtualizingStackPanel.CacheMode>
-                        </VirtualizingStackPanel>
-                    </ItemsPanelTemplate>
-                </ListView.ItemsPanel>
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <VirtualizingStackPanel Width="70" Orientation="Vertical" Margin="5,10,5,0" ToolTip="{Binding Title}" VerticalAlignment="Top" Cursor="Hand" MouseDown="Hot_StackPanel_MouseDown" MouseLeftButtonDown="StackPanel_MouseLeftButtonDown" Background="#02000000">
-                            <VirtualizingStackPanel.CacheMode>
-                                <BitmapCache/>
-                            </VirtualizingStackPanel.CacheMode>
-                            <Image Source="{Binding ImageData}" RenderOptions.EdgeMode="Aliased" RenderOptions.BitmapScalingMode="HighQuality" Width="65" Height="65" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Uniform" Effect="{DynamicResource HotRect.Item.Image.Shadow}"/>
-                            <TextBlock Text="{Binding Title}" TextOptions.TextFormattingMode="Display" MaxWidth="75" FontSize="12" Margin="0,10,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource HotRect.Item.Label.Foreground}" Effect="{DynamicResource HotRect.Item.Label.Shadow}" />
-                        </VirtualizingStackPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <!--MenuGrid-->
+            <controls:VirtualizingGridPanel x:Name="DesktopGridPanel" ColumnsCount="4" HorizontalAlignment="Left" Width="420" Margin="50,0,0,1" ItemSize="105,110" ScrollOffset="120">
+                <controls:VirtualizingGridPanel.CacheMode>
+                    <BitmapCache/>
+                </controls:VirtualizingGridPanel.CacheMode>
+            </controls:VirtualizingGridPanel>
+
             <!--PiContextMenu-->
             <Grid x:Name="PiContextMenu" Margin="458,278,0,0" VerticalAlignment="Top" Width="139" HorizontalAlignment="Left" Height="146">
                 <Rectangle Fill="{DynamicResource CustomWindow.Border}" RadiusX="2" RadiusY="2" Stroke="#FFABADB3" StrokeThickness="2">
@@ -217,6 +180,9 @@
                     </controls:PiButton>
                 </Grid>
                 <controls:PiButton x:Name="ThemeResizeButton" Tag="ThemeGrid" HorizontalAlignment="Left" Height="21" VerticalAlignment="Top" Width="21" Margin="7,50,0,0" Cursor="Hand" Click="OnToggleSettingsClick" Source="{DynamicResource PaletteIcon}">
+                    <controls:PiButton.CacheMode>
+                        <BitmapCache/>
+                    </controls:PiButton.CacheMode>
                     <controls:PiButton.Effect>
                         <DropShadowEffect ShadowDepth="0" RenderingBias="Quality" BlurRadius="7"/>
                     </controls:PiButton.Effect>

@@ -4,58 +4,57 @@
                     xmlns:local="clr-namespace:ProgramViewer3">
 
     <system:String x:Key="Description">The test theme of Program Viewer 3 application</system:String>
+    <SolidColorBrush x:Key="GridPanel.Item.Text.Foreground" Color="White"/>
+    <SolidColorBrush x:Key="GridPanel.Item.RippleBrush" Color="#7FDCDCDC"/>
+    <SolidColorBrush x:Key="GridPanel.Item.HighlightBrush" Color="#99FFFFFF"/>
+    <DropShadowEffect x:Key="GridPanel.Item.Text.Shadow" ShadowDepth="5"/>
+    <DropShadowEffect x:Key="GridPanel.Item.Image.Shadow" ShadowDepth="8"/>
 
     <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
-        <GradientStop Color="#FFBEE6FD" Offset="0"/>
-        <GradientStop Color="#FF87ACC1" Offset="1"/>
+        <GradientStop Color="#FF5D747E" Offset="0"/>
+        <GradientStop Color="#FF12131A" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="DesktopRect.Item.Label.Foreground"          Color="Black"/>
-    <DropShadowEffect x:Key="DesktopRect.Item.Label.Shadow" ShadowDepth="2" Opacity="0.5"/>
-    <DropShadowEffect x:Key="DesktopRect.Item.Image.Shadow" ShadowDepth="5" Opacity="0.5"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background"        Color="#FFFB4747"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border"            Color="Transparent"/>
-    <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness" Left="0" Right="0"/>
-    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background"  Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background" Color="#FFFFB900"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border" Color="#FF232323"/>
+    <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness" Left="1" Right="1"/>
+    <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background" Color="#FFBEE6FD"/>
 
     <LinearGradientBrush x:Key="HotRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
-        <GradientStop Color="#FFBEE6FD" Offset="0"/>
-        <GradientStop Color="#FF87ACC1" Offset="1"/>
+        <GradientStop Color="#FF688293" Offset="0"/>
+        <GradientStop Color="#FF2C363C" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground" Color="Black"/>
-    <DropShadowEffect x:Key="HotRect.Item.Label.Shadow" ShadowDepth="2" Opacity="0.5"/>
-    <DropShadowEffect x:Key="HotRect.Item.Image.Shadow" ShadowDepth="5" Opacity="0.5"/>
+    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground" Color="White"/>
 
-    <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="#FF6F8C9C"/>
+    <SolidColorBrush x:Key="ContextWindow.Button.Hover.Background" Color="#99BEE6FD"/>
 
-    <SolidColorBrush x:Key="ContextWindow.Button.Hover.Background" Color="#FF1D2128"/>
-
-    <SolidColorBrush x:Key="ThemeView.Item.Background" Color="#FF556270"/>
+    <SolidColorBrush x:Key="ThemeView.Item.Background" Color="#FF1D2128"/>
     <SolidColorBrush x:Key="ThemeView.Item.Foreground" Color="White"/>
     <SolidColorBrush x:Key="ThemeView.Item.Description.Foreground" Color="#FFC3C3C3"/>
-    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Background" Color="#FF556270"/>
+    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Background" Color="#FF1D2128"/>
     <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Border" Color="White"/>
     <Thickness x:Key="ThemeView.Item.SelectButton.Border.Thickness" Top="1"/>
     <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Foreground" Color="White"/>
-    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Hover.Background" Color="#FF748393"/>
-    <Duration x:Key="ThemeView.Item.SelectButton.Hover.Duration" >0:0:0.1</Duration>
+    <SolidColorBrush x:Key="ThemeView.Item.SelectButton.Hover.Background" Color="#FF2B323E"/>
+    <Duration x:Key="ThemeView.Item.SelectButton.Hover.Duration">0:0:0.1</Duration>
 
     <SolidColorBrush x:Key="PaletteIcon.Background" Color="#33FFFFFF" />
     <system:Double x:Key="PaletteIcon.Background.Thickness">1</system:Double>
     <SolidColorBrush x:Key="PaletteIcon.Background.Thickness.Brush" Color="Black"/>
-    <SolidColorBrush x:Key="PaletteIcon.Figure" Color="#FF8AB839" />
+    <SolidColorBrush x:Key="PaletteIcon.Figure" Color="#FFD1474E" />
     <system:Double x:Key="PaletteIcon.Figure.Thickness">0</system:Double>
     <SolidColorBrush x:Key="PaletteIcon.Figure.Thickness.Brush" Color="Black"/>
 
-    <SolidColorBrush x:Key="CloseIcon.Background" Color="#FFFB4747"/>
+    <SolidColorBrush x:Key="CloseIcon.Background" Color="#FFD1474E"/>
     <SolidColorBrush x:Key="CloseIcon.Foreground" Color="White"/>
 
     <SolidColorBrush x:Key="MenuIcon.Background" Color="Transparent"/>
     <SolidColorBrush x:Key="MenuIcon.Foreground" Color="White"/>
 
-    <SolidColorBrush x:Key="CustomWindow.TitleBar.Background"   Color="#FFFB4747"/>
-    <SolidColorBrush x:Key="CustomWindow.TitleBar.Border"       Color="#FFBB1818"/>
-    <SolidColorBrush x:Key="CustomWindow.Background"            Color="#FF101215"/>
-    <SolidColorBrush x:Key="CustomWindow.Border"                Color="#FF556270"/>
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Background"   Color="#FF1C1C1C"/>
+    <SolidColorBrush x:Key="CustomWindow.TitleBar.Border"       Color="#FF151515"/>
+    <SolidColorBrush x:Key="CustomWindow.Background"            Color="#FF1D2128"/>
+    <SolidColorBrush x:Key="CustomWindow.Border"                Color="#FF1D2128"/>
     <SolidColorBrush x:Key="CustomWindow.Label.Foreground"      Color="White"/>
     <SolidColorBrush x:Key="CustomWindow.TextBox.Background"    Color="White"/>
     <SolidColorBrush x:Key="CustomWindow.TextBox.Border"        Color="White"/>
@@ -81,7 +80,7 @@
 
     <SolidColorBrush x:Key="ComboBoxItem.Hover.Background"      Color="#FFBEE6FD"/>
     <SolidColorBrush x:Key="ComboBoxItem.Hover.Border"          Color="#FFABCEE2"/>
-    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="Red"/>
+    <SolidColorBrush x:Key="ComboBoxItem.Selected.Foreground"   Color="#FF1D2128"/>
     <SolidColorBrush x:Key="ComboBoxItem.Selected.Background"   Color="#FFBEE6FD"/>
     <SolidColorBrush x:Key="ComboBoxItem.Selected.Border"       Color="#FFABCEE2"/>
 </ResourceDictionary>
