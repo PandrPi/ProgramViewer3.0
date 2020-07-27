@@ -308,7 +308,7 @@ namespace ProgramViewer3
 		/// <summary>
 		/// Loads items inside Viewport
 		/// </summary>
-		private async void UpdateInternalChildren(int startingIndex)
+		private async Task UpdateInternalChildrenAsync(int startingIndex)
 		{
 			startingIndex = RoundToLowerMultiple(startingIndex, ColumnsCount);
 			int rowIndex = startingIndex / ColumnsCount;
@@ -379,30 +379,30 @@ namespace ProgramViewer3
 			return ItemSource;
 		}
 
-		public void SetItemSource(ObservableCollection<Managers.ItemData> items)
+		public async void SetItemSource(ObservableCollection<Managers.ItemData> items)
 		{
 			ItemSource = null;
 			ItemSource = items;
 			if (ItemSource != null)
 			{
 				ItemSource.CollectionChanged += ItemSource_Changed;
-				UpdateInternalChildren(0);
+				await UpdateInternalChildrenAsync(0);
 			}
 		}
 
-		private void ItemSource_Changed(object sender, NotifyCollectionChangedEventArgs e)
+		private async void ItemSource_Changed(object sender, NotifyCollectionChangedEventArgs e)
 		{
 			switch (e.Action)
 			{
 				case NotifyCollectionChangedAction.Add:
 					// remove all rows starting from the row with (e.NewStatringIndex / columnsCount) index,
 					// rebuild them and add again 
-					UpdateInternalChildren(e.NewStartingIndex);
+					await UpdateInternalChildrenAsync(e.NewStartingIndex);
 					break;
 				case NotifyCollectionChangedAction.Remove:
 					// remove all rows starting from the row with (e.OldStatringIndex / columnsCount) index,
 					// rebuild them and add again 
-					UpdateInternalChildren(e.OldStartingIndex);
+					await UpdateInternalChildrenAsync(e.OldStartingIndex);
 					break;
 			}
 		}
