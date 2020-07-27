@@ -277,7 +277,7 @@ namespace ProgramViewer3
 				}
 
 				filesToAddCounter = filesToAdd.Count + 1;
-				AddFileWindowFilesCount.Content = $"Files to proceed - {filesToAddCounter}";
+				AddFileWindowFilesCount.Content = $"Files to process - {filesToAddCounter}";
 				SetAddItemGridVisibility(Visibility.Visible);
 			}
 		}

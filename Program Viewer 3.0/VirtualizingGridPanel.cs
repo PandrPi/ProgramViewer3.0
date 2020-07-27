@@ -201,7 +201,6 @@ namespace ProgramViewer3
 
 					TextBlock textBlock = panel.Children[1] as TextBlock;
 					textBlock.SetValue(TextOptions.TextFormattingModeProperty, TextFormattingMode.Display);
-					textBlock.Foreground = new SolidColorBrush(Colors.White);
 
 					panelSize = new Size(panel.Width, panel.Height);
 					UpdateFrameworkElement(panel, panelSize, new Rect(panelSize));
@@ -271,7 +270,7 @@ namespace ProgramViewer3
 		/// It prepares RowRenderer for rendering a whole row to a single image.
 		/// </summary>
 		/// <param name="startIndex">Index in ItemSource collection to start with</param>
-		private async Task<int> FillRowRendererWithItemData(int startIndex)
+		private async Task<int> FillRowRendererWithItemDataAsync(int startIndex)
 		{
 			int itemsInRow = 0;
 			await Task.Run(() =>
@@ -323,8 +322,8 @@ namespace ProgramViewer3
 			{
 				try
 				{					
-					int itemsInRow = await FillRowRendererWithItemData(i);
-					AddChild(await RenderRowToImage(), itemsInRow);
+					int itemsInRow = await FillRowRendererWithItemDataAsync(i);
+					AddChild(await RenderRowToImageAsync(), itemsInRow);
 				}
 				catch (Exception e)
 				{
@@ -333,7 +332,7 @@ namespace ProgramViewer3
 			}
 		}
 
-		private async Task<BitmapSource> RenderRowToImage()
+		private async Task<BitmapSource> RenderRowToImageAsync()
 		{
 			BitmapSource result = null;
 			await Task.Run(() =>
@@ -400,6 +399,16 @@ namespace ProgramViewer3
 					await UpdateInternalChildrenAsync(e.NewStartingIndex);
 					break;
 				case NotifyCollectionChangedAction.Remove:
+					// remove all rows starting from the row with (e.OldStatringIndex / columnsCount) index,
+					// rebuild them and add again 
+					await UpdateInternalChildrenAsync(e.OldStartingIndex);
+					break;
+				case NotifyCollectionChangedAction.Replace:
+					// remove all rows starting from the row with (e.NewStatringIndex / columnsCount) index,
+					// rebuild them and add again 
+					await UpdateInternalChildrenAsync(e.NewStartingIndex);
+					break;
+				case NotifyCollectionChangedAction.Move:
 					// remove all rows starting from the row with (e.OldStatringIndex / columnsCount) index,
 					// rebuild them and add again 
 					await UpdateInternalChildrenAsync(e.OldStartingIndex);
