@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using ProgramViewer3.Managers;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-
-using ProgramViewer3.Managers;
 using System.Windows.Input;
-using Microsoft.Win32;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace ProgramViewer3
 {
@@ -29,7 +28,7 @@ namespace ProgramViewer3
 		private Point lastCursorPoint;  // Used to store cursor position at the moment when PiContextMenu was shown
 		private List<Grid> menuGridChildren;
 		private Dictionary<string, Action> menuGridExpandActions;
-
+		
 		private readonly Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
 		private int filesToAddCounter = 0;
 
@@ -55,53 +54,32 @@ namespace ProgramViewer3
 				PiContextMenu.Visibility = Visibility.Hidden;
 				RefreshWindow();
 
-				System.Diagnostics.Stopwatch managerStopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-				itemManager = new ItemManager(Dispatcher);
-				await itemManager.LoadFilesAsync();
-
-				DesktopLV.ItemsSource = itemManager.desktopItems;
-				HotLV.ItemsSource = itemManager.hotItems;
-				DesktopLV.LostFocus += (ev, ee) => DesktopLV.SelectedIndex = -1;
-				HotLV.LostFocus += (ev, ee) => HotLV.SelectedIndex = -1;
-
-				managerStopwatch.Stop();
-				LogManager.Write($"Item loading time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
-				
-				managerStopwatch.Restart();
-
-				animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
-				animationManager.SetStoryboardCompletedCallback("addItemWindowShowSB", () => AddItemGrid.Visibility = Visibility.Visible);
-				animationManager.SetStoryboardCompletedCallback("addItemWindowHideSB", () => AddItemGrid.Visibility = Visibility.Hidden);
-				animationManager.SetStoryboardCompletedCallback("contextMenuShowSB", () => PiContextMenu.Visibility = Visibility.Visible);
-				animationManager.SetStoryboardCompletedCallback("contextMenuHideSB", () => PiContextMenu.Visibility = Visibility.Hidden);
-				animationManager.SetStoryboardCompletedCallback("menuShrinkSB", () => MakeAllMenuChildrenGridsTransparent());
-
-				DesktopLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
-				HotLV.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
-				ThemeView.PreviewMouseWheel += animationManager.ListView_PreviewMouseWheel;
-
-				managerStopwatch.Stop();
-				LogManager.Write($"Animation managet init time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
-
-				managerStopwatch.Restart();
-
 				themeManager.Initialize();
 				ThemeView.ItemsSource = themeManager.themeItems;
 				themeManager.ApplyTheme(settingsManager.GetSettingValue<string>("LastUsedTheme"));
 				RefreshControlsAfterThemeChanging();
 
-				managerStopwatch.Stop();
-				LogManager.Write($"Theme managet init time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
+				InitializeGridPanels();
 
+				System.Diagnostics.Stopwatch managerStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+				itemManager = new ItemManager(Dispatcher);
+				await itemManager.LoadFilesAsync();
+
+				DesktopGridPanel.SetItemSource(itemManager.desktopItems);
+				HotGridPanel.SetItemSource(itemManager.hotItems);
+
+				managerStopwatch.Stop();
+				LogManager.Write($"Item loading time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
+
+				animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
+				animationManager.SetStoryboardCompletedCallback("addItemWindowShowSB", () => AddItemGrid.Visibility = Visibility.Visible);
+				animationManager.SetStoryboardCompletedCallback("addItemWindowHideSB", () => AddItemGrid.Visibility = Visibility.Hidden);
+				animationManager.SetStoryboardCompletedCallback("menuShrinkSB", () => MakeAllMenuChildrenGridsTransparent());
+
+				InitializeSmoothScrolling();
 				ToggleDesktop();
-
-				managerStopwatch.Restart();
-
 				RegisterAssembly();
-
-				managerStopwatch.Stop();
-				LogManager.Write($"Assenmly register time : {managerStopwatch.Elapsed.TotalMilliseconds} ms");
 
 				stopwatch.Stop();
 				LogManager.Write($"Application starting time : {stopwatch.Elapsed.TotalMilliseconds} ms");
@@ -130,6 +108,64 @@ namespace ProgramViewer3
 			registryKey.Dispose();
 		}
 
+		private void InitializeSmoothScrolling()
+		{
+			DesktopGridPanel.PreviewMouseWheel += AnimationManager.ListView_PreviewMouseWheel;
+			HotGridPanel.PreviewMouseWheel += AnimationManager.ListView_PreviewMouseWheel;
+			ThemeView.PreviewMouseWheel += AnimationManager.ListView_PreviewMouseWheel;
+		}
+
+		private T FindResource<T>(string key)
+		{
+			return (T)FindResource(key);
+		}
+
+		private StackPanel GetGridPanel_ItemTemplate()
+		{
+			var panelTemplate = FindResource<StackPanel>("GridPanel.ItemTemplate");
+			var titleShadowEffect = FindResource<System.Windows.Media.Effects.DropShadowEffect>("GridPanel.Item.Text.Shadow");
+			titleShadowEffect.Freeze();
+			var imageShadowEffect = FindResource<System.Windows.Media.Effects.DropShadowEffect>("GridPanel.Item.Image.Shadow");
+			imageShadowEffect.Freeze();
+			var titleForeground = FindResource<Brush>("GridPanel.Item.Text.Foreground");
+			titleForeground.Freeze();
+
+			panelTemplate.Effect = titleShadowEffect;
+			var image = panelTemplate.Children[0] as Image;
+			var title = panelTemplate.Children[1] as TextBlock;
+			image.Effect = imageShadowEffect;
+			title.Effect = titleShadowEffect;
+			title.Foreground = titleForeground;
+
+			return panelTemplate;
+		}
+
+		private void InitializeGridPanels()
+		{
+			var rippleBrush = FindResource<Brush>("GridPanel.Item.RippleBrush");
+			rippleBrush.Freeze();
+			var highlightBrush = FindResource<Brush>("GridPanel.Item.HighlightBrush");
+			highlightBrush.Freeze();
+
+			DesktopGridPanel.Initialize(GetGridPanel_ItemTemplate(), highlightBrush, rippleBrush);
+			HotGridPanel.Initialize(GetGridPanel_ItemTemplate(), highlightBrush, rippleBrush);
+
+			DesktopGridPanel.KeyDown += GridPanel_KeyDown;
+			DesktopGridPanel.Grid_MouseDown += Desktop_StackPanel_MouseDown;
+			DesktopGridPanel.Grid_MouseDown += StackPanel_MouseLeftButtonDown;
+			DesktopGridPanel.Grid_MouseWheel += GridPanel_MouseWheel;
+
+			HotGridPanel.KeyDown += GridPanel_KeyDown;
+			HotGridPanel.Grid_MouseDown += Hot_StackPanel_MouseDown;
+			HotGridPanel.Grid_MouseDown += StackPanel_MouseLeftButtonDown;
+			HotGridPanel.Grid_MouseWheel += GridPanel_MouseWheel;
+		}
+
+		private void GridPanel_MouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			if (PiContextMenu.Visibility == Visibility.Visible) SetContextMenuVisibility(Visibility.Hidden);
+		}
+
 		private void ToggleDesktop()
 		{
 			animationManager.ToggleDesktop(isWindowExpanded);
@@ -151,7 +187,7 @@ namespace ProgramViewer3
 		{
 			Grid activeGrid = menuGridChildren.Where(i => i.Opacity != 0.0).FirstOrDefault();
 			string buttonTag = (string)(sender as PiButton).Tag;
-			
+
 			if (activeGrid == default(Grid))
 			{
 				if (!isMenuExpanded)
@@ -206,23 +242,22 @@ namespace ProgramViewer3
 			SettingsVerticalRect.Fill = null;
 			const string expandBackground = "SettingVerticalRect.ExpandBackground";
 			const string background = "CustomWindow.TitleBar.Background";
-			SettingsVerticalRect.Fill = (TryFindResource(isMenuExpanded ? expandBackground : background)
-				as System.Windows.Media.Brush).Clone();
+			SettingsVerticalRect.Fill = FindResource<Brush>(isMenuExpanded ? expandBackground : background).Clone();
 
 			const string resizeButtonBackground = "DesktopRect.ResizeButton.Background";
 			desktopResizeButton.BeginAnimation(BackgroundProperty, null);
 			desktopResizeButton.Background = null;
-			desktopResizeButton.Background = (TryFindResource(resizeButtonBackground) as System.Windows.Media.Brush).Clone();
+			desktopResizeButton.Background = FindResource<Brush>(resizeButtonBackground).Clone();
 		}
 
 		private void MyGrid_Drop(object sender, DragEventArgs e)
 		{
 			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
-				Focus();
+				Activate();
 				string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
 
-				ItemType itemType = GetWindowTypeFromPoint(e.GetPosition(MyGrid));
+				ItemType itemType = GetItemTypeFromPoint(e.GetPosition(MyGrid));
 				for (int i = 1; i < files.Length; i++)
 				{
 					filesToAdd.Enqueue(new Tuple<string, ItemType>(files[i], itemType));
@@ -251,7 +286,7 @@ namespace ProgramViewer3
 		/// </summary>
 		/// <param name="point">Cursor point relative to main grid</param>
 		/// <returns></returns>
-		private ItemType GetWindowTypeFromPoint(Point point)
+		private ItemType GetItemTypeFromPoint(Point point)
 		{
 			if (point.X >= Width - (desktopResizeButton.Margin.Right + desktopResizeButton.Width))
 				return ItemType.Hot;
@@ -306,7 +341,9 @@ namespace ProgramViewer3
 				animationManager.AddItemWindowShow();
 			}
 			else
+			{
 				animationManager.AddItemWindowHide();
+			}
 		}
 		/// <summary>
 		/// Sets visibility of PiContextMenu, starts occur/dissolve animation
@@ -314,15 +351,15 @@ namespace ProgramViewer3
 		/// <param name="visibility"></param>
 		private void SetContextMenuVisibility(Visibility visibility)
 		{
-
+			Duration fadeDuration = TimeSpan.FromSeconds(0.3);
 			if (visibility == Visibility.Visible)
 			{
 				PiContextMenu.Visibility = visibility;
-				animationManager.ContextMenuShow();
+				AnimationManager.StartAnimation_FadeIn(PiContextMenu, fadeDuration, () => PiContextMenu.Visibility = Visibility.Visible);
 			}
 			else
 			{
-				animationManager.ContextMenuHide();
+				AnimationManager.StartAnimation_FadeOut(PiContextMenu, fadeDuration, () => PiContextMenu.Visibility = Visibility.Hidden);
 				if (shouldShirkWindowAfterContextMenuClosing)
 				{
 					ToggleDesktop();
@@ -346,6 +383,10 @@ namespace ProgramViewer3
 			settingsManager.SetSettingValue<string>("LastUsedTheme", themeManager.LastAppliedThemeName);
 			settingsManager?.CloseManager();
 			TaskbarIcon?.Dispose();
+			HotGridPanel.SetItemSource(null);
+			HotGridPanel.Dispose();
+			DesktopGridPanel.SetItemSource(null);
+			DesktopGridPanel.Dispose();
 			itemManager?.DisposeManager();
 			LogManager.Close();
 		}
@@ -353,10 +394,10 @@ namespace ProgramViewer3
 		private delegate void ExecuteContextCommand(int index, ItemType itemType);
 		private void ExexuteContextMenuCommand(ExecuteContextCommand command)
 		{
-			ItemType itemType = GetWindowTypeFromPoint(lastCursorPoint);
+			ItemType itemType = GetItemTypeFromPoint(lastCursorPoint);
 			if (itemType == ItemType.Hot)
 			{
-				int selectedIndex = HotLV.SelectedIndex;
+				int selectedIndex = HotGridPanel.GetSelectedIndex();
 				if (selectedIndex != -1)
 				{
 					command(selectedIndex, itemType);
@@ -364,7 +405,7 @@ namespace ProgramViewer3
 			}
 			else
 			{
-				int selectedIndex = DesktopLV.SelectedIndex;
+				int selectedIndex = DesktopGridPanel.GetSelectedIndex();
 				if (selectedIndex != -1)
 				{
 					command(selectedIndex, itemType);
@@ -411,6 +452,8 @@ namespace ProgramViewer3
 			Height = SystemParameters.VirtualScreenHeight - 44;
 			Left = screenWidth - Width - 2;
 			Top = 2;
+
+
 		}
 
 		private void Hot_StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
@@ -420,7 +463,7 @@ namespace ProgramViewer3
 			lastCursorPoint = cursorPosition;
 			if (e.RightButton == MouseButtonState.Pressed)
 			{
-				if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Hot)
+				if (GetItemTypeFromPoint(cursorPosition) == ItemType.Hot)
 				{
 					PiContextRemoveButton.Text = "Remove From List";
 					if (!isWindowExpanded)
@@ -444,7 +487,7 @@ namespace ProgramViewer3
 			lastCursorPoint = cursorPosition;
 			if (e.RightButton == MouseButtonState.Pressed)
 			{
-				if (GetWindowTypeFromPoint(cursorPosition) == ItemType.Desktop)
+				if (GetItemTypeFromPoint(cursorPosition) == ItemType.Desktop)
 				{
 					PiContextRemoveButton.Text = "Remove From Drive";
 					SetContextMenuVisibility(Visibility.Visible);
@@ -471,9 +514,12 @@ namespace ProgramViewer3
 
 		private void WindowBorder_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			SetContextMenuVisibility(Visibility.Hidden);
-			HotLV.SelectedIndex = -1;
-			DesktopLV.SelectedIndex = -1;
+			if (e.ChangedButton != MouseButton.Right)
+			{
+				SetContextMenuVisibility(Visibility.Hidden);
+				HotGridPanel.SetSelectedIndex(-1);
+				DesktopGridPanel.SetSelectedIndex(-1);
+			}
 		}
 
 		private void ExitToolTipButton_Click(object sender, RoutedEventArgs e)
@@ -481,16 +527,17 @@ namespace ProgramViewer3
 			Close();
 		}
 
-		private void ListView_KeyDown(object sender, KeyEventArgs e)
+		private void GridPanel_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
 			{
-				ListView listView = sender as ListView;
-				int selectedIndex = listView.SelectedIndex;
+				VirtualizingGridPanel gridPanel = sender as VirtualizingGridPanel;
+				int selectedIndex = gridPanel.GetSelectedIndex();
 
 				if (selectedIndex != -1)
 				{
-					itemManager.OpenItem(selectedIndex, listView.Name == HotLV.Name ? ItemType.Hot : ItemType.Desktop);
+					//TODO: Provide it
+					itemManager.OpenItem(selectedIndex, gridPanel.Name == HotGridPanel.Name ? ItemType.Hot : ItemType.Desktop);
 				}
 			}
 		}

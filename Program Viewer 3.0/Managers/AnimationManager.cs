@@ -13,12 +13,10 @@ namespace ProgramViewer3.Managers
     {
 		private MainWindow mainWindow;
         private FrameworkElement frameworkElement;
-        private readonly Storyboard desktopShrinkSB = new Storyboard();
-		private readonly Storyboard desktopExpandSB = new Storyboard();
-		private readonly Storyboard menuShrinkSB= new Storyboard();
-        private readonly Storyboard menuExpandSB = new Storyboard();
-        private readonly Storyboard addItemWindowShowSB = new Storyboard();
-        private readonly Storyboard addItemWindowHideSB = new Storyboard();
+		private readonly Storyboard menuShrinkSB = new Storyboard();
+		private readonly Storyboard menuExpandSB = new Storyboard();
+		//private readonly Storyboard addItemWindowShowSB = new Storyboard();
+  //      private readonly Storyboard addItemWindowHideSB = new Storyboard();
         private readonly Storyboard contextMenuShowSB = new Storyboard();
 		private readonly Storyboard contextMenuHideSB = new Storyboard();
 
@@ -34,9 +32,9 @@ namespace ProgramViewer3.Managers
 		};
 
 		private TimeSpan addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
-		private TimeSpan windowResizeDuration;
-
+		private TimeSpan WindowResizeDuration;
 		private Point MenuGridResizeArea = new Point(31, 491);
+		private Point WindowResizeArea;
 
 		/// <summary>
 		/// Initializes animation manager
@@ -48,49 +46,37 @@ namespace ProgramViewer3.Managers
         {
 			this.mainWindow = mainWindow;
             frameworkElement = mainWindow;
-			windowResizeDuration = resizeDuration;
+			WindowResizeDuration = resizeDuration;
+			WindowResizeArea = resizeArea;
 
 			mainWindow.RefreshControlsAfterThemeChanging();
 
-			var desktopWidthDA = CreateDoubleAnimation(resizeArea.X, resizeDuration, "WindowBorder", "Width", exponentialEaseIn);
             var settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.X, resizeDuration, "MenuGrid", "Width", exponentialEaseIn);
-            var opacityDA = CreateDoubleAnimation(0, resizeDuration, "DesktopLV", "Opacity", exponentialEaseIn);
-			var addItemWindowDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEaseIn);
+            var opacityDA = CreateDoubleAnimation(0, resizeDuration, "DesktopGridPanel", "Opacity", exponentialEaseIn);
             var contextMenuDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEaseIn);
 			var menuShadowOpacityDA = CreateDoubleAnimation(0, resizeDuration, "MenuGrid", "(Effect).Opacity", exponentialEaseIn);
 
 			var menuRectCA = CreateMenuVerticalRectExpandAnimation();
-
-            desktopShrinkSB.Children.Add(desktopWidthDA);
-            desktopShrinkSB.Children.Add(opacityDA);
 
 			menuShrinkSB.Children.Add(settingsWidthDA);
             menuExpandSB.Children.Add(opacityDA);
             menuExpandSB.Children.Add(menuShadowOpacityDA);
             menuExpandSB.Children.Insert(0, menuRectCA);
 
-            addItemWindowShowSB.Children.Add(addItemWindowDA);
             contextMenuShowSB.Children.Add(contextMenuDA);
 
-            desktopWidthDA = CreateDoubleAnimation(resizeArea.Y, resizeDuration, "WindowBorder", "Width", exponentialEaseOut);
 			settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.Y, resizeDuration, "MenuGrid", "Width", exponentialEaseOut);
-			opacityDA = CreateDoubleAnimation(1, resizeDuration, "DesktopLV", "Opacity", exponentialEaseOut);
+			opacityDA = CreateDoubleAnimation(1, resizeDuration, "DesktopGridPanel", "Opacity", exponentialEaseOut);
 			menuShadowOpacityDA = CreateDoubleAnimation(0.5, resizeDuration, "MenuGrid", "(Effect).Opacity", exponentialEaseOut);
-            addItemWindowDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "AddItemGrid", "Opacity", exponentialEaseOut);
             contextMenuDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEaseOut);
 
 			menuRectCA = CreateMenuVerticalRectShrinkAnimation();
-
-
-			desktopExpandSB.Children.Add(desktopWidthDA);
-            desktopExpandSB.Children.Add(opacityDA);
 
 			menuExpandSB.Children.Add(settingsWidthDA);
 			menuShrinkSB.Children.Add(opacityDA);
 			menuShrinkSB.Children.Add(menuShadowOpacityDA);
 			menuShrinkSB.Children.Insert(0, menuRectCA);
 
-			addItemWindowHideSB.Children.Add(addItemWindowDA);
             contextMenuHideSB.Children.Add(contextMenuDA);
 
 			FieldInfo[] fields = GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
@@ -131,26 +117,90 @@ namespace ProgramViewer3.Managers
 			return ca;
 		}		
 
+		public static void StartAnimation_FadeIn(FrameworkElement element, Duration duration)
+		{
+			DoubleAnimation animation = new DoubleAnimation(1.0, duration)
+			{
+				EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseOut }
+			};
+			element.BeginAnimation(UIElement.OpacityProperty, animation);
+		}
+		public static void StartAnimation_FadeIn(FrameworkElement element, Duration duration, Action callback)
+		{
+			DoubleAnimation animation = new DoubleAnimation(0.0, 1.0, duration)
+			{
+				EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseOut }
+			};
+			animation.Completed += (sender, e) => callback();
+			element.BeginAnimation(UIElement.OpacityProperty, animation);
+		}
+
+		public static void StartAnimation_FadeOut(FrameworkElement element, Duration duration)
+		{
+			DoubleAnimation animation = new DoubleAnimation(0.0, duration)
+			{
+				EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseOut }
+			};
+			element.BeginAnimation(UIElement.OpacityProperty, animation);
+		}
+		public static void StartAnimation_FadeOut(FrameworkElement element, Duration duration, Action callback)
+		{
+			DoubleAnimation animation = new DoubleAnimation(1.0, 0.0, duration)
+			{
+				EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseOut }
+			};
+			animation.Completed += (sender, e) => callback();
+			element.BeginAnimation(UIElement.OpacityProperty, animation);
+		}
+
+		public static void StartAnimation_Double(FrameworkElement target, DependencyProperty property, double from, double to, Duration duration)
+		{
+			target.BeginAnimation(property, null);
+			DoubleAnimation animation = new DoubleAnimation
+			{
+				From = from,
+				To = to,
+				Duration = duration
+			};
+
+			target.BeginAnimation(property, animation);
+		}
+		public static void StartAnimation_DoubleTransform(Transform target, DependencyProperty property, double to, Duration duration)
+		{
+			target.BeginAnimation(property, null);
+			DoubleAnimation animation = new DoubleAnimation
+			{
+				To = to,
+				Duration = duration
+			};
+
+			target.BeginAnimation(property, animation);
+		}
+
 		public void ToggleDesktop(bool value)
 		{
 			if (value)
 			{
-				desktopShrinkSB.Begin(frameworkElement);
+				StartAnimation_Double(mainWindow.WindowBorder, Border.WidthProperty,
+					mainWindow.WindowBorder.Width, WindowResizeArea.X, WindowResizeDuration);
+				StartAnimation_FadeOut(mainWindow.DesktopGridPanel, WindowResizeDuration);
 			}
 			else
 			{
-				desktopExpandSB.Begin(frameworkElement);
+				StartAnimation_Double(mainWindow.WindowBorder, Border.WidthProperty,
+					mainWindow.WindowBorder.Width, WindowResizeArea.Y, WindowResizeDuration);
+				StartAnimation_FadeIn(mainWindow.DesktopGridPanel, WindowResizeDuration);
 			}
 		}
 
 		private ColorAnimation CreateMenuVerticalRectShrinkAnimation()
 		{
-			return CreateColorAnimation((mainWindow.FindResource("CustomWindow.TitleBar.Background") as SolidColorBrush).Color, windowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseOut);
+			return CreateColorAnimation((mainWindow.FindResource("CustomWindow.TitleBar.Background") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseOut);
 		}
 
 		private ColorAnimation CreateMenuVerticalRectExpandAnimation()
 		{
-			return CreateColorAnimation((mainWindow.FindResource("SettingVerticalRect.ExpandBackground") as SolidColorBrush).Color, windowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseIn);
+			return CreateColorAnimation((mainWindow.FindResource("SettingVerticalRect.ExpandBackground") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseIn);
 		}
 
 		public void ToggleMenu(bool value)
@@ -171,31 +221,23 @@ namespace ProgramViewer3.Managers
 
 		public void ExpandSettingGrid()
 		{
-			var animation = new DoubleAnimation(1.0, windowResizeDuration)
-			{
-				EasingFunction = exponentialEaseOut
-			};
 			mainWindow.SettingGrid.Visibility = Visibility.Visible;
-			mainWindow.SettingGrid.BeginAnimation(UIElement.OpacityProperty, animation);
+			StartAnimation_FadeIn(mainWindow.SettingGrid, WindowResizeDuration);
 		}
 
 		public void ExpandThemeGrid()
 		{
-			var animation = new DoubleAnimation(1.0, windowResizeDuration)
-			{
-				EasingFunction = exponentialEaseOut
-			};
 			mainWindow.ThemeGrid.Visibility = Visibility.Visible;
-			mainWindow.ThemeGrid.BeginAnimation(UIElement.OpacityProperty, animation);
+			StartAnimation_FadeIn(mainWindow.ThemeGrid, WindowResizeDuration);
 		}
 
         public void AddItemWindowShow()
         {
-            addItemWindowShowSB.Begin(frameworkElement);
+			StartAnimation_FadeIn(mainWindow.AddItemGrid, addItemWindowSHAnimDuration, () => mainWindow.AddItemGrid.Visibility = Visibility.Visible);
         }
         public void AddItemWindowHide()
         {
-            addItemWindowHideSB.Begin(frameworkElement);
+			StartAnimation_FadeOut(mainWindow.AddItemGrid, addItemWindowSHAnimDuration, () => mainWindow.AddItemGrid.Visibility = Visibility.Hidden);
         }
 
         public void ContextMenuShow()
@@ -223,30 +265,29 @@ namespace ProgramViewer3.Managers
 			}
 		}
 
-		public void ListView_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+		public static void ListView_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
 		{
 			e.Handled = true;
 
-			ScrollViewer scrollViewer = ScrollAnimationBehavior.GetScrollViewer(sender as ListView) as ScrollViewer;
-			scrollViewer.IsDeferredScrollingEnabled = true;
-			int offset = 200;
-
+			ScrollViewer scrollViewer = ScrollAnimationBehavior.GetScrollViewer((DependencyObject)sender) as ScrollViewer;
+			int offset = 240;
+			AnimateScroll(scrollViewer, scrollViewer.VerticalOffset - (offset * Math.Sign(e.Delta)));
+		}
+		private static void AnimateScroll(ScrollViewer scrollViewer, double ToValue)
+		{
+			scrollViewer.BeginAnimation(ScrollAnimationBehavior.VerticalOffsetProperty, null);
 			DoubleAnimation verticalAnimation = new DoubleAnimation
 			{
-				To = scrollViewer.VerticalOffset - (offset * Math.Sign(e.Delta)),
-				Duration = TimeSpan.FromSeconds(0.4),
-				EasingFunction = new ExponentialEase()
+				From = scrollViewer.VerticalOffset,
+				To = ToValue,
+				Duration = TimeSpan.FromSeconds(0.7),
+				EasingFunction = new ExponentialEase
 				{
-					EasingMode = EasingMode.EaseOut
+					EasingMode = EasingMode.EaseOut,
+					Exponent = 1.2
 				}
 			};
-
-			Storyboard storyboard = new Storyboard();
-
-			storyboard.Children.Add(verticalAnimation);
-			Storyboard.SetTarget(verticalAnimation, scrollViewer);
-			Storyboard.SetTargetProperty(verticalAnimation, new PropertyPath(ScrollAnimationBehavior.VerticalOffsetProperty));
-			storyboard.Begin();
+			scrollViewer.BeginAnimation(ScrollAnimationBehavior.VerticalOffsetProperty, verticalAnimation);
 		}
 	}
 
@@ -256,6 +297,7 @@ namespace ProgramViewer3.Managers
 		public static DependencyProperty VerticalOffsetProperty =
 		DependencyProperty.RegisterAttached("VerticalOffset", typeof(double), typeof(ScrollAnimationBehavior),
 											new UIPropertyMetadata(0.0, OnVerticalOffsetChanged));
+
 
 		private static void OnVerticalOffsetChanged(DependencyObject target, DependencyPropertyChangedEventArgs e)
 		{

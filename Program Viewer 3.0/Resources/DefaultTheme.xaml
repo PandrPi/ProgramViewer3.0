@@ -4,14 +4,16 @@
                     xmlns:local="clr-namespace:ProgramViewer3">
 
     <system:String x:Key="Description">The default theme of Program Viewer 3 application</system:String>
+    <SolidColorBrush x:Key="GridPanel.Item.Text.Foreground" Color="White"/>
+    <SolidColorBrush x:Key="GridPanel.Item.RippleBrush" Color="#7FDCDCDC"/>
+    <SolidColorBrush x:Key="GridPanel.Item.HighlightBrush" Color="#99FFFFFF"/>
+    <DropShadowEffect x:Key="GridPanel.Item.Text.Shadow" ShadowDepth="5"/>
+    <DropShadowEffect x:Key="GridPanel.Item.Image.Shadow" ShadowDepth="8"/>
 
     <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FF5D747E" Offset="0"/>
         <GradientStop Color="#FF12131A" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="DesktopRect.Item.Label.Foreground" Color="White"/>
-    <DropShadowEffect x:Key="DesktopRect.Item.Label.Shadow" ShadowDepth="5"/>
-    <DropShadowEffect x:Key="DesktopRect.Item.Image.Shadow" ShadowDepth="8"/>
     <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background" Color="#FFFFB900"/>
     <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border" Color="#FF232323"/>
     <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness" Left="1" Right="1"/>
@@ -21,12 +23,8 @@
         <GradientStop Color="#FF688293" Offset="0"/>
         <GradientStop Color="#FF2C363C" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="HotRect.Item.Label.Foreground" Color="White"/>
-    <DropShadowEffect x:Key="HotRect.Item.Label.Shadow" ShadowDepth="5"/>
-    <DropShadowEffect x:Key="HotRect.Item.Image.Shadow" ShadowDepth="8"/>
 
     <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="#FF6F8C9C"/>
-
     <SolidColorBrush x:Key="ContextWindow.Button.Hover.Background" Color="#99BEE6FD"/>
 
     <SolidColorBrush x:Key="ThemeView.Item.Background" Color="#FF1D2128"/>
@@ -46,7 +44,7 @@
     <system:Double x:Key="PaletteIcon.Figure.Thickness">0</system:Double>
     <SolidColorBrush x:Key="PaletteIcon.Figure.Thickness.Brush" Color="Black"/>
 
-    <SolidColorBrush x:Key="CloseIcon.Background" Color="Red"/>
+    <SolidColorBrush x:Key="CloseIcon.Background" Color="#FFD1474E"/>
     <SolidColorBrush x:Key="CloseIcon.Foreground" Color="White"/>
 
     <SolidColorBrush x:Key="MenuIcon.Background" Color="Transparent"/>

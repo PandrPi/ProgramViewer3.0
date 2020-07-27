@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.IO;
@@ -11,6 +12,8 @@ using Newtonsoft.Json;
 using System.Windows.Threading;
 using System.Diagnostics;
 using System.Text;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace ProgramViewer3.Managers
 {
@@ -19,7 +22,7 @@ namespace ProgramViewer3.Managers
 	/// </summary>
 	public sealed class CacheManager
 	{
-		private readonly Dictionary<string, ImageSource> cachedIcons = new Dictionary<string, ImageSource>();
+		private readonly ConcurrentDictionary<string, ImageSource> cachedIcons = new ConcurrentDictionary<string, ImageSource>();
 		private readonly Dictionary<string, Stream> iconStreams = new Dictionary<string, Stream>();
 		private Dictionary<string, dynamic> cacheJson;
 		private Dispatcher dispatcher;
@@ -34,7 +37,6 @@ namespace ProgramViewer3.Managers
 			this.dispatcher = dispatcher;
 			InitiallizeDirectory(IconsCacheFolderPath);
 			InitiallizeDirectory(SourceIconsFolderPath);
-
 			InitializeJSONFile(CacheJSONPath);
 
 			sourceIconsFolderInfo = new DirectoryInfo(SourceIconsFolderPath);
@@ -190,7 +192,7 @@ namespace ProgramViewer3.Managers
 						}
 						else
 						{
-							cachedIcons.Add(properName, LoadImageFromFile(info.FullName, properName));
+							cachedIcons.AddOrUpdate(properName, LoadImageFromFile(info.FullName, properName), (k, v) => v);
 							LogManager.Write($"Cache icon '{nameWithoutExt}' assigned with image: {info.FullName}");
 						}
 					}
@@ -202,7 +204,7 @@ namespace ProgramViewer3.Managers
 			}
 
 			await Task.WhenAll(tasks);
-		}
+		}		
 
 		/// <summary>
 		/// Load BitmapSource object from file and returns it.
@@ -240,7 +242,7 @@ namespace ProgramViewer3.Managers
 		/// <param name="path">Path of image file to save</param>
 		/// <param name="image">Image object to save</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void SaveImageToFile(string path, BitmapSource image)
+		public static void SaveImageToFile(string path, BitmapSource image)
 		{
 #if DEBUG
 			using (var fileStream = new FileStream(path, FileMode.Create))
