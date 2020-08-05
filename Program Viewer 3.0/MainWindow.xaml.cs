@@ -26,10 +26,9 @@ namespace ProgramViewer3
 		private bool shouldShirkWindowAfterContextMenuClosing = false;
 		private bool isMenuExpanded = false;
 		private Point lastCursorPoint;  // Used to store cursor position at the moment when PiContextMenu was shown
-		private List<Grid> menuGridChildren;
-		private Dictionary<string, Action> menuGridExpandActions;
-		
-		private readonly Queue<Tuple<string, ItemType>> filesToAdd = new Queue<Tuple<string, ItemType>>();
+		private List<Grid> MenuGridChildren;
+
+		private readonly Queue<(string, ItemType)> DragAndDrop_FilesToProcessQueue = new Queue<(string, ItemType)>();
 		private int filesToAddCounter = 0;
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -38,18 +37,12 @@ namespace ProgramViewer3
 			{
 				System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-				settingsManager.Initialize();
-				menuGridChildren = new List<Grid>() { SettingGrid, ThemeGrid };
-				menuGridExpandActions = new Dictionary<string, Action>()
-				{
-					{ SettingGrid.Name, animationManager.ExpandSettingGrid },
-					{ ThemeGrid.Name, animationManager.ExpandThemeGrid }
-				};
+				settingsManager.Initialize();				
 
 				LogManager.Initiallize(settingsManager.GetSettingValue<bool>("RedirectMessageLogging"));
-				IconExtractor.BaseExeIcon = (FindResource("BaseExeImage") as Image).Source;
-				IconExtractor.Dispatcher = Dispatcher;
+				IconExtractor.Initialize((FindResource("BaseExeImage") as Image).Source, Dispatcher);
 
+				MenuGridChildren = new List<Grid>() { ThemeGrid, SettingGrid };
 				AddItemGrid.Visibility = Visibility.Hidden;
 				PiContextMenu.Visibility = Visibility.Hidden;
 				RefreshWindow();
@@ -75,7 +68,6 @@ namespace ProgramViewer3
 				animationManager.Initiallize(this, TimeSpan.FromSeconds(0.5), new Point(110, 600));
 				animationManager.SetStoryboardCompletedCallback("addItemWindowShowSB", () => AddItemGrid.Visibility = Visibility.Visible);
 				animationManager.SetStoryboardCompletedCallback("addItemWindowHideSB", () => AddItemGrid.Visibility = Visibility.Hidden);
-				animationManager.SetStoryboardCompletedCallback("menuShrinkSB", () => MakeAllMenuChildrenGridsTransparent());
 
 				InitializeSmoothScrolling();
 				ToggleDesktop();
@@ -118,6 +110,23 @@ namespace ProgramViewer3
 		private T FindResource<T>(string key)
 		{
 			return (T)FindResource(key);
+		}
+
+		private T FindChildByName<T>(FrameworkElement parent, string childName) where T : FrameworkElement
+		{
+			if (parent == null || childName == null || childName == string.Empty)
+				return null;
+
+			int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+			for (int i = 0; i < childrenCount; i++)
+			{
+				var child = VisualTreeHelper.GetChild(parent, i) as FrameworkElement;
+
+				if (child.Name == childName)
+					return child as T;
+			}
+
+			return null;
 		}
 
 		private StackPanel GetGridPanel_ItemTemplate()
@@ -172,9 +181,19 @@ namespace ProgramViewer3
 			isWindowExpanded = !isWindowExpanded;
 		}
 
-		private void ToggleMenu()
+		private void ToggleMenu(Grid activeGrid)
 		{
 			animationManager.ToggleMenu(isMenuExpanded);
+			if (activeGrid != null)
+			{
+				if (isMenuExpanded)
+					AnimationManager.StartAnimation_FadeOut(activeGrid, animationManager.WindowResizeDuration, () => activeGrid.Visibility = Visibility.Hidden);
+				else
+				{
+					activeGrid.Visibility = Visibility.Visible;
+					AnimationManager.StartAnimation_FadeIn(activeGrid, animationManager.WindowResizeDuration);
+				}
+			}
 			isMenuExpanded = !isMenuExpanded;
 		}
 
@@ -185,36 +204,17 @@ namespace ProgramViewer3
 
 		private void OnToggleSettingsClick(object sender, RoutedEventArgs e)
 		{
-			Grid activeGrid = menuGridChildren.Where(i => i.Opacity != 0.0).FirstOrDefault();
-			string buttonTag = (string)(sender as PiButton).Tag;
+			string gridToOpen_Name = Convert.ToString((sender as FrameworkElement).Tag);
+			Grid gridToOpen = FindChildByName<Grid>(MenuGrid, gridToOpen_Name);
 
-			if (activeGrid == default(Grid))
-			{
-				if (!isMenuExpanded)
-				{
-					ToggleMenu();
-					menuGridExpandActions[buttonTag]();
-				}
-			}
-			else
-			{
-				if (menuGridExpandActions[activeGrid.Name] != menuGridExpandActions[buttonTag])
-				{
-					MakeAllMenuChildrenGridsTransparent();
-					menuGridExpandActions[buttonTag]();
-				}
-				else
-				{
-					ToggleMenu();
-				}
-			}
+			MakeAllMenuChildrenGridsTransparent();
+			ToggleMenu(gridToOpen);
 		}
 
 		private void MakeAllMenuChildrenGridsTransparent()
 		{
-			for (int i = 0; i < menuGridChildren.Count; i++)
+			foreach (Grid item in MenuGridChildren)
 			{
-				Grid item = menuGridChildren[i];
 				item.BeginAnimation(OpacityProperty, null);
 				item.Opacity = 0.0;
 				item.Visibility = Visibility.Hidden;
@@ -260,12 +260,13 @@ namespace ProgramViewer3
 				ItemType itemType = GetItemTypeFromPoint(e.GetPosition(MyGrid));
 				for (int i = 1; i < files.Length; i++)
 				{
-					filesToAdd.Enqueue(new Tuple<string, ItemType>(files[i], itemType));
+					DragAndDrop_FilesToProcessQueue.Enqueue((files[i], itemType));
 				}
 
 				string title = System.IO.Path.GetFileNameWithoutExtension(files[0]);
 				AddWindowFilePath.Text = files[0];
 				AddWindowFileTitle.Text = title;
+				AddFileButton.Tag = e.KeyStates == DragDropKeyStates.ControlKey;
 				AddWindowFileWindow.SelectedIndex = (itemType == ItemType.Hot) ? 0 : 1;
 
 				if (!isWindowExpanded)
@@ -273,10 +274,10 @@ namespace ProgramViewer3
 
 				if (isMenuExpanded)
 				{
-					ToggleMenu();
+					ToggleMenu(null);
 				}
 
-				filesToAddCounter = filesToAdd.Count + 1;
+				filesToAddCounter = DragAndDrop_FilesToProcessQueue.Count + 1;
 				AddFileWindowFilesCount.Content = $"Files to process - {filesToAddCounter}";
 				SetAddItemGridVisibility(Visibility.Visible);
 			}
@@ -296,24 +297,34 @@ namespace ProgramViewer3
 
 		private void AddFileButton_Click(object sender, RoutedEventArgs e)
 		{
-			AddFile();
+			bool shouldCopy = Convert.ToBoolean((sender as FrameworkElement).Tag);
+			AddItem_ToItemManager(shouldCopy);
 		}
 
-		private void AddFile()
+		private void AddItemGrid_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Enter)
+			{
+				bool shouldCopy = Convert.ToBoolean((sender as FrameworkElement).Tag);
+				AddItem_ToItemManager(shouldCopy);
+			}
+		}
+
+		private void AddItem_ToItemManager(bool shouldCopy)
 		{
 			string title = AddWindowFileTitle.Text;
 			string path = AddWindowFilePath.Text;
 			ItemType itemType = AddWindowFileWindow.SelectedIndex == 0 ? ItemType.Hot : ItemType.Desktop;
-			itemManager.AddItem(title, path, itemType);
+			itemManager.AddItem(title, path, itemType, shouldCopy);
 
 			ProceedNextFile();
 		}
 
 		private void ProceedNextFile()
 		{
-			if (filesToAdd.Count > 0)
+			if (DragAndDrop_FilesToProcessQueue.Count > 0)
 			{
-				var item = filesToAdd.Dequeue();
+				var item = DragAndDrop_FilesToProcessQueue.Dequeue();
 				AddWindowFilePath.Text = item.Item1;
 				AddWindowFileTitle.Text = System.IO.Path.GetFileNameWithoutExtension(item.Item1);
 				AddWindowFileWindow.SelectedIndex = (item.Item2 == ItemType.Hot) ? 0 : 1;
@@ -324,6 +335,7 @@ namespace ProgramViewer3
 
 			if (filesToAddCounter == 0)
 			{
+				AddFileButton.Tag = string.Empty;
 				SetAddItemGridVisibility(Visibility.Hidden);
 			}
 		}
@@ -473,7 +485,7 @@ namespace ProgramViewer3
 					SetContextMenuVisibility(Visibility.Visible);
 					if (isMenuExpanded)
 					{
-						ToggleMenu();
+						ToggleMenu(null);
 					}
 					PiContextMenu.Margin = GetContextMenuMarginFromCursorPosition(cursorPosition, ItemType.Hot);
 				}
@@ -540,14 +552,6 @@ namespace ProgramViewer3
 					itemManager.OpenItem(selectedIndex, gridPanel.Name == HotGridPanel.Name ? ItemType.Hot : ItemType.Desktop);
 				}
 			}
-		}
-
-		private void AddItemGrid_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.Key == Key.Enter)
-			{
-				AddFile();
-			}
-		}
+		}		
 	}
 }

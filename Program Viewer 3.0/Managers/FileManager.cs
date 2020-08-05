@@ -12,15 +12,43 @@ namespace ProgramViewer3.Managers
         /// <param name="fileName">name of file without rest of the path</param>
         /// <param name="sourcePath">path of source folder</param>
         /// <param name="targetPath">path of target folder</param>
-        public static string MoveFile(string fileName, string sourcePath, string targetPath)
+        public static string MoveFile(string sourcePath, string targetPath)
         {
-            string sourceFile = Path.Combine(sourcePath, fileName);
+			string fileName = Path.GetFileName(sourcePath);
             string destFile = Path.Combine(targetPath, fileName);
 
-            try { File.Move(sourceFile, destFile); }
+            try { File.Move(sourcePath, destFile); }
             catch { return ""; }
             return destFile;
         }
+		
+		/// <summary>
+        /// Copy file method
+        /// </summary>
+        /// <param name="fileName">name of file without rest of the path</param>
+        /// <param name="sourcePath">path of source folder</param>
+        /// <param name="targetPath">path of target folder</param>
+        public static string CopyFile(string sourcePath, string targetPath)
+        {
+			string fileName = Path.GetFileName(sourcePath);
+			string destFile = Path.Combine(targetPath, fileName);
+
+			try { File.Copy(sourcePath, destFile); }
+			catch { return ""; }
+			return destFile;
+		}
+
+		public static void ProcessFile(string sourcePath, string targetPath, bool shouldCopy)
+		{
+			if (shouldCopy)
+			{
+				CopyFile(sourcePath, targetPath);
+			}
+			else
+			{
+				MoveFile(sourcePath, targetPath);
+			}
+		}
 
         /// <summary>
         /// Move folder method
@@ -43,7 +71,7 @@ namespace ProgramViewer3.Managers
             return targetFolder;
         }
 
-        private static void CopyFolder(string sourceFolder, string targetFolder)
+        public static void CopyFolder(string sourceFolder, string targetFolder)
         {
             if (!Directory.Exists(targetFolder))
                 Directory.CreateDirectory(targetFolder);
@@ -62,6 +90,18 @@ namespace ProgramViewer3.Managers
                 CopyFolder(folder, dest);
             }
         }
+
+		public static void ProcessFolder(string sourcePath, string targetPath, bool shouldCopy)
+		{
+			if (shouldCopy)
+			{
+				CopyFolder(sourcePath, targetPath);
+			}
+			else
+			{
+				MoveFolder(sourcePath, targetPath);
+			}
+		}
 
         /// <summary>
         /// Possible flags for the SHFileOperation method.

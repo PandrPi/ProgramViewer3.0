@@ -30,7 +30,11 @@
             </tb:TaskbarIcon>
             
             <!--Hot ListView-->
-            <controls:VirtualizingGridPanel x:Name="HotGridPanel" ColumnsCount="1" Width="105" Margin="0,0,-4,0" HorizontalAlignment="Right" ItemSize="105,110"/>
+            <controls:VirtualizingGridPanel x:Name="HotGridPanel" ColumnsCount="1" Width="105" Margin="0,0,-4,0" HorizontalAlignment="Right" ItemSize="105,110" OpacityMask="{StaticResource GridPanel.OpacityMask}">
+                <controls:VirtualizingGridPanel.CacheMode>
+                    <BitmapCache/>
+                </controls:VirtualizingGridPanel.CacheMode>
+            </controls:VirtualizingGridPanel>
 
             <controls:PiButton x:Name="desktopResizeButton" HoverDuration="0:0:0.3" HorizontalAlignment="Right" Margin="0,0,97,0" Width="10" BorderBrush="{DynamicResource DesktopRect.ResizeButton.Border}" Background="{DynamicResource DesktopRect.ResizeButton.Background}" BorderThickness="{DynamicResource DesktopRect.ResizeButton.Border.Thickness}" Cursor="Hand" Click="OnToggleDesktopClick" HoverBrush="{DynamicResource DesktopRect.ResizeButton.Hover.Background}">
                 <controls:PiButton.Effect>
@@ -39,7 +43,7 @@
             </controls:PiButton>
 
             <!--Desktop ListView-->
-            <controls:VirtualizingGridPanel x:Name="DesktopGridPanel" ColumnsCount="4" HorizontalAlignment="Left" Width="420" Margin="50,0,0,1" ItemSize="105,110" ScrollOffset="120">
+            <controls:VirtualizingGridPanel x:Name="DesktopGridPanel" ColumnsCount="4" HorizontalAlignment="Left" Width="420" Margin="50,0,0,1" ItemSize="105,110" ScrollOffset="120" OpacityMask="{StaticResource GridPanel.OpacityMask}">
                 <controls:VirtualizingGridPanel.CacheMode>
                     <BitmapCache/>
                 </controls:VirtualizingGridPanel.CacheMode>
@@ -80,7 +84,7 @@
             </Grid>
             <Grid x:Name="MenuGrid" HorizontalAlignment="Left" Width="31" Background="{DynamicResource CustomWindow.Background}" AllowDrop="False">
                 <Grid.Effect>
-                    <DropShadowEffect Direction="0" Opacity="0.5" RenderingBias="Quality"/>
+                    <DropShadowEffect Direction="0" Opacity="0.5"/>
                 </Grid.Effect>
                 <!--SettingsButton-->
                 <Rectangle x:Name="SettingsVerticalRect" StrokeThickness="0" HorizontalAlignment="Left" Width="29" Margin="2,0,0,0" Fill="{DynamicResource CustomWindow.TitleBar.Background}">
@@ -114,6 +118,9 @@
                         <ListView.CacheMode>
                             <BitmapCache/>
                         </ListView.CacheMode>
+                        <ListView.Resources>
+                            <DropShadowEffect x:Key="ItemShadow" Opacity="0.5"/>
+                        </ListView.Resources>
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <VirtualizingStackPanel VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" Orientation="Vertical" HorizontalAlignment="Center">
@@ -133,42 +140,18 @@
                                         <DropShadowEffect ShadowDepth="0" BlurRadius="15"/>
                                     </Grid.Effect>
                                     <TextBlock HorizontalAlignment="Stretch" Margin="10,10,10,0" FontSize="14" TextWrapping="NoWrap" Text="{Binding Name}" VerticalAlignment="Top" Foreground="{DynamicResource ThemeView.Item.Foreground}" Width="Auto" TextTrimming="CharacterEllipsis"/>
-                                    <controls:PiButton Click="SelectThemeButton_Click" HorizontalAlignment="Right" Cursor="Hand" Height="20" VerticalAlignment="Bottom" Width="90" TextHorizontalAlignment="Center" Margin="0,0,10,10" Text="Select Theme" TextVerticalAlignment="Center" Foreground="{DynamicResource ThemeView.Item.SelectButton.Foreground}" HoverBrush="{DynamicResource ThemeView.Item.SelectButton.Hover.Background}" HoverDuration="{StaticResource ThemeView.Item.SelectButton.Hover.Duration}" Background="{DynamicResource ThemeView.Item.SelectButton.Background}" BorderThickness="{DynamicResource ThemeView.Item.SelectButton.Border.Thickness}" BorderBrush="{DynamicResource ThemeView.Item.SelectButton.Border}">
-                                        <controls:PiButton.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </controls:PiButton.Effect>
-                                    </controls:PiButton>
+                                    <controls:PiButton Click="SelectThemeButton_Click" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Right" Cursor="Hand" Height="20" VerticalAlignment="Bottom" Width="90" TextHorizontalAlignment="Center" Margin="0,0,10,10" Text="Select Theme" TextVerticalAlignment="Center" Foreground="{DynamicResource ThemeView.Item.SelectButton.Foreground}" HoverBrush="{DynamicResource ThemeView.Item.SelectButton.Hover.Background}" HoverDuration="{StaticResource ThemeView.Item.SelectButton.Hover.Duration}" Background="{DynamicResource ThemeView.Item.SelectButton.Background}" BorderThickness="{DynamicResource ThemeView.Item.SelectButton.Border.Thickness}" BorderBrush="{DynamicResource ThemeView.Item.SelectButton.Border}"/>
                                     <TextBlock HorizontalAlignment="Left" Margin="20,40,0,0" TextWrapping="Wrap" Text="{Binding Description}" VerticalAlignment="Top" Width="300" Height="50" FontStyle="Italic" FontSize="12" Foreground="{DynamicResource ThemeView.Item.Description.Foreground}" ScrollViewer.CanContentScroll="True" TextAlignment="Justify" Padding="0"/>
                                     <Separator HorizontalAlignment="Stretch" Height="3" Margin="0,32,0,0" VerticalAlignment="Top" Width="Auto" Background="{DynamicResource DesktopRect.ResizeButton.Background}">
                                         <Separator.Effect>
                                             <DropShadowEffect ShadowDepth="2"/>
                                         </Separator.Effect>
                                     </Separator>
-                                    <Ellipse Fill="{Binding FirstBrush}" HorizontalAlignment="Left" Height="14" Margin="345,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
-                                    <Ellipse Fill="{Binding SecondBrush}" HorizontalAlignment="Left" Height="14" Margin="364,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
-                                    <Ellipse Fill="{Binding ThirdBrush}" HorizontalAlignment="Left" Height="14" Margin="383,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
-                                    <Ellipse Fill="{Binding FourthBrush}" HorizontalAlignment="Left" Height="14" Margin="402,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
-                                    <Ellipse Fill="{Binding FifthBrush}" HorizontalAlignment="Left" Height="14" Margin="421,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14">
-                                        <Ellipse.Effect>
-                                            <DropShadowEffect Opacity="0.5"/>
-                                        </Ellipse.Effect>
-                                    </Ellipse>
+                                    <Ellipse Fill="{Binding FirstBrush}" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Left" Height="14" Margin="345,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14"/>
+                                    <Ellipse Fill="{Binding SecondBrush}" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Left" Height="14" Margin="364,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14"/>
+                                    <Ellipse Fill="{Binding ThirdBrush}" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Left" Height="14" Margin="383,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14"/>
+                                    <Ellipse Fill="{Binding FourthBrush}" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Left" Height="14" Margin="402,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14"/>
+                                    <Ellipse Fill="{Binding FifthBrush}" Effect="{StaticResource ItemShadow}" HorizontalAlignment="Left" Height="14" Margin="421,45,0,0" Stroke="White" VerticalAlignment="Top" Width="14"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
@@ -184,16 +167,14 @@
                         <BitmapCache/>
                     </controls:PiButton.CacheMode>
                     <controls:PiButton.Effect>
-                        <DropShadowEffect ShadowDepth="0" RenderingBias="Quality" BlurRadius="7"/>
+                        <DropShadowEffect ShadowDepth="0" BlurRadius="7"/>
                     </controls:PiButton.Effect>
                 </controls:PiButton>
                 <controls:PiButton x:Name="SettingsButton" Tag="SettingGrid" HorizontalAlignment="Left" Height="26" VerticalAlignment="Top" Width="24" Margin="5,5,0,0" Cursor="Hand" Click="OnToggleSettingsClick" Source="{DynamicResource MenuIcon}">
                     <controls:PiButton.Effect>
-                        <DropShadowEffect ShadowDepth="0" RenderingBias="Quality" BlurRadius="7"/>
+                        <DropShadowEffect ShadowDepth="0" BlurRadius="7"/>
                     </controls:PiButton.Effect>
                 </controls:PiButton>
-
-
             </Grid>
         </Grid>
     </Border>

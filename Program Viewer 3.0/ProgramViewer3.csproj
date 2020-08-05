@@ -113,7 +113,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FileToIcon.cs" />
-    <Compile Include="IconExtractot.cs" />
+    <Compile Include="IconExtractor.cs" />
     <Compile Include="Managers\ItemManager.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

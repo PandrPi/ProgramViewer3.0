@@ -161,7 +161,9 @@ namespace ProgramViewer3
 			{
 				VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
 				HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-				FocusVisualStyle = null
+				FocusVisualStyle = null,
+				Opacity = this.Opacity,
+				OpacityMask = this.OpacityMask,
 			};
 			ScrollOwner.InvalidateScrollInfo();
 			UpdateFrameworkElement(ScrollOwner, RenderSize, new Rect(RenderSize));
@@ -385,6 +387,7 @@ namespace ProgramViewer3
 			if (ItemSource != null)
 			{
 				ItemSource.CollectionChanged += ItemSource_Changed;
+				ScrollOwner.InvalidateScrollInfo();
 				await UpdateInternalChildrenAsync(0);
 			}
 		}

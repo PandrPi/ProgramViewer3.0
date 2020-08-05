@@ -204,6 +204,11 @@ namespace ProgramViewer3.Managers
 			return Path.GetFileNameWithoutExtension(path);
 		}
 
+		/// <summary>
+		/// This event rises when new file or folder inside the Desktop folder was renamed 
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
 		{
 			ItemData oldItem = desktopItemsData[e.OldFullPath];
@@ -212,24 +217,32 @@ namespace ProgramViewer3.Managers
 			ItemData newItem = new ItemData(newTitle, e.FullPath, oldItem.ImageData);
 			desktopItemsData.TryRemove(e.OldFullPath, out ItemData removedItem);
 
-			Action action = () =>
+			mainDispatcher.BeginInvoke(new Action(() =>
 			{
 				desktopItems[index] = newItem;
 				desktopItemsData.AddOrUpdate(e.FullPath, newItem, (k, v) => v);
-			};
-			mainDispatcher.BeginInvoke(action);
+			}));
 		}
 
+		/// <summary>
+		/// This event rises when new file or folder was removed from the Desktop folder
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void DesktopFileWatcher_Deleted(object sender, FileSystemEventArgs e)
 		{
-			Action action = () =>
+			mainDispatcher.BeginInvoke(new Action(() =>
 			{
 				desktopItems.Remove(desktopItemsData[e.FullPath]);
 				desktopItemsData.TryRemove(e.FullPath, out ItemData itemData);
-			};
-			mainDispatcher.BeginInvoke(action);
+			}));
 		}
 
+		/// <summary>
+		/// This event is called when new file or folder was added to the Desktop folder
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void DesktopFileWatcher_Created(object sender, FileSystemEventArgs e)
 		{
 			FileAttributes attributes = File.GetAttributes(e.FullPath);
@@ -238,17 +251,20 @@ namespace ProgramViewer3.Managers
 				title = e.Name;
 			else
 				title = Path.GetFileNameWithoutExtension(e.Name);
-			Action action = () =>
+			mainDispatcher.BeginInvoke(new Action(() =>
 			{
 				ItemData itemData = new ItemData(title, e.FullPath, cacheManager.GetFileIcon(e.FullPath));
-				AddSorted(desktopItems, itemData);
+				AddItemToSortedCollection(desktopItems, itemData);
 				desktopItemsData.AddOrUpdate(e.FullPath, itemData, (k, v) => v);
-			};
-			mainDispatcher.BeginInvoke(action);
+			}));
 		}
 
-
-		private void AddSorted(ObservableCollection<ItemData> list, ItemData item)
+		/// <summary>
+		/// Method determines the index of new item and inserts it there
+		/// </summary>
+		/// <param name="list">Collection to add item to</param>
+		/// <param name="item">The item to add</param>
+		private void AddItemToSortedCollection(ObservableCollection<ItemData> list, ItemData item)
 		{
 			int i = 0;
 			while (i < list.Count && itemDataComparer.Compare(list[i], item) < 0)
@@ -257,13 +273,13 @@ namespace ProgramViewer3.Managers
 			mainDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => list.Insert(i, item)));
 		}
 
-		public void AddItem(string title, string path, ItemType itemType)
+		public void AddItem(string title, string path, ItemType itemType, bool shouldCopy)
 		{
 			if (itemType == ItemType.Hot)
 			{
 				if (!hotItemsJsonData.ContainsKey(path))
 				{
-					AddSorted(hotItems, new ItemData(title, path, cacheManager.GetFileIcon(path)));
+					AddItemToSortedCollection(hotItems, new ItemData(title, path, cacheManager.GetFileIcon(path)));
 					hotItemsJsonData.Add(path, title);
 					HotItemsSave();
 				}
@@ -272,16 +288,13 @@ namespace ProgramViewer3.Managers
 			{
 				try
 				{
-					FileAttributes attributes = File.GetAttributes(path);
-					if (attributes.HasFlag(FileAttributes.Directory))
+					if (File.GetAttributes(path).HasFlag(FileAttributes.Directory))
 					{
-						FileManager.MoveFolder(path, DesktopFolderPath);
+						FileManager.ProcessFolder(path, DesktopFolderPath, shouldCopy);
 					}
 					else
 					{
-						string filename = Path.GetFileName(path);
-						string sourcePath = Path.GetDirectoryName(path);
-						FileManager.MoveFile(filename, sourcePath, DesktopFolderPath);
+						FileManager.ProcessFile(path, DesktopFolderPath, shouldCopy);
 					}
 				}
 				catch (Exception e)

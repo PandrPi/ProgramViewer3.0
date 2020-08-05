@@ -5,20 +5,26 @@ using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using QuickZip.Tools;
 
 namespace ProgramViewer3
 {
     public static class IconExtractor
     {
-        public static ImageSource BaseExeIcon;
-        public static Dispatcher Dispatcher;
+        private static ImageSource BaseExeIcon { get; set; }
+        private static Dispatcher Dispatcher { get; set; }
 
 		private static readonly FileToIconConverter fic = new FileToIconConverter();
 		private static readonly int DefaultIconSize = 256;
 		private static readonly Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
-        public static readonly HashSet<string> imageExtensions = 
-            new HashSet<string>(new [] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
+        private static readonly HashSet<string> imageExtensions =
+			new HashSet<string>(new[] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
+
+		public static void Initialize(ImageSource baseExeIcon, Dispatcher dispatcher)
+		{
+			BaseExeIcon = baseExeIcon;
+			BaseExeIcon.Freeze();
+			Dispatcher = dispatcher;
+		}
 
         public static ImageSource GetIcon(string fileName)
         {
@@ -70,10 +76,7 @@ namespace ProgramViewer3
 		private static BitmapSource LoadIcon(string fileName)
 		{
 			Icon icon = null;
-			Dispatcher.Invoke(() =>
-			{
-				icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo);
-			});
+			Dispatcher.Invoke(() => icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo));
 			BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
 						new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
 			image.Freeze();
@@ -85,10 +88,7 @@ namespace ProgramViewer3
 		private static ImageSource LoadIconFromImageFile(string fileName)
 		{
 			ImageSource temp = null;
-			Dispatcher.Invoke(() =>
-			{
-				temp = fic.GetImage(fileName, DefaultIconSize);
-			});
+			Dispatcher.Invoke(() => temp = fic.GetImage(fileName, DefaultIconSize));
 			return temp;
 		}
 

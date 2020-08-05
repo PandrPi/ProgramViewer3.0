@@ -31,10 +31,10 @@ namespace ProgramViewer3.Managers
 			EasingMode = EasingMode.EaseOut
 		};
 
-		private TimeSpan addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
-		private TimeSpan WindowResizeDuration;
-		private Point MenuGridResizeArea = new Point(31, 491);
-		private Point WindowResizeArea;
+		public TimeSpan addItemWindowSHAnimDuration = TimeSpan.FromSeconds(0.3);
+		public TimeSpan WindowResizeDuration;
+		public Point MenuGridResizeArea = new Point(31, 491);
+		public Point WindowResizeArea;
 
 		/// <summary>
 		/// Initializes animation manager
@@ -119,7 +119,7 @@ namespace ProgramViewer3.Managers
 
 		public static void StartAnimation_FadeIn(FrameworkElement element, Duration duration)
 		{
-			DoubleAnimation animation = new DoubleAnimation(1.0, duration)
+			DoubleAnimation animation = new DoubleAnimation(element.Opacity, 1.0, duration)
 			{
 				EasingFunction = new ExponentialEase() { EasingMode = EasingMode.EaseOut }
 			};

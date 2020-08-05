@@ -52,7 +52,7 @@ namespace ProgramViewer3.Managers
 					themeResources.Add(title, dictionary);
 					themeItems.Add(new ThemeItem(title, dictionary));
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					MessageBox.Show(e.Message, $"{e.GetType().Name} occured in file 'Themes/{current.Name}'");
 				}
@@ -108,40 +108,40 @@ namespace ProgramViewer3.Managers
 		{
 			return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Regex.Replace(title, "([a-z])([A-Z])", "$1 $2").ToLower());
 		}
-	}
 
-	public struct ThemeItem
-	{
-		public string Name { get; set; }
-		public string Description { get; set; }
-		public Brush FirstBrush { get; set; }
-		public Brush SecondBrush { get; set; }
-		public Brush ThirdBrush { get; set; }
-		public Brush FourthBrush { get; set; }
-		public Brush FifthBrush { get; set; }
-
-		private static readonly string DefaultDescription = "The description is not available...";
-		private static readonly string DescriptionKey = "Description";
-		private static readonly string FirstBrushKey = "HotRect.Background";
-		private static readonly string SecondBrushKey = "DesktopRect.Background";
-		private static readonly string ThirdBrushKey = "CustomWindow.TitleBar.Background";
-		private static readonly string FourthBrushKey = "CustomWindow.Background";
-		private static readonly string FifthBrushKey = "DesktopRect.ResizeButton.Background";
-
-		public ThemeItem(string name, ResourceDictionary resource)
+		public struct ThemeItem
 		{
-			Name = name;
-			Description = resource.Contains(DescriptionKey) ? (string)resource[DescriptionKey] : DefaultDescription;
-			FirstBrush = GetResource<Brush>(resource, FirstBrushKey);
-			SecondBrush = GetResource<Brush>(resource, SecondBrushKey);
-			ThirdBrush = GetResource<Brush>(resource, ThirdBrushKey);
-			FourthBrush = GetResource<Brush>(resource, FourthBrushKey);
-			FifthBrush = GetResource<Brush>(resource, FifthBrushKey);
-		}
+			public string Name { get; set; }
+			public string Description { get; set; }
+			public Brush FirstBrush { get; set; }
+			public Brush SecondBrush { get; set; }
+			public Brush ThirdBrush { get; set; }
+			public Brush FourthBrush { get; set; }
+			public Brush FifthBrush { get; set; }
 
-		private static T GetResource<T>(ResourceDictionary resource, string key)
-		{
-			return resource.Contains(key) ? (T)resource[key] : (T)ThemeManager.DefaultThemeDictionary[key];
+			private static readonly string DefaultDescription = "The description is not available...";
+			private static readonly string DescriptionKey = "Description";
+			private static readonly string FirstBrushKey = "HotRect.Background";
+			private static readonly string SecondBrushKey = "DesktopRect.Background";
+			private static readonly string ThirdBrushKey = "CustomWindow.TitleBar.Background";
+			private static readonly string FourthBrushKey = "CustomWindow.Background";
+			private static readonly string FifthBrushKey = "DesktopRect.ResizeButton.Background";
+
+			public ThemeItem(string name, ResourceDictionary resource)
+			{
+				Name = name;
+				Description = resource.Contains(DescriptionKey) ? (string)resource[DescriptionKey] : DefaultDescription;
+				FirstBrush = GetResource<Brush>(resource, FirstBrushKey);
+				SecondBrush = GetResource<Brush>(resource, SecondBrushKey);
+				ThirdBrush = GetResource<Brush>(resource, ThirdBrushKey);
+				FourthBrush = GetResource<Brush>(resource, FourthBrushKey);
+				FifthBrush = GetResource<Brush>(resource, FifthBrushKey);
+			}
+
+			private static T GetResource<T>(ResourceDictionary resource, string key)
+			{
+				return resource.Contains(key) ? (T)resource[key] : (T)ThemeManager.DefaultThemeDictionary[key];
+			}
 		}
 	}
 }

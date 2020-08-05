@@ -13,7 +13,7 @@ using System.Threading;
 using System.Windows.Threading;
 using System.Drawing.Imaging;
 
-namespace QuickZip.Tools
+namespace ProgramViewer3
 {
 
 	[ValueConversion(typeof(string), typeof(ImageSource))]
