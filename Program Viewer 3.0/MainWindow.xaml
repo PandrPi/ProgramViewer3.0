@@ -30,7 +30,7 @@
             </tb:TaskbarIcon>
             
             <!--Hot ListView-->
-            <controls:VirtualizingGridPanel x:Name="HotGridPanel" ColumnsCount="1" Width="105" Margin="0,0,-4,0" HorizontalAlignment="Right" ItemSize="105,110" OpacityMask="{StaticResource GridPanel.OpacityMask}">
+            <controls:VirtualizingGridPanel x:Name="HotGridPanel" ColumnsCount="1" Width="105" Margin="0,0,-4,0" HorizontalAlignment="Right" ItemSize="105,110" PanelOpacityMask="{StaticResource GridPanel.OpacityMask}">
                 <controls:VirtualizingGridPanel.CacheMode>
                     <BitmapCache/>
                 </controls:VirtualizingGridPanel.CacheMode>
@@ -43,7 +43,7 @@
             </controls:PiButton>
 
             <!--Desktop ListView-->
-            <controls:VirtualizingGridPanel x:Name="DesktopGridPanel" ColumnsCount="4" HorizontalAlignment="Left" Width="420" Margin="50,0,0,1" ItemSize="105,110" ScrollOffset="120" OpacityMask="{StaticResource GridPanel.OpacityMask}">
+            <controls:VirtualizingGridPanel x:Name="DesktopGridPanel" ColumnsCount="4" HorizontalAlignment="Left" Width="420" Margin="50,0,0,1" ItemSize="105,110" ScrollOffset="120" PanelOpacityMask="{StaticResource GridPanel.OpacityMask}">
                 <controls:VirtualizingGridPanel.CacheMode>
                     <BitmapCache/>
                 </controls:VirtualizingGridPanel.CacheMode>

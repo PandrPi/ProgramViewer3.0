@@ -12,10 +12,10 @@
     </StackPanel>
 
     <LinearGradientBrush x:Key="GridPanel.OpacityMask" EndPoint="0.5,1" StartPoint="0.5,0">
-        <GradientStop Color="#00000000" Offset="0"/>
-        <GradientStop Color="#00000000" Offset="1"/>
+        <GradientStop Color="#7F000000" Offset="0"/>
+        <GradientStop Color="#7F000000" Offset="1"/>
         <GradientStop Color="White" Offset="0.015"/>
-        <GradientStop Color="#FEFFFFFF" Offset="0.985"/>
+        <GradientStop Color="White" Offset="0.985"/>
     </LinearGradientBrush>
 
     <Style x:Key="FocusVisual">

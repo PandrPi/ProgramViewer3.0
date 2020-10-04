@@ -21,12 +21,12 @@ namespace ProgramViewer3
 		private readonly SettingsManager settingsManager = new SettingsManager();
 		private readonly ThemeManager themeManager = new ThemeManager();
 		private ItemManager itemManager;
+		private Grid ActiveMenuGrid;
 
 		private bool isWindowExpanded = true;
 		private bool shouldShirkWindowAfterContextMenuClosing = false;
 		private bool isMenuExpanded = false;
 		private Point lastCursorPoint;  // Used to store cursor position at the moment when PiContextMenu was shown
-		private List<Grid> MenuGridChildren;
 
 		private readonly Queue<(string, ItemType)> DragAndDrop_FilesToProcessQueue = new Queue<(string, ItemType)>();
 		private int filesToAddCounter = 0;
@@ -41,8 +41,7 @@ namespace ProgramViewer3
 
 				LogManager.Initiallize(settingsManager.GetSettingValue<bool>("RedirectMessageLogging"));
 				IconExtractor.Initialize((FindResource("BaseExeImage") as Image).Source, Dispatcher);
-
-				MenuGridChildren = new List<Grid>() { ThemeGrid, SettingGrid };
+				
 				AddItemGrid.Visibility = Visibility.Hidden;
 				PiContextMenu.Visibility = Visibility.Hidden;
 				RefreshWindow();
@@ -181,45 +180,60 @@ namespace ProgramViewer3
 			isWindowExpanded = !isWindowExpanded;
 		}
 
-		private void ToggleMenu(Grid activeGrid)
-		{
-			animationManager.ToggleMenu(isMenuExpanded);
-			if (activeGrid != null)
-			{
-				if (isMenuExpanded)
-					AnimationManager.StartAnimation_FadeOut(activeGrid, animationManager.WindowResizeDuration, () => activeGrid.Visibility = Visibility.Hidden);
-				else
-				{
-					activeGrid.Visibility = Visibility.Visible;
-					AnimationManager.StartAnimation_FadeIn(activeGrid, animationManager.WindowResizeDuration);
-				}
-			}
-			isMenuExpanded = !isMenuExpanded;
-		}
 
 		private void OnToggleDesktopClick(object sender, RoutedEventArgs e)
 		{
 			ToggleDesktop();
 		}
 
+		private void ToggleMenu(Grid gridToProcess)
+		{
+			void HideMenuGrid(Grid gridToHide)
+			{
+				gridToHide.BeginAnimation(OpacityProperty, null);
+				gridToHide.Opacity = 0.0;
+				gridToHide.Visibility = Visibility.Hidden;
+			}
+
+			void ShowMenuGrid(Grid gridToShow)
+			{
+				gridToShow.Visibility = Visibility.Visible;
+				AnimationManager.StartAnimation_FadeIn(gridToShow, animationManager.WindowResizeDuration);
+			}
+
+			if (isMenuExpanded)
+			{
+				if (ActiveMenuGrid == gridToProcess)
+				{
+					AnimationManager.StartAnimation_FadeOut(gridToProcess, animationManager.WindowResizeDuration,
+											 () => { if (gridToProcess.HasAnimatedProperties == false) gridToProcess.Visibility = Visibility.Hidden; });
+					animationManager.ToggleMenu(isMenuExpanded);
+					isMenuExpanded = !isMenuExpanded;
+				}
+				else
+				{
+					HideMenuGrid(ActiveMenuGrid);
+					ShowMenuGrid(gridToProcess);
+				}
+			}
+			else
+			{
+				animationManager.ToggleMenu(isMenuExpanded);
+				isMenuExpanded = !isMenuExpanded;
+				ShowMenuGrid(gridToProcess);
+			}
+			ActiveMenuGrid = gridToProcess;
+
+		}
+
 		private void OnToggleSettingsClick(object sender, RoutedEventArgs e)
 		{
-			string gridToOpen_Name = Convert.ToString((sender as FrameworkElement).Tag);
-			Grid gridToOpen = FindChildByName<Grid>(MenuGrid, gridToOpen_Name);
+			string gridToProcess_Name = Convert.ToString((sender as FrameworkElement).Tag);
+			Grid gridToOpen = FindChildByName<Grid>(MenuGrid, gridToProcess_Name);
 
-			MakeAllMenuChildrenGridsTransparent();
 			ToggleMenu(gridToOpen);
 		}
 
-		private void MakeAllMenuChildrenGridsTransparent()
-		{
-			foreach (Grid item in MenuGridChildren)
-			{
-				item.BeginAnimation(OpacityProperty, null);
-				item.Opacity = 0.0;
-				item.Visibility = Visibility.Hidden;
-			}
-		}
 
 		private void LoadThemesButton_Click(object sender, RoutedEventArgs e)
 		{

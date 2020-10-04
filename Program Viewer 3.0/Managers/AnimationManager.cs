@@ -209,13 +209,13 @@ namespace ProgramViewer3.Managers
 			{
 				menuShrinkSB.Children.RemoveAt(0);
 				menuShrinkSB.Children.Insert(0, CreateMenuVerticalRectShrinkAnimation());
-				menuShrinkSB.Begin(frameworkElement);
+				menuShrinkSB.Begin(frameworkElement, true);
 			}
 			else
 			{
 				menuExpandSB.Children.RemoveAt(0);
 				menuExpandSB.Children.Insert(0, CreateMenuVerticalRectExpandAnimation());
-				menuExpandSB.Begin(frameworkElement);
+				menuExpandSB.Begin(frameworkElement, true);
 			}
         }
 

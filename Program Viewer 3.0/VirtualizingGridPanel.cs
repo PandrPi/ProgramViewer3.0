@@ -27,6 +27,7 @@ namespace ProgramViewer3
 		public static DependencyProperty ItemSizeProperty = DependencyProperty.Register("ItemSize", typeof(Size), OwnerType);
 		public static DependencyProperty ScrollOffsetProperty = DependencyProperty.Register("ScrollOffset", typeof(double), OwnerType);
 		public static DependencyProperty ColumnsCountProperty = DependencyProperty.Register("ColumnsCount", typeof(int), OwnerType);
+		public static DependencyProperty PanelOpacityMaskProperty = DependencyProperty.Register("PanelOpacityMask", typeof(Brush), OwnerType);
 		#endregion
 
 		#region DependencyProperties
@@ -65,6 +66,18 @@ namespace ProgramViewer3
 			set
 			{
 				SetValue(ColumnsCountProperty, value);
+			}
+		}
+
+		public Brush PanelOpacityMask
+		{
+			get
+			{
+				return (Brush)GetValue(PanelOpacityMaskProperty);
+			}
+			set
+			{
+				SetValue(PanelOpacityMaskProperty, (Brush)value);
 			}
 		}
 		#endregion
@@ -145,7 +158,8 @@ namespace ProgramViewer3
 			{
 				Width = this.Width,
 				Height = this.Height,
-				FocusVisualStyle = null
+				FocusVisualStyle = null,
+				
 			};
 			VirtualizingPanel.SetIsVirtualizing(ItemsOwner, true);
 			VirtualizingPanel.SetCacheLengthUnit(ItemsOwner, VirtualizationCacheLengthUnit.Item);
@@ -163,7 +177,7 @@ namespace ProgramViewer3
 				HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
 				FocusVisualStyle = null,
 				Opacity = this.Opacity,
-				OpacityMask = this.OpacityMask,
+				OpacityMask = this.PanelOpacityMask
 			};
 			ScrollOwner.InvalidateScrollInfo();
 			UpdateFrameworkElement(ScrollOwner, RenderSize, new Rect(RenderSize));

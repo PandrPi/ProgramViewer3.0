@@ -35,7 +35,7 @@
             <Style TargetType="Grid">
                 <Setter Property="Background">
                     <Setter.Value>
-                        <SolidColorBrush Color="Transparent"/>
+                        <SolidColorBrush Color="{Binding Path=Background.Color}"/>
                     </Setter.Value>
                 </Setter>
             </Style>
