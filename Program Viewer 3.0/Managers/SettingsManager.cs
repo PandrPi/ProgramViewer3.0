@@ -20,6 +20,7 @@ namespace ProgramViewer3.Managers
 
 			InitFieldFromJson("RedirectMessageLogging", true);
 			InitFieldFromJson("LastUsedTheme", ThemeManager.DefaultThemeName);
+			InitFieldFromJson("", ThemeManager.DefaultThemeName);
 		}
 
 		public void CloseManager()

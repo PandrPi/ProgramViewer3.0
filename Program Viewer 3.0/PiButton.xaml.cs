@@ -1,17 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Media.Animation;
+using ProgramViewer3.Managers;
 
 namespace ProgramViewer3
 {
@@ -73,15 +66,35 @@ namespace ProgramViewer3
 			set => SetValue(TextMarginProperty, value);
 		}
 
+		public event RoutedEventHandler Click;
+
 		public PiButton()
 		{
 			InitializeComponent();
+
 			LostMouseCapture += PiButton_LostMouseCapture;
 		}
 
 		private void PiButton_LostMouseCapture(object sender, MouseEventArgs e) => Opacity = 1;
 
-		public event RoutedEventHandler Click;
 		private void Grid_MouseDown(object sender, MouseButtonEventArgs e) => Click?.Invoke(this, e);
+
+		private void MouseEnterBackgroundStoryboard_Completed(object sender, EventArgs e)
+		{
+			if (HoverBrush is null == false)
+			{
+				(ButtonGrid.Background as SolidColorBrush).Color = (HoverBrush as SolidColorBrush).Color;
+			}
+			ButtonGrid.BeginAnimation(BackgroundProperty, null);
+		}
+
+		private void MouseLeaveBackgroundStoryboard_Completed(object sender, EventArgs e)
+		{
+			if (Background is null == false)
+			{
+				(ButtonGrid.Background as SolidColorBrush).Color = (Background as SolidColorBrush).Color;
+			}
+			ButtonGrid.BeginAnimation(BackgroundProperty, null);
+		}
 	}
 }

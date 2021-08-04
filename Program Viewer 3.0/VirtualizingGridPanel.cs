@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +13,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml;
+using ProgramViewer3.Managers;
 
 namespace ProgramViewer3
 {
@@ -28,6 +25,9 @@ namespace ProgramViewer3
 		public static DependencyProperty ScrollOffsetProperty = DependencyProperty.Register("ScrollOffset", typeof(double), OwnerType);
 		public static DependencyProperty ColumnsCountProperty = DependencyProperty.Register("ColumnsCount", typeof(int), OwnerType);
 		public static DependencyProperty PanelOpacityMaskProperty = DependencyProperty.Register("PanelOpacityMask", typeof(Brush), OwnerType);
+		public static DependencyProperty ChildItemsVerticalOffsetProperty = DependencyProperty.Register("ChildItemsVerticalOffset", typeof(double), OwnerType);
+		public static DependencyProperty ChildItemsHorizontalOffsetProperty = DependencyProperty.Register("ChildItemsHorizontalOffset", typeof(double), OwnerType);
+		public static DependencyProperty ItemHighlighterFadeDurationProperty = DependencyProperty.Register("ItemHighlighterFadeDuration", typeof(TimeSpan), OwnerType, new PropertyMetadata(TimeSpan.FromSeconds(0.5)));
 		#endregion
 
 		#region DependencyProperties
@@ -78,6 +78,42 @@ namespace ProgramViewer3
 			set
 			{
 				SetValue(PanelOpacityMaskProperty, (Brush)value);
+			}
+		}
+
+		public double ChildItemsVerticalOffset
+		{
+			get
+			{
+				return (double)GetValue(ChildItemsVerticalOffsetProperty);
+			}
+			set
+			{
+				SetValue(ChildItemsVerticalOffsetProperty, value);
+			}
+		}
+
+		public double ChildItemsHorizontalOffset
+		{
+			get
+			{
+				return (double)GetValue(ChildItemsHorizontalOffsetProperty);
+			}
+			set
+			{
+				SetValue(ChildItemsHorizontalOffsetProperty, value);
+			}
+		}
+
+		public TimeSpan ItemHighlighterFadeDuration
+		{
+			get
+			{
+				return (TimeSpan)GetValue(ItemHighlighterFadeDurationProperty);
+			}
+			set
+			{
+				SetValue(ItemHighlighterFadeDurationProperty, value);
 			}
 		}
 		#endregion
@@ -153,19 +189,18 @@ namespace ProgramViewer3
 		/// Updates ItemsOwner object
 		/// </summary>
 		private void Initialize_ItemsOwner()
-		{	
+		{
 			ItemsOwner = new VirtualizingStackPanel
 			{
 				Width = this.Width,
 				Height = this.Height,
 				FocusVisualStyle = null,
-				
 			};
 			VirtualizingPanel.SetIsVirtualizing(ItemsOwner, true);
 			VirtualizingPanel.SetCacheLengthUnit(ItemsOwner, VirtualizationCacheLengthUnit.Item);
 			VirtualizingPanel.SetCacheLength(ItemsOwner, new VirtualizationCacheLength(2));
 			VirtualizingPanel.SetVirtualizationMode(ItemsOwner, VirtualizationMode.Recycling);
-			UpdateFrameworkElement(ItemsOwner, RenderSize, new Rect(RenderSize));					
+			UpdateFrameworkElement(ItemsOwner, RenderSize, new Rect(RenderSize));
 			ChildrenGrid.Children.Add(ItemsOwner);
 		}
 
@@ -177,7 +212,7 @@ namespace ProgramViewer3
 				HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
 				FocusVisualStyle = null,
 				Opacity = this.Opacity,
-				OpacityMask = this.PanelOpacityMask
+				OpacityMask = this.PanelOpacityMask,
 			};
 			ScrollOwner.InvalidateScrollInfo();
 			UpdateFrameworkElement(ScrollOwner, RenderSize, new Rect(RenderSize));
@@ -193,6 +228,8 @@ namespace ProgramViewer3
 			string PanelTemplateXaml = XamlWriter.Save(PanelTemplate);
 			int columnsCount = ColumnsCount;
 
+			// We have to initialize the RowRenderer object not in the main thread to have an ability to
+			// use the RowRenderer not in the main thread. It allows us to use asynchronous item loading
 			Thread thread = new Thread(() =>
 			{
 				AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
@@ -232,6 +269,18 @@ namespace ProgramViewer3
 		}
 
 		/// <summary>
+		/// Sets a new brush for the RippleEllipse object
+		/// </summary>
+		/// <param name="fillBrush">New fill brush</param>
+		public void SetRippleBrush(Brush fillBrush) => RippleEllipse.Fill = fillBrush;
+
+		/// <summary>
+		/// Sets a new brush for the ItemHighlighter object
+		/// </summary>
+		/// <param name="fillBrush">New fill brush</param>
+		public void SetItemHighlighterBrush(Brush fillBrush) => ItemHighlighter.Fill = fillBrush;
+
+		/// <summary>
 		/// Renders a UI object to BitmapSource object in the same way as it would be rendered on the display
 		/// </summary>
 		/// <param name="element">UI object to render</param>
@@ -258,7 +307,7 @@ namespace ProgramViewer3
 			StringReader stringReader = new StringReader(savedXaml);
 			XmlReader xmlReader = XmlReader.Create(stringReader);
 			return (T)XamlReader.Load(xmlReader);
-		}		
+		}
 
 		/// <summary>
 		/// Updates layout of FrameworkElement object
@@ -334,10 +383,10 @@ namespace ProgramViewer3
 				ItemsOwner.Children.RemoveRange(rowIndex, itemsNumber - rowIndex);
 			}
 
-			for (int i = startingIndex; i < ItemSource.Count; i+= ColumnsCount)
+			for (int i = startingIndex; i < ItemSource.Count; i += ColumnsCount)
 			{
 				try
-				{					
+				{
 					int itemsInRow = await FillRowRendererWithItemDataAsync(i);
 					AddChild(await RenderRowToImageAsync(), itemsInRow);
 				}
@@ -353,7 +402,8 @@ namespace ProgramViewer3
 			BitmapSource result = null;
 			await Task.Run(() =>
 			{
-				RowRenderer.Dispatcher.Invoke(() => {
+				RowRenderer.Dispatcher.Invoke(() =>
+				{
 					result = RenderFrameworkElementToBitmap(RowRenderer);
 				});
 			});
@@ -374,6 +424,8 @@ namespace ProgramViewer3
 				Tag = itemsInRow,
 				UseLayoutRounding = true,
 				Width = image.Width,
+				HorizontalAlignment = this.HorizontalContentAlignment,
+				Margin = new Thickness(ChildItemsHorizontalOffset, ChildItemsVerticalOffset, 0, 0),
 			};
 			RenderOptions.SetBitmapScalingMode(imageControl, BitmapScalingMode.NearestNeighbor);
 			imageControl.CacheMode = new BitmapCache();
@@ -386,8 +438,8 @@ namespace ProgramViewer3
 
 			UpdateFrameworkElement(imageControl, imageSize, new Rect(imageSize));
 			ItemsOwner.UpdateLayout();
-			Managers.AnimationManager.StartAnimation_FadeIn(imageControl, TimeSpan.FromSeconds(0.7));
-		}	
+			AnimationManager.StartAnimation_FadeIn(imageControl, TimeSpan.FromSeconds(0.7));
+		}
 
 		public ObservableCollection<Managers.ItemData> GetItemSource()
 		{
@@ -465,30 +517,32 @@ namespace ProgramViewer3
 		/// Replace the ItemHighlighter to be behind the current internal item pointed to by the mouse
 		/// </summary>
 		/// <param name="offset"></param>
-		/// <param name="tag">The number of elements in the current row</param>
-		private void ReplaceItemHighlighter(Point offset, double tag)
+		/// <param name="elementsInRow">The number of elements in the current row</param>
+		private void ReplaceItemHighlighter(Point offset, double elementsInRow)
 		{
 			offset.X = RoundToLowerMultiple((int)offset.X, (int)ItemSize.Width);
-			if ((int)offset.X > (int)((tag - 1) * ItemSize.Width))
+			if (offset.X > (elementsInRow - 1) * ItemSize.Width)
 			{
 				StartItemHighlighter_FadeAnimation(false);
 			}
-
-			if (offset != LastItemHighlighter_Offset)
-				StartItemHighlighter_FadeAnimation(true);
-
+			else
+			{
+				if (offset != LastItemHighlighter_Offset) StartItemHighlighter_FadeAnimation(true);
+			}
 			LastItemHighlighter_Offset = new Point(offset.X, offset.Y);
-			ItemHighlighter.Margin = new Thickness(offset.X, offset.Y, 0, 0);
+			ItemHighlighter.Margin = new Thickness(offset.X + ChildItemsHorizontalOffset, offset.Y + ChildItemsVerticalOffset, 0, 0);
 		}
 		private void StartItemHighlighter_FadeAnimation(bool isFadeInAnimation)
 		{
+			// This line stops the current animation if it exists
 			ItemHighlighter.BeginAnimation(OpacityProperty, null);
 			ItemHighlighter.Opacity = 0;
-			var fade_Duration = TimeSpan.FromSeconds(0.5);
+
+			var fade_Duration = ItemHighlighterFadeDuration;
 			if (isFadeInAnimation)
-				Managers.AnimationManager.StartAnimation_FadeIn(ItemHighlighter, fade_Duration);
+				AnimationManager.StartAnimation_FadeIn(ItemHighlighter, fade_Duration);
 			else
-				Managers.AnimationManager.StartAnimation_FadeOut(ItemHighlighter, fade_Duration);
+				AnimationManager.StartAnimation_FadeOut(ItemHighlighter, fade_Duration);
 		}
 
 		/// <summary>
@@ -500,7 +554,7 @@ namespace ProgramViewer3
 		{
 			Point clickPoint = e.GetPosition(ItemsOwner);
 			int itemIndex = (int)(clickPoint.Y / ItemSize.Height) * ColumnsCount + (int)(clickPoint.X / ItemSize.Width);
-			StartRippleClick_Animation(clickPoint);
+			StartRippleClickAnimation(clickPoint);
 
 			if (itemIndex >= 0 && itemIndex < ItemSource.Count)
 			{
@@ -532,7 +586,7 @@ namespace ProgramViewer3
 			Grid_MouseWheel?.Invoke(this, e);
 		}
 
-		private void StartRippleClick_Animation(Point clickPoint)
+		private void StartRippleClickAnimation(Point clickPoint)
 		{
 			Size startSize = new Size(10, 10);
 			Size finalSize = new Size(300, 300);
@@ -549,11 +603,11 @@ namespace ProgramViewer3
 			RippleEllipse.RenderTransform = null;
 			RippleEllipse.RenderTransform = transformGroup;
 
-			Managers.AnimationManager.StartAnimation_DoubleTransform(scaleTransform, ScaleTransform.ScaleXProperty, finalSize.Width / startSize.Width, duration);
-			Managers.AnimationManager.StartAnimation_DoubleTransform(scaleTransform, ScaleTransform.ScaleYProperty, finalSize.Height / startSize.Height, duration);
-			Managers.AnimationManager.StartAnimation_DoubleTransform(translateTransform, TranslateTransform.XProperty, -(finalSize.Width / 2), duration);
-			Managers.AnimationManager.StartAnimation_DoubleTransform(translateTransform, TranslateTransform.YProperty, -(finalSize.Height / 2), duration);
-			Managers.AnimationManager.StartAnimation_FadeOut(RippleEllipse, duration);
+			AnimationManager.StartAnimation_DoubleTransform(scaleTransform, ScaleTransform.ScaleXProperty, finalSize.Width / startSize.Width, duration);
+			AnimationManager.StartAnimation_DoubleTransform(scaleTransform, ScaleTransform.ScaleYProperty, finalSize.Height / startSize.Height, duration);
+			AnimationManager.StartAnimation_DoubleTransform(translateTransform, TranslateTransform.XProperty, -(finalSize.Width / 2), duration);
+			AnimationManager.StartAnimation_DoubleTransform(translateTransform, TranslateTransform.YProperty, -(finalSize.Height / 2), duration);
+			AnimationManager.StartAnimation_FadeOut(RippleEllipse, duration);
 		}
 
 		public void Dispose()

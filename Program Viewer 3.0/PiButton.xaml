@@ -24,7 +24,7 @@
         </EventTrigger>
     </UserControl.Triggers>
 
-    <Grid MouseDown="Grid_MouseDown">
+    <Grid x:Name="ButtonGrid" MouseDown="Grid_MouseDown">
         <Image x:Name="ButtonImage" Source="{Binding Path=Source}"/>
         <TextBlock x:Name="ButtonText" Text="{Binding Path=Text}" Foreground="{Binding Path=Foreground}"
                    HorizontalAlignment="{Binding Path=TextHorizontalAlignment}"
@@ -43,7 +43,7 @@
         <Grid.Triggers>
             <EventTrigger RoutedEvent="MouseEnter">
                 <BeginStoryboard>
-                    <Storyboard>
+                    <Storyboard x:Name="MouseEnterBackgroundStoryboard" FillBehavior="Stop" Completed="MouseEnterBackgroundStoryboard_Completed">
                         <ColorAnimation To="{Binding Path=HoverBrush.Color}" Duration="{Binding Path=HoverDuration}" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)">
                             <ColorAnimation.EasingFunction>
                                 <ExponentialEase EasingMode="EaseOut" />
@@ -54,11 +54,11 @@
             </EventTrigger>
             <EventTrigger RoutedEvent="MouseLeave">
                 <BeginStoryboard>
-                    <Storyboard>
+                    <Storyboard x:Name="MouseLeaveBackgroundStoryboard" FillBehavior="Stop" Completed="MouseLeaveBackgroundStoryboard_Completed">
                         <ColorAnimation To="{Binding Path=Background.Color}" Duration="{Binding Path=HoverDuration}" Storyboard.TargetProperty="(Grid.Background).(SolidColorBrush.Color)">
-                        <ColorAnimation.EasingFunction>
-                            <ExponentialEase EasingMode="EaseOut" />
-                        </ColorAnimation.EasingFunction>
+                            <ColorAnimation.EasingFunction>
+                                <ExponentialEase EasingMode="EaseOut" />
+                            </ColorAnimation.EasingFunction>
                         </ColorAnimation>
                     </Storyboard>
                 </BeginStoryboard>
