@@ -66,7 +66,7 @@ namespace ProgramViewer3.Managers
 			DefaultResourceCollection = null;
 			DefaultResourceCollection = new List<ResourceDictionary>(collection);
 
-			if (name != DefaultThemeName && name != null && name != string.Empty)
+			if (name != DefaultThemeName && name is null == false && name != string.Empty)
 			{
 				var resource = GetThemeRecource(name);
 				if (resource != null)

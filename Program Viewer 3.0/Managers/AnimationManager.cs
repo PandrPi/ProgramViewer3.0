@@ -16,17 +16,17 @@ namespace ProgramViewer3.Managers
 		private readonly Storyboard menuShrinkSB = new Storyboard();
 		private readonly Storyboard menuExpandSB = new Storyboard();
 		//private readonly Storyboard addItemWindowShowSB = new Storyboard();
-  //      private readonly Storyboard addItemWindowHideSB = new Storyboard();
-        private readonly Storyboard contextMenuShowSB = new Storyboard();
+		//private readonly Storyboard addItemWindowHideSB = new Storyboard();
+		private readonly Storyboard contextMenuShowSB = new Storyboard();
 		private readonly Storyboard contextMenuHideSB = new Storyboard();
 
 		private readonly Dictionary<string, Storyboard> storyboards = new Dictionary<string, Storyboard>();
 
-		private readonly ExponentialEase exponentialEaseIn = new ExponentialEase
+		public static readonly ExponentialEase ExponentialEaseIn = new ExponentialEase
 		{
 			EasingMode = EasingMode.EaseIn
 		};
-		private readonly ExponentialEase exponentialEaseOut = new ExponentialEase
+		public static readonly ExponentialEase ExponentialEaseOut = new ExponentialEase
 		{
 			EasingMode = EasingMode.EaseOut
 		};
@@ -51,10 +51,10 @@ namespace ProgramViewer3.Managers
 
 			mainWindow.RefreshControlsAfterThemeChanging();
 
-            var settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.X, resizeDuration, "MenuGrid", "Width", exponentialEaseIn);
-            var opacityDA = CreateDoubleAnimation(0, resizeDuration, "DesktopGridPanel", "Opacity", exponentialEaseIn);
-            var contextMenuDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEaseIn);
-			var menuShadowOpacityDA = CreateDoubleAnimation(0, resizeDuration, "MenuGrid", "(Effect).Opacity", exponentialEaseIn);
+            var settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.X, resizeDuration, "MenuGrid", "Width", ExponentialEaseIn);
+            var opacityDA = CreateDoubleAnimation(0, resizeDuration, "DesktopGridPanel", "Opacity", ExponentialEaseIn);
+            var contextMenuDA = CreateDoubleAnimation(1, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", ExponentialEaseIn);
+			var menuShadowOpacityDA = CreateDoubleAnimation(0, resizeDuration, "MenuGrid", "(Effect).Opacity", ExponentialEaseIn);
 
 			var menuRectCA = CreateMenuVerticalRectExpandAnimation();
 
@@ -65,10 +65,10 @@ namespace ProgramViewer3.Managers
 
             contextMenuShowSB.Children.Add(contextMenuDA);
 
-			settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.Y, resizeDuration, "MenuGrid", "Width", exponentialEaseOut);
-			opacityDA = CreateDoubleAnimation(1, resizeDuration, "DesktopGridPanel", "Opacity", exponentialEaseOut);
-			menuShadowOpacityDA = CreateDoubleAnimation(0.5, resizeDuration, "MenuGrid", "(Effect).Opacity", exponentialEaseOut);
-            contextMenuDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", exponentialEaseOut);
+			settingsWidthDA = CreateDoubleAnimation(MenuGridResizeArea.Y, resizeDuration, "MenuGrid", "Width", ExponentialEaseOut);
+			opacityDA = CreateDoubleAnimation(1, resizeDuration, "DesktopGridPanel", "Opacity", ExponentialEaseOut);
+			menuShadowOpacityDA = CreateDoubleAnimation(0.5, resizeDuration, "MenuGrid", "(Effect).Opacity", ExponentialEaseOut);
+            contextMenuDA = CreateDoubleAnimation(0, addItemWindowSHAnimDuration, "PiContextMenu", "Opacity", ExponentialEaseOut);
 
 			menuRectCA = CreateMenuVerticalRectShrinkAnimation();
 
@@ -106,7 +106,18 @@ namespace ProgramViewer3.Managers
             return da;
         }
 
-		private ColorAnimation CreateColorAnimation(Color to, TimeSpan duration,
+		public static ColorAnimation CreateColorAnimation(Color to, TimeSpan duration,
+			string targetProperty, string propertyPath, IEasingFunction easingFunction)
+		{
+			ColorAnimation ca = new ColorAnimation(to, duration);
+			ca.SetValue(Storyboard.TargetNameProperty, targetProperty);
+			Storyboard.SetTargetProperty(ca, new PropertyPath(propertyPath));
+			ca.EasingFunction = easingFunction;
+
+			return ca;
+		}
+
+		public static ColorAnimation CreateColorAnimation(Color to, Duration duration,
 			string targetProperty, string propertyPath, IEasingFunction easingFunction)
 		{
 			ColorAnimation ca = new ColorAnimation(to, duration);
@@ -195,12 +206,12 @@ namespace ProgramViewer3.Managers
 
 		private ColorAnimation CreateMenuVerticalRectShrinkAnimation()
 		{
-			return CreateColorAnimation((mainWindow.FindResource("CustomWindow.TitleBar.Background") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseOut);
+			return CreateColorAnimation((mainWindow.FindResource("CustomWindow.TitleBar.Background") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", ExponentialEaseOut);
 		}
 
 		private ColorAnimation CreateMenuVerticalRectExpandAnimation()
 		{
-			return CreateColorAnimation((mainWindow.FindResource("SettingVerticalRect.ExpandBackground") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", exponentialEaseIn);
+			return CreateColorAnimation((mainWindow.FindResource("SettingVerticalRect.ExpandBackground") as SolidColorBrush).Color, WindowResizeDuration, "SettingsVerticalRect", "(Rectangle.Fill).(SolidColorBrush.Color)", ExponentialEaseIn);
 		}
 
 		public void ToggleMenu(bool value)
