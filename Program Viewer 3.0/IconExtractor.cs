@@ -5,99 +5,122 @@ using System.Windows;
 using System.Windows.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System;
+using System.Windows.Interop;
 
 namespace ProgramViewer3
 {
-    public static class IconExtractor
-    {
-        private static ImageSource BaseExeIcon { get; set; }
-        private static Dispatcher Dispatcher { get; set; }
+	public static class IconExtractor
+	{
+		private static ImageSource BaseExeIcon { get; set; }
+		private static Dispatcher Dispatcher { get; set; }
 
-		private static readonly FileToIconConverter fic = new FileToIconConverter();
 		private static readonly int DefaultIconSize = 256;
-		private static readonly Dictionary<string, ImageSource> cachedImages = new Dictionary<string, ImageSource>();
-        private static readonly HashSet<string> imageExtensions =
-			new HashSet<string>(new[] { ".png", ".jpg", ".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
+		private static readonly HashSet<string> imageExtensions = new HashSet<string>(new[] { ".png", ".jpg",
+			".gif", ".bmp", ".jpeg", ".tga", ".tiff", ".psd", ".pdf" });
 
 		public static void Initialize(ImageSource baseExeIcon, Dispatcher dispatcher)
 		{
 			BaseExeIcon = baseExeIcon;
-			BaseExeIcon.Freeze();
+			if (BaseExeIcon.CanFreeze) BaseExeIcon.Freeze();
 			Dispatcher = dispatcher;
 		}
 
-        public static ImageSource GetIcon(string fileName)
-        {
-            string extension = Path.GetExtension(fileName);
-            if (extension == ".lnk")
-            {
-				var tempIcon = LoadIcon(fileName);
+		public static ImageSource GetIcon(string filePath)
+		{
+			string fileExtension = Path.GetExtension(filePath);
+
+			// If the specified file is a link we have to extract its target file
+			if (fileExtension == ".lnk")
+			{
+				var tempIcon = LoadIcon(filePath);
 				if (tempIcon != BaseExeIcon)
 					return tempIcon;
 
-                fileName = GetShortcutTargetFile(Path.GetFullPath(fileName));
-                extension = Path.GetExtension(fileName);
-            }
+				filePath = GetShortcutTargetFile(Path.GetFullPath(filePath));
+				fileExtension = Path.GetExtension(filePath);
+			}
 
-            if (extension == ".exe")
-            {
-                try
-                {
-                    return LoadIcon(fileName);
+			if (fileExtension == ".exe")
+			{
+				try
+				{
+					return LoadIcon(filePath);
 				}
-                catch
-                {
-                    return BaseExeIcon;
-                }
-            }
-            else
-            {
-                if (cachedImages.ContainsKey(extension))
-                {
-                    return cachedImages[extension];
-                }
-                else
-                {
-					if (!imageExtensions.Contains(extension))
-					{
-						BitmapSource image = LoadIcon(fileName);
-						if (cachedImages.ContainsKey(extension))
-							cachedImages.Add(extension, image);
-						return image;
-					}
-					else
-					{
-						return LoadIconFromImageFile(fileName);
-					}
+				catch
+				{
+					return BaseExeIcon;
 				}
-            }
-        }
+			}
+			else
+			{
+				if (imageExtensions.Contains(fileExtension))
+				{
+					// Our file is an image file
+					return LoadIconFromImageFile(filePath);
+				}
+				else
+				{
+					// Our file is not an image file
+					BitmapSource image = LoadIcon(filePath);
+					return image;
+				}
+			}
+		}
 
-		private static BitmapSource LoadIcon(string fileName)
+		private static BitmapSource LoadIcon(string filePath)
 		{
 			Icon icon = null;
-			Dispatcher.Invoke(() => icon = FileToIconConverter.GetFileIcon(fileName, FileToIconConverter.IconSize.jumbo));
-			BitmapSource image = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
-						new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
-			image.Freeze();
+			Dispatcher.Invoke(() => icon = FileToIconConverter.GetFileIcon(filePath, FileToIconConverter.IconSize.jumbo));
+			BitmapSource image = Imaging.CreateBitmapSourceFromHIcon(icon.Handle,
+				new Int32Rect(0, 0, icon.Width, icon.Height), BitmapSizeOptions.FromEmptyOptions());
+			if (image.CanFreeze) image.Freeze();
 			icon?.Dispose();
 
 			return image;
 		}
 
-		private static ImageSource LoadIconFromImageFile(string fileName)
+		private static ImageSource LoadIconFromImageFile(string filePath)
 		{
-			ImageSource temp = null;
-			Dispatcher.Invoke(() => temp = fic.GetImage(fileName, DefaultIconSize));
-			return temp;
+			Bitmap originalImage = null;
+			Bitmap resizedImage = null;
+			try
+			{
+				originalImage = new Bitmap(filePath);
+				float aspectRatio = originalImage.Width / (float)originalImage.Height;
+				int newWidth = DefaultIconSize;
+				int newHeight = (int)(DefaultIconSize / aspectRatio);
+				resizedImage = new Bitmap(originalImage, newWidth, newHeight);
+
+				IntPtr hBitmap = resizedImage.GetHbitmap();
+				ImageSource resultImage = Imaging.CreateBitmapSourceFromHBitmap(hBitmap,
+					IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+				if (resultImage.CanFreeze) resultImage.Freeze();
+
+				return resultImage;
+			}
+			catch
+			{
+				return null;
+			}
+			finally
+			{
+				originalImage?.Dispose();
+				resizedImage?.Dispose();
+			}
 		}
 
-        private static string GetShortcutTargetFile(string shortcutFilename)
-        {
+		/// <summary>
+		/// This method extracts the target file path from the spetified shortcut (*.lnk) file path
+		/// </summary>
+		/// <param name="shortcutPath">The path ro the shortcut file</param>
+		/// <returns>Target file path of the shortcut</returns>
+		private static string GetShortcutTargetFile(string shortcutPath)
+		{
 			IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
-			IWshRuntimeLibrary.IWshShortcut link = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutFilename);
+			IWshRuntimeLibrary.IWshShortcut link = (IWshRuntimeLibrary.IWshShortcut)shell.CreateShortcut(shortcutPath);
 
-            return link.TargetPath;
-        }
+			return link.TargetPath;
+		}
 	}
 }

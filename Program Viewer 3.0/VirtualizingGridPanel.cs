@@ -351,7 +351,7 @@ namespace ProgramViewer3
 						var panel = (StackPanel)RowRenderer.Children[columnIndex];
 						if (needToFill)
 						{
-							Managers.ItemData itemData = ItemSource[itemIndex];
+							ItemData itemData = ItemSource[itemIndex];
 							(panel.Children[0] as Image).Source = itemData.ImageData;
 							(panel.Children[1] as TextBlock).Text = itemData.Title;
 							itemsInRow++;
@@ -392,6 +392,7 @@ namespace ProgramViewer3
 				}
 				catch (Exception e)
 				{
+					LogManager.Error(e);
 					MessageBox.Show(e.StackTrace, e.Message);
 				}
 			}
@@ -520,7 +521,7 @@ namespace ProgramViewer3
 		/// <param name="elementsInRow">The number of elements in the current row</param>
 		private void ReplaceItemHighlighter(Point offset, double elementsInRow)
 		{
-			offset.X = RoundToLowerMultiple((int)offset.X, (int)ItemSize.Width);
+			offset.X = RoundToLowerMultiple((int)(offset.X - ChildItemsHorizontalOffset), (int)ItemSize.Width);
 			if (offset.X > (elementsInRow - 1) * ItemSize.Width)
 			{
 				StartItemHighlighter_FadeAnimation(false);

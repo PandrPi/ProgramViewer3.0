@@ -315,12 +315,33 @@ namespace ProgramViewer3
 
 			//Bugfixes by h32
 
+			// Causes "The calling thread cannot access this object because a different thread owns it."
+			// exception but not every time the method is called
+			//if (dispatcher)
+			//{
+			//	target.Dispatcher.BeginInvoke(DispatcherPriority.Background,
+			//	new ThreadStart(delegate
+			//	{
+			//		//UI Thread
+			//		var delta = target.Height - height;
+			//		var newWidth = width > target.Width ? (int)target.Width : width;
+			//		var newHeight = height > target.Height ? (int)target.Height : height;
+			//		Int32Rect outRect = new Int32Rect(0, (int)(delta >= 0 ? delta : 0) / 2, newWidth, newWidth);
+			//		try
+			//		{
+			//			target.WritePixels(outRect, bits, stride, 0);
+			//		}
+			//		catch
+			//		{
+			//			System.Diagnostics.Debugger.Break();
+			//		}
+			//	}));
+			//}
+
 			if (dispatcher)
 			{
-				target.Dispatcher.BeginInvoke(DispatcherPriority.Background,
-				new ThreadStart(delegate
+				target.Dispatcher.Invoke(DispatcherPriority.Background, new Action(() =>
 				{
-					//UI Thread
 					var delta = target.Height - height;
 					var newWidth = width > target.Width ? (int)target.Width : width;
 					var newHeight = height > target.Height ? (int)target.Height : height;
