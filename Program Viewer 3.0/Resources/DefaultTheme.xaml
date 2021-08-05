@@ -11,17 +11,17 @@
     <DropShadowEffect x:Key="GridPanel.Item.Image.Shadow" ShadowDepth="8"/>
 
     <LinearGradientBrush x:Key="DesktopRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
-        <GradientStop Color="#FF5D747E" Offset="0"/>
-        <GradientStop Color="#FF12131A" Offset="1"/>
+        <GradientStop Color="#FF8CB3C3" Offset="0"/>
+        <GradientStop Color="#FF646B9C" Offset="1"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="DesktopRect.ResizeButton.Background" Color="#FFFFB900"/>
     <SolidColorBrush x:Key="DesktopRect.ResizeButton.Border" Color="#FF232323"/>
-    <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness" Left="1" Right="1"/>
+    <Thickness x:Key="DesktopRect.ResizeButton.Border.Thickness"  Left="0" Right="0"/>
     <SolidColorBrush x:Key="DesktopRect.ResizeButton.Hover.Background" Color="#FFBEE6FD"/>
 
     <LinearGradientBrush x:Key="HotRect.Background" EndPoint="0.5,1" StartPoint="0.5,0">
-        <GradientStop Color="#FF688293" Offset="0"/>
-        <GradientStop Color="#FF2C363C" Offset="1"/>
+        <GradientStop Color="#FF8CB3C3" Offset="0"/>
+        <GradientStop Color="#FF646B9C" Offset="1"/>
     </LinearGradientBrush>
 
     <SolidColorBrush x:Key="SettingVerticalRect.ExpandBackground" Color="#FF6F8C9C"/>

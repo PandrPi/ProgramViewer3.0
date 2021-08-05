@@ -19,7 +19,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="1" Stroke="Black"/>
+            <Rectangle Fill="{DynamicResource HotRect.Background}" HorizontalAlignment="Right" Width="99" ScrollViewer.VerticalScrollBarVisibility="Hidden" StrokeLineJoin="Round" StrokeEndLineCap="Triangle" StrokeThickness="0"/>
 
             <tb:TaskbarIcon x:Name="TaskbarIcon" ToolTipText="Program Viewer 3.0" IconSource="Pictures/Icon.ico">
                 <tb:TaskbarIcon.ContextMenu>

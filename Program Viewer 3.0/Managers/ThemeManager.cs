@@ -28,7 +28,7 @@ namespace ProgramViewer3.Managers
 			DefaultThemeDictionary = DefaultResourceCollection.Where(i => i.Source.OriginalString.Contains(Regex.Replace(DefaultThemeName, @"\s+", ""))).First();
 			DefaultResourcesNumber = DefaultResourceCollection.Count;
 
-			CacheManager.InitiallizeDirectory(ThemeFolder);
+			CacheManager.InitializeDirectory(ThemeFolder);
 
 			LoadThemes();
 		}
@@ -54,6 +54,7 @@ namespace ProgramViewer3.Managers
 				}
 				catch (Exception e)
 				{
+					LogManager.Error(e);
 					MessageBox.Show(e.Message, $"{e.GetType().Name} occured in file 'Themes/{current.Name}'");
 				}
 			}
@@ -140,7 +141,7 @@ namespace ProgramViewer3.Managers
 
 			private static T GetResource<T>(ResourceDictionary resource, string key)
 			{
-				return resource.Contains(key) ? (T)resource[key] : (T)ThemeManager.DefaultThemeDictionary[key];
+				return resource.Contains(key) ? (T)resource[key] : (T)DefaultThemeDictionary[key];
 			}
 		}
 	}

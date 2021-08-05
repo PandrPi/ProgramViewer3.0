@@ -105,27 +105,30 @@ namespace ProgramViewer3.Managers
 		public async Task LoadFilesAsync()
 		{
 			CacheManager.InitializeJSONFile(HotItemsJSONFilename);
-			desktopDirectoryInfo = CacheManager.InitiallizeDirectory(DesktopFolderPath);
+			desktopDirectoryInfo = CacheManager.InitializeDirectory(DesktopFolderPath);
 
 			hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
 
 			var cacheWatch = Stopwatch.StartNew();
-			await cacheManager.InitiallizeCacheDictionary();
+			await cacheManager.InitiallizeCacheDictionaryAsync();
 			cacheWatch.Stop();
 			LogManager.Write($"Cache init time: {cacheWatch.Elapsed.TotalMilliseconds} ms");
 
-			var hotLoadedList = await LoadHotItems();
-			var desktopLoadedList = await LoadDesktopItems();
+			var hotLoadedList = await LoadHotItemsAsync();
+			var desktopLoadedList = await LoadDesktopItemsAsync();
 
 			hotItems = new ObservableCollection<ItemData>(hotLoadedList.OrderBy(i => i, itemDataComparer));
 			desktopItems = new ObservableCollection<ItemData>(desktopLoadedList.OrderBy(i => i, itemDataComparer));
+
+			// Save icons to files
+			cacheManager.SaveIcons(hotItems, desktopItems);
 
 			// Free resources with some kind of Dispose
 			hotLoadedList = null;
 			desktopLoadedList = null;
 		}
 
-		private async Task<ConcurrentList<ItemData>> LoadHotItems()
+		private async Task<ConcurrentList<ItemData>> LoadHotItemsAsync()
 		{
 			List<Task> tasks = new List<Task>();
 			List<string> hotItemsToRemove = new List<string>();
@@ -162,7 +165,7 @@ namespace ProgramViewer3.Managers
 			return list;
 		}
 
-		private async Task<ConcurrentList<ItemData>> LoadDesktopItems()
+		private async Task<ConcurrentList<ItemData>> LoadDesktopItemsAsync()
 		{
 			List<Task> tasks = new List<Task>();
 			FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
@@ -205,10 +208,8 @@ namespace ProgramViewer3.Managers
 		}
 
 		/// <summary>
-		/// This event rises when new file or folder inside the Desktop folder was renamed 
+		/// This event rises when a new file or folder inside the Desktop folder was renamed 
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
 		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
 		{
 			ItemData oldItem = desktopItemsData[e.OldFullPath];
@@ -222,13 +223,12 @@ namespace ProgramViewer3.Managers
 				desktopItems[index] = newItem;
 				desktopItemsData.AddOrUpdate(e.FullPath, newItem, (k, v) => v);
 			}));
+			cacheManager.SaveIcons(hotItems, desktopItems);
 		}
 
 		/// <summary>
-		/// This event rises when new file or folder was removed from the Desktop folder
+		/// This event rises when a new file or folder was removed from the Desktop folder
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
 		private void DesktopFileWatcher_Deleted(object sender, FileSystemEventArgs e)
 		{
 			mainDispatcher.BeginInvoke(new Action(() =>
@@ -236,34 +236,30 @@ namespace ProgramViewer3.Managers
 				desktopItems.Remove(desktopItemsData[e.FullPath]);
 				desktopItemsData.TryRemove(e.FullPath, out ItemData itemData);
 			}));
+			cacheManager.SaveIcons(hotItems, desktopItems);
 		}
 
 		/// <summary>
 		/// This event is called when new file or folder was added to the Desktop folder
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
 		private void DesktopFileWatcher_Created(object sender, FileSystemEventArgs e)
 		{
 			FileAttributes attributes = File.GetAttributes(e.FullPath);
-			string title;
-			if (attributes.HasFlag(FileAttributes.Directory))
-				title = e.Name;
-			else
-				title = Path.GetFileNameWithoutExtension(e.Name);
+			string title = attributes.HasFlag(FileAttributes.Directory) ? e.Name : Path.GetFileNameWithoutExtension(e.Name);
 			mainDispatcher.BeginInvoke(new Action(() =>
 			{
 				ItemData itemData = new ItemData(title, e.FullPath, cacheManager.GetFileIcon(e.FullPath));
 				AddItemToSortedCollection(desktopItems, itemData);
 				desktopItemsData.AddOrUpdate(e.FullPath, itemData, (k, v) => v);
 			}));
+			cacheManager.SaveIcons(hotItems, desktopItems);
 		}
 
 		/// <summary>
-		/// Method determines the index of new item and inserts it there
+		/// This method determines the index for the new item and inserts this item there
 		/// </summary>
-		/// <param name="list">Collection to add item to</param>
-		/// <param name="item">The item to add</param>
+		/// <param name="list">Collection to which a new item will be added</param>
+		/// <param name="item">The item we want to add</param>
 		private void AddItemToSortedCollection(ObservableCollection<ItemData> list, ItemData item)
 		{
 			int i = 0;
@@ -299,6 +295,7 @@ namespace ProgramViewer3.Managers
 				}
 				catch (Exception e)
 				{
+					LogManager.Error(e);
 					MessageBox.Show(e.StackTrace, e.Message);
 				}
 			}
@@ -313,19 +310,17 @@ namespace ProgramViewer3.Managers
 		public void DisposeManager()
 		{
 			desktopFileWatcher.Dispose();
-			HotItemsSave();
-			
-			cacheManager.SaveIcons(hotItems, desktopItems);
+			cacheManager.ReleaseResources();
 		}
 
-		private void StartProcess(string filename)
+		private void StartProcess(string fileName)
 		{
 			Process process = new Process();
 			try
 			{
 				process.StartInfo = new ProcessStartInfo()
 				{
-					FileName = filename
+					FileName = fileName
 				};
 				process.Start();
 			}
@@ -336,7 +331,7 @@ namespace ProgramViewer3.Managers
 					process.StartInfo = new ProcessStartInfo()
 					{
 						FileName = "rundll32.exe",
-						Arguments = "shell32.dll,OpenAs_RunDLL " + filename
+						Arguments = "shell32.dll,OpenAs_RunDLL " + fileName
 					};
 					process.Start();
 				}
@@ -344,11 +339,22 @@ namespace ProgramViewer3.Managers
 			process.Dispose();
 		}
 
+		/// <summary>
+		/// Opens the process associated to the item source file. 
+		/// </summary>
+		/// <param name="index">Item index</param>
+		/// <param name="itemType">Item type</param>
 		public void OpenItem(int index, ItemType itemType)
 		{
-			Task.Run(() => StartProcess(itemType == ItemType.Hot ? hotItems[index].Path : desktopItems[index].Path));
+			var itemPath = itemType == ItemType.Hot ? hotItems[index].Path : desktopItems[index].Path;
+			Task.Run(() => StartProcess(itemPath));
 		}
 
+		/// <summary>
+		/// Removes item specified by the index and itemType parameters from the app
+		/// </summary>
+		/// <param name="index">Item index</param>
+		/// <param name="itemType">Item type</param>
 		public void RemoveItem(int index, ItemType itemType)
 		{
 			if (itemType == ItemType.Hot)
@@ -367,16 +373,18 @@ namespace ProgramViewer3.Managers
 			}
 		}
 
+		/// <summary>
+		/// Shows the the source file of the item specified by the index and itemType parameters
+		/// </summary>
+		/// <param name="index">Item index</param>
+		/// <param name="itemType">Item type</param>
 		public void ShowItemInExplorer(int index, ItemType itemType)
 		{
-			string argument = "/select, \"";
-			if (itemType == ItemType.Hot)
-				argument += hotItems[index].Path + "\"";
-			else
-				argument += desktopItems[index].Path + "\"";
-
 			try
 			{
+				var itemPath = itemType == ItemType.Hot ? hotItems[index].Path : desktopItems[index].Path;
+				string argument = $"/select, \"{itemPath}\"";
+
 				Task.Run(() => Process.Start("explorer.exe", argument).Dispose());
 			}
 			catch { }
