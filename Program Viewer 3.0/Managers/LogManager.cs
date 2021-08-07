@@ -54,6 +54,18 @@ namespace ProgramViewer3.Managers
 			Console.WriteLine(writeFormat, date, message);
 		}
 
+		/// <summary>
+		/// Writes the specified message object to the Console output stream
+		/// </summary>
+		/// <param name="message"></param>
+		public static void Write(string message, params object[] args)
+		{
+			const string writeFormat = "{0} : {1}";
+			string date = DateTime.Now.ToString();
+			string value = string.Format(writeFormat, date, message);
+			Console.WriteLine(value, args);
+		}
+
 		public static void Error(Exception exception)
 		{
 			const string errorFormat = "Message: {0}.\nStack trace: {1}";

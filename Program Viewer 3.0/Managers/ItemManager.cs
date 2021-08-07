@@ -9,7 +9,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using Newtonsoft.Json;
-using System.Collections.Concurrent;
 
 namespace ProgramViewer3.Managers
 {
@@ -30,19 +29,20 @@ namespace ProgramViewer3.Managers
 		}
 
 		/// <summary>
-		/// Gets a type of path(folder or file)
+		/// Determines the actual type of the specified path parameter. Returns PathType.Folder if the
+		/// file on the specified path has a directory attribute, otherwise returns PathType.File
 		/// </summary>
-		/// <param name="path">Item full path</param>
+		/// <param name="path">The full path to the item's source file</param>
 		/// <returns></returns>
 		private PathType GetPathType(string path)
 		{
 			return File.GetAttributes(path).HasFlag(FileAttributes.Directory) ? PathType.Folder : PathType.File;
 		}
 
-		public int CompareTo(ItemData that)
+		public int CompareTo(ItemData other)
 		{
-			int pathCompare = PathType.CompareTo(that.PathType) * 2;
-			int titleCompare = Title.CompareTo(that.Title) + pathCompare;
+			int pathCompare = PathType.CompareTo(other.PathType) * 2;
+			int titleCompare = Title.CompareTo(other.Title) + pathCompare;
 
 			return titleCompare;
 		}
@@ -63,13 +63,13 @@ namespace ProgramViewer3.Managers
 
 	public class ItemManager
 	{
-		public ObservableCollection<ItemData> desktopItems { get; private set; }
-		public ObservableCollection<ItemData> hotItems { get; private set; }
+		public ObservableCollection<ItemData> DesktopItems { get; private set; }
+		public ObservableCollection<ItemData> HotItems { get; private set; }
 
 		private CacheManager cacheManager;
 		private Dispatcher mainDispatcher;
 		private Dictionary<string, dynamic> hotItemsJsonData; // used to store loaded json data for hot items
-		private ConcurrentDictionary<string, ItemData> desktopItemsData = new ConcurrentDictionary<string, ItemData>(); // used to store to get ItemData fast by file name
+		private Dictionary<string, ItemData> desktopItemsData = new Dictionary<string, ItemData>(); // used to store to get ItemData fast by file name
 		private DirectoryInfo desktopDirectoryInfo;
 		private FileSystemWatcher desktopFileWatcher;
 		private readonly ItemDataComparer itemDataComparer = new ItemDataComparer();
@@ -81,10 +81,10 @@ namespace ProgramViewer3.Managers
 
 		public ItemManager(Dispatcher dispatcher)
 		{
-			this.mainDispatcher = dispatcher;
-			desktopItems = new ObservableCollection<ItemData>();
-			hotItems = new ObservableCollection<ItemData>();
-			cacheManager = new CacheManager(dispatcher);
+			mainDispatcher = dispatcher;
+			DesktopItems = new ObservableCollection<ItemData>();
+			HotItems = new ObservableCollection<ItemData>();
+			cacheManager = new CacheManager();
 
 			InitializeDesktopFilesWatcher();
 		}
@@ -102,7 +102,7 @@ namespace ProgramViewer3.Managers
 			desktopFileWatcher.EnableRaisingEvents = true;
 		}
 
-		public async Task LoadFilesAsync()
+		public void LoadItems()
 		{
 			CacheManager.InitializeJSONFile(HotItemsJSONFilename);
 			desktopDirectoryInfo = CacheManager.InitializeDirectory(DesktopFolderPath);
@@ -110,39 +110,36 @@ namespace ProgramViewer3.Managers
 			hotItemsJsonData = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(HotItemsJSONFilename));
 
 			var cacheWatch = Stopwatch.StartNew();
-			await cacheManager.InitiallizeCacheDictionaryAsync();
+			cacheManager.InitiallizeCache();
 			cacheWatch.Stop();
 			LogManager.Write($"Cache init time: {cacheWatch.Elapsed.TotalMilliseconds} ms");
 
-			var hotLoadedList = await LoadHotItemsAsync();
-			var desktopLoadedList = await LoadDesktopItemsAsync();
+			var hotLoadedList = LoadHotItems();
+			var desktopLoadedList = LoadDesktopItems();
 
-			hotItems = new ObservableCollection<ItemData>(hotLoadedList.OrderBy(i => i, itemDataComparer));
-			desktopItems = new ObservableCollection<ItemData>(desktopLoadedList.OrderBy(i => i, itemDataComparer));
+			HotItems = new ObservableCollection<ItemData>(hotLoadedList.OrderBy(i => i, itemDataComparer));
+			DesktopItems = new ObservableCollection<ItemData>(desktopLoadedList.OrderBy(i => i, itemDataComparer));
 
 			// Save icons to files
-			cacheManager.SaveIcons(hotItems, desktopItems);
+			cacheManager.SaveCacheData();
 
-			// Free resources with some kind of Dispose
+			// Release resources
 			hotLoadedList = null;
 			desktopLoadedList = null;
 		}
 
-		private async Task<ConcurrentList<ItemData>> LoadHotItemsAsync()
+		private List<ItemData> LoadHotItems()
 		{
-			List<Task> tasks = new List<Task>();
-			List<string> hotItemsToRemove = new List<string>();
-			ConcurrentList<ItemData> list = new ConcurrentList<ItemData>();
+			var hotItemsToRemove = new List<string>();
+			var list = new List<ItemData>();
 
 			foreach (var item in hotItemsJsonData)
 			{
 				if (Directory.Exists(item.Key) || File.Exists(item.Key))
 				{
-					tasks.Add(Task.Run(() =>
-					{
-						ItemData itemData = new ItemData(item.Value, item.Key, cacheManager.GetFileIcon(item.Key));
-						list.Add(itemData);
-					}));
+					var itemIcon = cacheManager.GetFileIcon(item.Key);
+					ItemData itemData = new ItemData(item.Value, item.Key, itemIcon);
+					list.Add(itemData);
 				}
 				else
 				{
@@ -151,60 +148,42 @@ namespace ProgramViewer3.Managers
 
 			}
 
-			if (hotItemsToRemove.Count != 0)
+			for (int i = 0; i < hotItemsToRemove.Count; i++)
 			{
-				for (int i = 0; i < hotItemsToRemove.Count; i++)
-				{
-					hotItemsJsonData.Remove(hotItemsToRemove[i]);
-				}
-				HotItemsSave();
+				hotItemsJsonData.Remove(hotItemsToRemove[i]);
 			}
-
-			await Task.WhenAll(tasks);
+			if (hotItemsToRemove.Count != 0) HotItemsSave();
 
 			return list;
 		}
 
-		private async Task<ConcurrentList<ItemData>> LoadDesktopItemsAsync()
+		private List<ItemData> LoadDesktopItems()
 		{
-			List<Task> tasks = new List<Task>();
-			FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
-			ConcurrentList<ItemData> list = new ConcurrentList<ItemData>();
+			var list = new List<ItemData>();
 
 			void LoadItem(string title, string path)
 			{
 				ItemData itemData = new ItemData(title, path, cacheManager.GetFileIcon(path));
 				list.Add(itemData);
-				desktopItemsData.AddOrUpdate(path, itemData, (k, v) => v);
+				desktopItemsData[path] = itemData;
 			}
 
-			foreach (FileInfo item in fileInfos)
+			FileInfo[] fileInfos = desktopDirectoryInfo.GetFiles();
+			for (int i = 0; i < fileInfos.Length; i++)
 			{
-				tasks.Add(Task.Run(() =>
-				{
-					FileInfo info = item;
-					LoadItem(GetFileTitle(info.Name), info.FullName);
-				}));
+				FileInfo info = fileInfos[i];
+				string title = Path.GetFileNameWithoutExtension(info.Name);
+				LoadItem(title, info.FullName);
 			}
 
 			DirectoryInfo[] directoryInfos = desktopDirectoryInfo.GetDirectories();
-			foreach (DirectoryInfo item in directoryInfos)
+			for (int i = 0; i < directoryInfos.Length; i++)
 			{
-				tasks.Add(Task.Run(() =>
-				{
-					DirectoryInfo info = item;
-					LoadItem(info.Name, info.FullName);
-				}));
+				DirectoryInfo info = directoryInfos[i];
+				LoadItem(info.Name, info.FullName);
 			}
 
-			await Task.WhenAll(tasks);
-
 			return list;
-		}
-
-		public static string GetFileTitle(string path)
-		{
-			return Path.GetFileNameWithoutExtension(path);
 		}
 
 		/// <summary>
@@ -213,17 +192,17 @@ namespace ProgramViewer3.Managers
 		private void DesktopFileWatcher_Renamed(object sender, RenamedEventArgs e)
 		{
 			ItemData oldItem = desktopItemsData[e.OldFullPath];
-			int index = desktopItems.IndexOf(oldItem);
+			int index = DesktopItems.IndexOf(oldItem);
 			string newTitle = Path.GetFileNameWithoutExtension(e.Name);
 			ItemData newItem = new ItemData(newTitle, e.FullPath, oldItem.ImageData);
-			desktopItemsData.TryRemove(e.OldFullPath, out ItemData removedItem);
+			desktopItemsData.Remove(e.OldFullPath);
 
-			mainDispatcher.BeginInvoke(new Action(() =>
+			mainDispatcher.Invoke(new Action(() =>
 			{
-				desktopItems[index] = newItem;
-				desktopItemsData.AddOrUpdate(e.FullPath, newItem, (k, v) => v);
+				DesktopItems[index] = newItem;
+				desktopItemsData[e.FullPath] = newItem;
 			}));
-			cacheManager.SaveIcons(hotItems, desktopItems);
+			cacheManager.SaveCacheData();
 		}
 
 		/// <summary>
@@ -231,12 +210,12 @@ namespace ProgramViewer3.Managers
 		/// </summary>
 		private void DesktopFileWatcher_Deleted(object sender, FileSystemEventArgs e)
 		{
-			mainDispatcher.BeginInvoke(new Action(() =>
+			mainDispatcher.Invoke(new Action(() =>
 			{
-				desktopItems.Remove(desktopItemsData[e.FullPath]);
-				desktopItemsData.TryRemove(e.FullPath, out ItemData itemData);
+				DesktopItems.Remove(desktopItemsData[e.FullPath]);
+				desktopItemsData.Remove(e.FullPath);
 			}));
-			cacheManager.SaveIcons(hotItems, desktopItems);
+			cacheManager.SaveCacheData();
 		}
 
 		/// <summary>
@@ -246,27 +225,27 @@ namespace ProgramViewer3.Managers
 		{
 			FileAttributes attributes = File.GetAttributes(e.FullPath);
 			string title = attributes.HasFlag(FileAttributes.Directory) ? e.Name : Path.GetFileNameWithoutExtension(e.Name);
-			mainDispatcher.BeginInvoke(new Action(() =>
+			mainDispatcher.Invoke(new Action(() =>
 			{
 				ItemData itemData = new ItemData(title, e.FullPath, cacheManager.GetFileIcon(e.FullPath));
-				AddItemToSortedCollection(desktopItems, itemData);
-				desktopItemsData.AddOrUpdate(e.FullPath, itemData, (k, v) => v);
+				AddItemToSortedCollection(DesktopItems, itemData);
+				desktopItemsData[e.FullPath] = itemData;
 			}));
-			cacheManager.SaveIcons(hotItems, desktopItems);
+			cacheManager.SaveCacheData();
 		}
 
 		/// <summary>
-		/// This method determines the index for the new item and inserts this item there
+		/// Determines the index for the new item and inserts this item there
 		/// </summary>
 		/// <param name="list">Collection to which a new item will be added</param>
-		/// <param name="item">The item we want to add</param>
+		/// <param name="item">The desired ItemData object for inserting</param>
 		private void AddItemToSortedCollection(ObservableCollection<ItemData> list, ItemData item)
 		{
 			int i = 0;
 			while (i < list.Count && itemDataComparer.Compare(list[i], item) < 0)
 				i++;
 
-			mainDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => list.Insert(i, item)));
+			mainDispatcher.Invoke(new Action(() => list.Insert(i, item)));
 		}
 
 		public void AddItem(string title, string path, ItemType itemType, bool shouldCopy)
@@ -275,7 +254,7 @@ namespace ProgramViewer3.Managers
 			{
 				if (!hotItemsJsonData.ContainsKey(path))
 				{
-					AddItemToSortedCollection(hotItems, new ItemData(title, path, cacheManager.GetFileIcon(path)));
+					AddItemToSortedCollection(HotItems, new ItemData(title, path, cacheManager.GetFileIcon(path)));
 					hotItemsJsonData.Add(path, title);
 					HotItemsSave();
 				}
@@ -346,7 +325,7 @@ namespace ProgramViewer3.Managers
 		/// <param name="itemType">Item type</param>
 		public void OpenItem(int index, ItemType itemType)
 		{
-			var itemPath = itemType == ItemType.Hot ? hotItems[index].Path : desktopItems[index].Path;
+			var itemPath = itemType == ItemType.Hot ? HotItems[index].Path : DesktopItems[index].Path;
 			Task.Run(() => StartProcess(itemPath));
 		}
 
@@ -359,15 +338,15 @@ namespace ProgramViewer3.Managers
 		{
 			if (itemType == ItemType.Hot)
 			{
-				hotItemsJsonData.Remove(hotItems[index].Path);
-				hotItems.RemoveAt(index);
+				hotItemsJsonData.Remove(HotItems[index].Path);
+				HotItems.RemoveAt(index);
 				HotItemsSave();
 			}
 			else
 			{
 				Task.Run(() =>
 				{
-					string path = desktopItems[index].Path;
+					string path = DesktopItems[index].Path;
 					FileManager.SendToRecycle(path);
 				});
 			}
@@ -382,7 +361,7 @@ namespace ProgramViewer3.Managers
 		{
 			try
 			{
-				var itemPath = itemType == ItemType.Hot ? hotItems[index].Path : desktopItems[index].Path;
+				var itemPath = itemType == ItemType.Hot ? HotItems[index].Path : DesktopItems[index].Path;
 				string argument = $"/select, \"{itemPath}\"";
 
 				Task.Run(() => Process.Start("explorer.exe", argument).Dispose());
