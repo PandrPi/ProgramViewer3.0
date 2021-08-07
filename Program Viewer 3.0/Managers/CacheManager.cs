@@ -1,132 +1,167 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Newtonsoft.Json;
-using System.Windows.Threading;
 using System.Diagnostics;
-using System.Text;
 
 namespace ProgramViewer3.Managers
 {
 	/// <summary>
-	/// This class is used for cache files icons. It is neccessary because extracting them directly from files can be only executed on main thread, which causes freezes.
+	/// Struct that is used for more convenient work with the cache data
+	/// </summary>
+	internal struct IconData
+	{
+		public DateTime LastWriteTime { get; set; }
+		public List<string> FilesSourcePaths { get; set; }
+	}
+
+	/// <summary>
+	/// Manages icons for ItemData objects in the app.
 	/// </summary>
 	public sealed class CacheManager
 	{
-		private readonly ConcurrentDictionary<string, ImageSource> cachedIcons = new ConcurrentDictionary<string, ImageSource>();
-		private readonly Dictionary<string, Stream> iconStreams = new Dictionary<string, Stream>();
 		/// <summary>
-		/// This dictionary contains information about each cached icon file, namely the path to the icon file
-		/// and the date of the last modification of the file
+		/// Displays key-value pairs in which Key is the path to a specific source file and Value is
+		/// the hash string of the icon associated with that file
 		/// </summary>
-		private Dictionary<string, dynamic> cacheJson;
-		private readonly Dispatcher dispatcher;
-		private readonly DirectoryInfo sourceIconsFolderInfo; // It stores all the info about the exact directory
+		private readonly Dictionary<string, string> itemPathToIconHash = new Dictionary<string, string>();
+		/// <summary>
+		/// Displays key-value pairs in which the Key is the hash string calculated from the icon that is
+		/// associated with some source file and Value is the icon of that source file
+		/// </summary>
+		private readonly Dictionary<string, ImageSource> iconHashToIcon = new Dictionary<string, ImageSource>();
+		/// <summary>
+		/// Displays key-value pairs in which Key is the hash string calculated from the icon that is
+		/// associated with some source file and Value is the StreamSource property of that icon
+		/// </summary>
+		private readonly Dictionary<string, Stream> iconHashToIconStream = new Dictionary<string, Stream>();
+		/// <summary>
+		/// Contains all the information about the SourceIcons directory
+		/// </summary>
+		private readonly DirectoryInfo sourceIconsFolderInfo;
+		/// <summary>
+		/// Displays key-value pairs in which the key is a hash string calculated from a file path and
+		/// the value is a IconData object
+		/// </summary>
+		private Dictionary<string, IconData> cacheJson;
 
 		private static readonly string IconsCacheFolderPath = Path.Combine(ItemManager.ApplicationPath, "IconsCache");
 		private static readonly string SourceIconsFolderPath = Path.Combine(IconsCacheFolderPath, "SourceIcons");
-		private static readonly string CacheJSONPath = Path.Combine(IconsCacheFolderPath, "cacheFilesNames.json");
+		private static readonly string CacheJsonPath = Path.Combine(IconsCacheFolderPath, "CacheData.json");
 
-		public CacheManager(Dispatcher dispatcher)
+
+		public CacheManager()
 		{
-			this.dispatcher = dispatcher;
 			InitializeDirectory(IconsCacheFolderPath);
 			InitializeDirectory(SourceIconsFolderPath);
-			InitializeJSONFile(CacheJSONPath);
+			InitializeJSONFile(CacheJsonPath);
 
 			sourceIconsFolderInfo = new DirectoryInfo(SourceIconsFolderPath);
 		}
 
 		/// <summary>
-		/// This method is used to cache all icons into files in SourceIconsFolder
+		/// Saves the cache data of the manager
 		/// </summary>
-		/// <param name="hotItems"></param>
-		/// <param name="desktopItems"></param>
-		public void SaveIcons(ObservableCollection<ItemData> hotItems, ObservableCollection<ItemData> desktopItems)
+		public void SaveCacheData()
 		{
 			// Start our timer/watch
 			var watch = Stopwatch.StartNew();
 
-			// Merge hot and desktop items into a single list
-			List<ItemData> hotAndDesktopItemsDataList = hotItems.ToList();
-			hotAndDesktopItemsDataList.AddRange(desktopItems);
+			// Create a Dictionary object which will be serialized for our CacheData.json file.
+			// Key is the hash string of the icon, Value is a list of the paths of the source files.
+			var cacheData = new Dictionary<string, IconData>();
+
+			// A lookup table that stores hash strings of icons that are already saved
+			var savedIcons = new HashSet<string>();
 
 			// Refresh our DirectoryInfo instance and loop throught all the files inside the directory with
-			// icons sources to fill
+			// icons sources to fill the iconFilesInfoDict dictionary with needed values
 			sourceIconsFolderInfo.Refresh();
 			var iconFilesInfoDict = new Dictionary<string, FileInfo>();
-			foreach (var item in sourceIconsFolderInfo.GetFiles())
+			FileInfo[] array = sourceIconsFolderInfo.GetFiles();
+			for (int i = 0; i < array.Length; i++)
 			{
+				FileInfo item = array[i];
 				iconFilesInfoDict.Add(Path.GetFileNameWithoutExtension(item.FullName), item);
 			}
 
-			// Loop throught every desktop and hot item and save its icon to a file if it is necessary
-			foreach (var item in hotAndDesktopItemsDataList)
+			foreach (var item in itemPathToIconHash)
 			{
-				string hashedName = GetHash(item.Path); // get the hash string of the path
-				bool needToSaveIcon = true;
-				if (iconFilesInfoDict.ContainsKey(hashedName) && cacheJson.ContainsKey(hashedName))
-				{
-					var iconFileInfo = iconFilesInfoDict[hashedName];
-					if (iconFileInfo.LastWriteTimeUtc == (DateTime)cacheJson[hashedName]["LastWriteTime"])
-					{
-						needToSaveIcon = false;
-					}
-				}
-				// We have to save the icon only if LastWriteTimeUtc of the file and LastWriteTime from
-				// our cache is not the same or we failed to compare them
-				if (needToSaveIcon == true)
-				{
-					string filePath = Path.Combine(SourceIconsFolderPath, $"{hashedName}.png");
-					SaveImageToFile(filePath, item.ImageData as BitmapSource);
-					var iconFileInfo = new FileInfo(filePath);
-					var newIconData = new Dictionary<string, dynamic>
-					{
-						{ "Path", item.Path },
-						{ "LastWriteTime", iconFileInfo.LastAccessTimeUtc }
-					};
+				string iconHash = item.Value;
+				string sourcePath = item.Key;
 
-					cacheJson[hashedName] = newIconData;
+				var actualLastWriteTime = iconFilesInfoDict.ContainsKey(iconHash) ? TrimMilliseconds(iconFilesInfoDict[iconHash].LastWriteTimeUtc) : DateTime.MinValue;
+				var storedLastWriteTime = cacheJson.ContainsKey(iconHash) ? TrimMilliseconds(cacheJson[iconHash].LastWriteTime) : DateTime.MaxValue;
+
+				// We have to save the icon to the file only if this icon was not saved before. Multiple
+				// ItemData objects can share the same icon and such a check prevents us from saving the same
+				// icon multiple times and thus improves the speed of our code.
+				//
+				// Also we have to compare the actual LastWriteTime of the icon file and the LastWriteTime
+				// that we store inside our CacheData.json. There is no need to write to the icon file if this
+				// file was not modified since the moment we write to it last time
+				if (savedIcons.Contains(iconHash) == false && actualLastWriteTime != storedLastWriteTime)
+				{
+					string filePath = Path.Combine(SourceIconsFolderPath, $"{iconHash}.png");
+					SaveImageToFile(filePath, iconHashToIcon[iconHash] as BitmapSource);
+					storedLastWriteTime = TrimMilliseconds(DateTime.UtcNow);
+				}
+
+				if (cacheData.ContainsKey(iconHash))
+				{
+					cacheData[iconHash].FilesSourcePaths.Add(sourcePath);
+				}
+				else
+				{
+					cacheData[iconHash] = new IconData()
+					{
+						LastWriteTime = storedLastWriteTime,
+						FilesSourcePaths = new List<string>() { sourcePath }
+					};
 				}
 			}
 
-			bool saveResult = WriteObjectToJsonFile(CacheJSONPath, cacheJson);
-			//string json = JsonConvert.SerializeObject(cacheJson, Formatting.Indented);
-			//File.WriteAllText(CacheJSONPath, json);
+			bool saveResult = WriteObjectToJsonFile(CacheJsonPath, cacheData);
 			const string successfullSave = "Icons saved successfully!";
 			const string failedSave = "Icons saved successfully!";
 			string saveResultMessage = saveResult ? successfullSave : failedSave;
 			LogManager.Write(saveResultMessage);
+
+			cacheData.Clear();
 
 			watch.Stop();
 			LogManager.Write($"Icons saving time: {watch.Elapsed.TotalMilliseconds} ms");
 		}
 
 		/// <summary>
-		/// Returns an associated icon for the file. If the specified path is presented in the cachedIcons we
-		/// return the icon from the cache, otherwise we have to extract the icon from the file.
+		/// Returns an associated icon for the file. If the specified path is presented in the cachedIcons
+		/// returns the icon from the cache, otherwise extracts the icon from the file.
 		/// </summary>
 		/// <param name="path">The path to the file whose icon we want to get</param>
 		/// <returns>The associated icon as ImageSource instance</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ImageSource GetFileIcon(string path)
 		{
-			if (cachedIcons.ContainsKey(path))
+			const string returnedFromCacheFormat = "Icon '{0}' was returned from the cache!";
+			const string extractedFromFileFormat = "Icon '{0}' was extracted from file!";
+
+			if (itemPathToIconHash.ContainsKey(path))
 			{
-				LogManager.Write($"Image '{path}' was returned from dictionary!");
-				return cachedIcons[path];
+				LogManager.Write(returnedFromCacheFormat, path);
+				var iconHash = itemPathToIconHash[path];
+				return iconHashToIcon[iconHash];
 			}
 			else
 			{
-				LogManager.Write($"Image '{path}' was extracted from file!");
-				return IconExtractor.GetIcon(path);
+				LogManager.Write(extractedFromFileFormat, path);
+
+				var itemIcon = IconExtractor.GetIcon(path, out string iconHash);
+
+				itemPathToIconHash[path] = iconHash;
+				iconHashToIcon[iconHash] = itemIcon;
+
+				return itemIcon;
 			}
 		}
 
@@ -134,17 +169,20 @@ namespace ProgramViewer3.Managers
 		/// Returns a new instance of DirectoryInfo class for the directory specified by the path parameter. If 
 		/// the directory specified by the path parameter does not exist this method will create the directory.
 		/// </summary>
-		/// <param name="path">Path to the directory for initialization</param>
+		/// <param name="path">The path to the directory for initialization</param>
 		public static DirectoryInfo InitializeDirectory(string path)
 		{
+			const string directoryCreatedFormat = "Directory created: {0}";
+			const string directoryExistsFormat = "Directory exists: {0}";
+
 			if (Directory.Exists(path) == false)
 			{
-				LogManager.Write($"Directory created: {path}");
+				LogManager.Write(directoryCreatedFormat, path);
 				return Directory.CreateDirectory(path);
 			}
 			else
 			{
-				LogManager.Write($"Directory exist: {path}");
+				LogManager.Write(directoryExistsFormat, path);
 				return new DirectoryInfo(path);
 			}
 		}
@@ -152,19 +190,22 @@ namespace ProgramViewer3.Managers
 		/// <summary>
 		/// Creates an empty json file and fills it with a basic json structure
 		/// </summary>
-		/// <param name="path">A path where we want to create our json file</param>
+		/// <param name="path">The desired path for the json file creation</param>
 		public static void InitializeJSONFile(string path)
 		{
+			const string successfullInitializationFormat = "Json [{0}] was successfully initiallized!";
+			const string failedInitializationFormat = "Json [{0}] does not exist or it is corrupted! This json file will be created and filled with an empty json structure automatically.";
+
 			try
 			{
 				string fileContent = File.ReadAllText(path);
 				var currentJsonContent = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(fileContent);
-				if (currentJsonContent is null) throw new NullReferenceException();
-				LogManager.Write($"Json [{path}] was successfully initiallized!");
+				if (currentJsonContent is null) throw new ArgumentException();
+				LogManager.Write(successfullInitializationFormat, path);
 			}
 			catch
 			{
-				LogManager.Write($"Json [{path}] does not exist or it is corrupted! This json file will be created and filled with an empty json structure automatically");
+				LogManager.Write(failedInitializationFormat, path);
 				WriteObjectToJsonFile(path, new Dictionary<string, dynamic>());
 			}
 		}
@@ -191,63 +232,52 @@ namespace ProgramViewer3.Managers
 		}
 
 		/// <summary>
-		/// Loads all the cached icons from files asynchronously
+		/// Loads all the cached icons from the cache files
 		/// </summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public async Task InitiallizeCacheDictionaryAsync()
+		public void InitiallizeCache()
 		{
-			cacheJson = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText(CacheJSONPath));
-			FileInfo[] fileInfos = new DirectoryInfo(SourceIconsFolderPath).GetFiles();
-			var tasks = new List<Task>();
+			var fileContent = File.ReadAllText(CacheJsonPath);
+			cacheJson = JsonConvert.DeserializeObject<Dictionary<string, IconData>>(fileContent);
+			const string successfulConnectionMessageFormat = "Source path '{0}' is successfully linked to the '{1}' icon hash string!";
 
-			foreach (FileInfo info in fileInfos)
+			foreach (var item in cacheJson)
 			{
-				tasks.Add(Task.Run(() =>
-				{
-					string nameWithoutExt = Path.GetFileNameWithoutExtension(info.Name);
-					if (cacheJson.ContainsKey(nameWithoutExt))
-					{
-						string properName = cacheJson[nameWithoutExt].Path;
-						if (properName is null || properName == string.Empty)
-						{
-							LogManager.Write($"Error: Cache item '{nameWithoutExt}' has corrupted Path value!!!");
-						}
-						else
-						{
-							cachedIcons.AddOrUpdate(properName, LoadImageFromFile(info.FullName, properName), (k, v) => v);
-							LogManager.Write($"Cache icon '{nameWithoutExt}' assigned with image: {info.FullName}");
-						}
-					}
-					else
-					{
-						LogManager.Write($"Error: Cache icon '{nameWithoutExt}' is not presented in dictionary");
-					}
-				}));
-			}
+				string iconHash = item.Key;
+				var iconData = item.Value;
+				var filesSourcePaths = iconData.FilesSourcePaths;
 
-			await Task.WhenAll(tasks);
+				for (int i = 0; i < filesSourcePaths.Count; i++)
+				{
+					string sourcePath = filesSourcePaths[i];
+					itemPathToIconHash[sourcePath] = iconHash;
+					LogManager.Write(successfulConnectionMessageFormat, sourcePath, iconHash);
+				}
+				string iconFilePath = Path.Combine(SourceIconsFolderPath, $"{iconHash}.png");
+				var loadedIcon = LoadImageFromFile(iconFilePath);
+				if (loadedIcon is null == false) iconHashToIcon[iconHash] = loadedIcon;
+			}
 		}
 
 		/// <summary>
 		/// Loads and returns a BitmapSource object from the specified path
 		/// </summary>
-		/// <param name="path">Path to an image file for loading</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private BitmapSource LoadImageFromFile(string path, string name)
+		/// <param name="imagePath">The path to the desired image file for loading</param>
+		/// <param name="sourceFilePath">The path to the source file</param>
+		private BitmapSource LoadImageFromFile(string imagePath)
 		{
+			const string successfulLoadingFormat = "Image '{0}' was successfully loaded!";
+
 			try
 			{
-				var stream = new MemoryStream(File.ReadAllBytes(path));
+				var stream = new MemoryStream(File.ReadAllBytes(imagePath));
 
 				var image = new BitmapImage();
 				image.BeginInit();
 				image.StreamSource = stream;
 				image.EndInit();
-				image.Freeze();
+				if (image.CanFreeze) image.Freeze();
 
-				dispatcher.Invoke(() => iconStreams.Add(name, stream));
-
-				LogManager.Write($"Image '{path}' was successfully loaded!");
+				LogManager.Write(successfulLoadingFormat, imagePath);
 				return image;
 			}
 			catch (Exception e)
@@ -263,27 +293,27 @@ namespace ProgramViewer3.Managers
 		public void ReleaseResources()
 		{
 			// Loop throught all iconStreams items and dispose the streams
-			foreach (var item in iconStreams)
+			foreach (var item in iconHashToIconStream)
 			{
 				item.Value.Dispose();
 			}
 		}
 
 		/// <summary>
-		/// Saves a BitmapSource object to an png image file
+		/// Saves the input BitmapSource object to a file located at the specified path
 		/// </summary>
-		/// <param name="path">Path of image file to save</param>
-		/// <param name="image">Image object to save</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		/// <param name="path">The desired image file path for saving</param>
+		/// <param name="image">The desired image object for saving</param>
 		public static void SaveImageToFile(string path, BitmapSource image)
 		{
+			const string successfulSaveFormat = "Image '{0}' was successfully saved!";
 #if DEBUG
 			using (var fileStream = new FileStream(path, FileMode.Create))
 			{
 				BitmapEncoder encoder = new PngBitmapEncoder();
 				encoder.Frames.Add(BitmapFrame.Create(image));
 				encoder.Save(fileStream);
-				LogManager.Write($"Image '{path}' was successfully saved!");
+				LogManager.Write(successfulSaveFormat, path);
 			}
 #else
 			try
@@ -293,36 +323,22 @@ namespace ProgramViewer3.Managers
 					BitmapEncoder encoder = new PngBitmapEncoder();
 					encoder.Frames.Add(BitmapFrame.Create(image));
 					encoder.Save(fileStream);
-					LogManager.Write($"Image '{path}' was successfully saved!");
+					LogManager.Write(successfulSaveFormat, path);
 				}
 			}
 			catch(Exception e)
 			{
-				LogManager.Write($"Message: {e.Message}. Stack trace: {e.StackTrace}");
+				LogManager.Error(e);
 			}
 #endif
 		}
 
 		/// <summary>
-		/// Generates a new hash string from the specified input string.
+		/// Returns a copy of the input DateTime object with Miliseconds property set to zero
 		/// </summary>
-		/// <returns>Generated hash string</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static string GetHash(string input)
+		private DateTime TrimMilliseconds(DateTime dt)
 		{
-			using (var hashAlgorithm = System.Security.Cryptography.SHA256.Create())
-			{
-				byte[] data = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
-
-				var sBuilder = new StringBuilder();
-
-				for (int i = 0; i < data.Length; i++)
-				{
-					sBuilder.Append(data[i].ToString("x2"));
-				}
-
-				return sBuilder.ToString();
-			}
+			return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second, 0, dt.Kind);
 		}
 	}
 }
